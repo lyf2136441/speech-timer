@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: cba-basketball
+    env: node
+    rootDir: basketball-game/server
+    buildCommand: npm install
+    startCommand: node server.js
+    plan: free
+    envVars:
+      - key: PORT
+        value: "10000"
