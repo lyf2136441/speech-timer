@@ -57,9 +57,13 @@ var server = http.createServer(function(req, res) {
   // Static files
   var filePath
   if (url === '/' || url === '/play') {
-    filePath = path.join(__dirname, '..', 'cba-online.html')
+    filePath = path.join(__dirname, '..', 'index.html')
   } else if (url === '/cba-online.html') {
     filePath = path.join(__dirname, '..', 'cba-online.html')
+  } else if (url === '/cba-game.html') {
+    filePath = path.join(__dirname, '..', 'cba-game.html')
+  } else if (url === '/index.html') {
+    filePath = path.join(__dirname, '..', 'index.html')
   } else if (url.indexOf('/images/') === 0) {
     filePath = path.join(__dirname, '..', url)
   } else {
