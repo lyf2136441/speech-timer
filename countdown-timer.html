@@ -493,13 +493,21 @@ function initAudio(){
 
 function unlockAudio(){
   if(audioUnlocked) return;
-  // iOS requires playing & pausing in a user gesture to unlock
+  audioUnlocked=true;
+  // iOS requires playing audio in a user gesture to unlock
   var a=audioCache[ALL_AUDIO[0]];
   if(a){
-    a.volume=0.001;
-    a.play().then(function(){a.pause();a.currentTime=0;a.volume=1;audioUnlocked=true;}).catch(function(){});
+    a.volume=1;
+    a.play().then(function(){a.pause();a.currentTime=0;}).catch(function(){});
   }
-  audioUnlocked=true;
+  // Also warm up speechSynthesis on mobile
+  if(typeof speechSynthesis!=='undefined'){
+    try{
+      var u=new SpeechSynthesisUtterance('');
+      u.volume=0;
+      speechSynthesis.speak(u);
+    }catch(e){}
+  }
 }
 
 function playAudio(src){
@@ -523,13 +531,7 @@ function playAudio(src){
 }
 
 function speak(txt,r0,p0){
-  // 1. Try pre-generated neural voice audio (best quality, works everywhere)
-  if(currentScene && currentScene.audio){
-    if(playAudio(currentScene.audio)) return;
-  }
-  if(playAudio(AUDIO.generic)) return;
-
-  // 2. Try browser speechSynthesis
+  // 1. Try browser speechSynthesis first (natural voice, like desktop)
   if('speechSynthesis' in window){
     try{
       const {voice,rate,pitch}=voiceParams();
@@ -542,16 +544,18 @@ function speak(txt,r0,p0){
     }catch(e){}
   }
 
+  // 2. Try pre-generated neural voice MP3 audio (high quality, works offline)
+  if(curScene && curScene.audio && playAudio(curScene.audio)) return;
+  if(playAudio(AUDIO.generic)) return;
+
   // 3. Last resort: beep alarm
   beepAlarm();
 }
 
 // Play checkpoint warning audio
 function speakWarning(type){
-  const src = type==='1min' ? AUDIO.warn1min : type==='30s' ? AUDIO.warn30s : type==='10s' ? AUDIO.warn10s : null;
-  if(playAudio(src)) return;
-  // Fallback: text-to-speech or beep
   const txt = type==='1min' ? '剩余最后一分钟' : type==='30s' ? '剩余30秒' : '剩余10秒';
+  // 1. Try speechSynthesis first
   if('speechSynthesis' in window){
     try{
       speechSynthesis.cancel();
@@ -562,6 +566,10 @@ function speakWarning(type){
       return;
     }catch(e){}
   }
+  // 2. Try MP3 audio
+  const src = type==='1min' ? AUDIO.warn1min : type==='30s' ? AUDIO.warn30s : type==='10s' ? AUDIO.warn10s : null;
+  if(playAudio(src)) return;
+  // 3. Beep
   beepAlarm();
 }
 
@@ -586,8 +594,12 @@ function beepAlarm(){
   }catch(e){}
 }
 Q('btnTest').addEventListener('click',()=>{
-  const {voice,phrase}=voiceParams();
-  if(voice){speak(phrase);}else{beepAlarm();}
+  unlockAudio();
+  const {phrase}=voiceParams();
+  // Try scene audio first, then generic audio, then speech, then beep
+  if(curScene&&curScene.audio&&playAudio(curScene.audio)) return;
+  if(playAudio(AUDIO.generic)) return;
+  speak(phrase);
 });
 
 // ═══════════════ CHECKPOINTS ═══════════════
