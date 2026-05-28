@@ -475,8 +475,33 @@ function voiceParams(){
   if(curScene){const pf=curScene.pref;rate=pf.r==='slow'?.8:pf.r==='fast'?1.15:.95;pitch=pf.p==='low'?.78:pf.p==='high'?1.25:1;phrase=curScene.phrase;}
   return {voice:v,rate,pitch,phrase};
 }
-// Play pre-generated neural voice audio (works on ALL devices)
+// Preload ALL audio files upfront so they work on mobile
 const audioCache={};
+const ALL_AUDIO=['audio/warn_1min.mp3','audio/warn_30s.mp3','audio/warn_10s.mp3','audio/finish_generic.mp3','audio/speech.mp3','audio/leader.mp3','audio/exam.mp3','audio/meeting.mp3','audio/fun.mp3','audio/kitchen.mp3','audio/sport.mp3'];
+let audioUnlocked=false;
+
+function initAudio(){
+  ALL_AUDIO.forEach(function(src){
+    if(!audioCache[src]){
+      var a=new Audio(src);
+      a.preload='auto';
+      a.load();
+      audioCache[src]=a;
+    }
+  });
+}
+
+function unlockAudio(){
+  if(audioUnlocked) return;
+  // iOS requires playing & pausing in a user gesture to unlock
+  var a=audioCache[ALL_AUDIO[0]];
+  if(a){
+    a.volume=0.001;
+    a.play().then(function(){a.pause();a.currentTime=0;a.volume=1;audioUnlocked=true;}).catch(function(){});
+  }
+  audioUnlocked=true;
+}
+
 function playAudio(src){
   if(!src) return false;
   try{
@@ -484,9 +509,15 @@ function playAudio(src){
       audioCache[src]=new Audio(src);
       audioCache[src].preload='auto';
     }
-    const a=audioCache[src];
+    var a=audioCache[src];
     a.currentTime=0;
-    a.play().catch(()=>{});
+    a.volume=1;
+    var p=a.play();
+    if(p) p.catch(function(){
+      // Retry once
+      a.currentTime=0;
+      a.play().catch(function(){});
+    });
     return true;
   }catch(e){return false;}
 }
@@ -797,6 +828,7 @@ document.addEventListener('visibilitychange',()=>{
 
 // ═══════════════ BUTTON BINDINGS ═══════════════
 btnPlay.addEventListener('click',()=>{
+  unlockAudio();
   if(state===ST.PAUSE){state=ST.RUN;renderBtns();timer=setInterval(tick,1000);requestWakeLock();}
   else startTimer();
 });
@@ -808,6 +840,7 @@ Q('finishDismiss').addEventListener('click',dismissFinish);
 
 // Hero tap → pause/resume
 heroZone.addEventListener('click',e=>{
+  unlockAudio();
   if(e.target.closest('button')) return;
   if(state===ST.RUN) pauseTimer();
   else if(state===ST.PAUSE){state=ST.RUN;renderBtns();timer=setInterval(tick,1000);requestWakeLock();}
@@ -848,6 +881,7 @@ window.addEventListener('resize',()=>{if(state===ST.IDLE||state===ST.PAUSE||stat
 // ═══════════════ INIT ═══════════════
 function init(){
   total=300;remain=300;elapsed=0;overtime=0;
+  initAudio();
   render();renderBtns();refreshPresets();
   refreshSceneUI();refreshVoiceUI();
 }
