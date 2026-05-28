@@ -544,42 +544,40 @@ function speak(txt,r0,p0){
   if('speechSynthesis' in window){
     try{
       const {voice,rate,pitch}=voiceParams();
-      speechSynthesis.cancel();
-      const u=new SpeechSynthesisUtterance(txt);
-      if(voice){u.voice=voice;u.lang=voice.lang;}
-      u.rate=r0||rate;u.pitch=p0||pitch;u.volume=1;
-      speechSynthesis.speak(u);
-      return;
+      // Only use speechSynthesis if we actually have a Chinese voice
+      if(voice){
+        speechSynthesis.cancel();
+        const u=new SpeechSynthesisUtterance(txt);
+        u.voice=voice;u.lang=voice.lang;
+        u.rate=r0||rate;u.pitch=p0||pitch;u.volume=1;
+        speechSynthesis.speak(u);
+        return;
+      }
     }catch(e){}
   }
 
-  // 2. Try pre-generated neural voice MP3 audio (high quality, works offline)
-  if(curScene && curScene.audio && playAudio(curScene.audio)) return;
-  if(playAudio(AUDIO.generic)) return;
-
-  // 3. Last resort: beep alarm
-  beepAlarm();
+  // 2. Try embedded MP3 audio (guaranteed to work, no network needed)
+  if(curScene && curScene.audio){ playAudio(curScene.audio); return; }
+  playAudio(AUDIO.generic);
 }
 
 // Play checkpoint warning audio
 function speakWarning(type){
   const txt = type==='1min' ? '剩余最后一分钟' : type==='30s' ? '剩余30秒' : '剩余10秒';
-  // 1. Try speechSynthesis first
-  if('speechSynthesis' in window){
+  // 1. Try speechSynthesis (only if Chinese voice available)
+  if('speechSynthesis' in window && selVoice){
     try{
       speechSynthesis.cancel();
       const u=new SpeechSynthesisUtterance(txt);
-      if(selVoice){u.voice=selVoice;u.lang=selVoice.lang;}
+      u.voice=selVoice;u.lang=selVoice.lang;
       u.rate=0.85;u.pitch=1;u.volume=1;
       speechSynthesis.speak(u);
       return;
     }catch(e){}
   }
-  // 2. Try MP3 audio
+  // 2. Try embedded MP3 audio (always works)
   const src = type==='1min' ? AUDIO.warn1min : type==='30s' ? AUDIO.warn30s : type==='10s' ? AUDIO.warn10s : null;
-  if(playAudio(src)) return;
-  // 3. Beep
-  beepAlarm();
+  playAudio(src);
 }
 
 // Web Audio beep alarm (works on ALL mobile browsers)
