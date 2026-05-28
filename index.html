@@ -3,494 +3,636 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>演讲计时器</title>
+<title>演讲计时器 Pro</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="演讲计时">
-<meta name="theme-color" content="#0d1117">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="计时器">
+<meta name="theme-color" content="#000">
 <style>
-:root {
-  --bg: #0d1117;
-  --surface: #161b22;
-  --border: #30363d;
-  --text: #f0f6fc;
-  --muted: #8b949e;
-  --accent: #58a6ff;
-  --green: #3fb950;
-  --orange: #d2991d;
-  --red: #f85149;
-  --radius: 14px;
-  --sb: env(safe-area-inset-bottom, 0px);
+:root{
+  --c0:#000;--c1:#111;--c2:#222;--c3:#333;--c4:#888;--c5:#eee;
+  --green:#30d158;--yellow:#ffd60a;--red:#ff453a;--blue:#0a84ff;
+  --radius:16px;--sb:env(safe-area-inset-bottom,0px);
+  --fs-hero:clamp(4.5rem,16vw,9rem);
+  --fs-hero-landscape:clamp(2.8rem,18vh,6rem);
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{height:100%;overflow:hidden}
 body{
   font-family:-apple-system,'SF Pro Display','PingFang SC','Microsoft YaHei',sans-serif;
-  background:var(--bg);color:var(--text);
-  display:flex;align-items:center;justify-content:center;
+  background:var(--c0);color:var(--c5);
   -webkit-tap-highlight-color:transparent;
   user-select:none;-webkit-user-select:none;
 }
+body.light{--c0:#f5f5f7;--c1:#fff;--c2:#e8e8ed;--c3:#d1d1d6;--c4:#86868b;--c5:#1d1d1f}
+body.light .hero{color:#000}
 
+/* ── App shell ── */
 .app{
-  width:min(100%,440px);height:100dvh;
-  display:flex;flex-direction:column;
-  padding:clamp(12px,3vh,20px) clamp(14px,4vw,20px);
-  padding-bottom:calc(clamp(12px,3vh,20px) + var(--sb));
+  width:100%;height:100dvh;display:flex;flex-direction:column;
+  padding:env(safe-area-inset-top,12px) max(12px,env(safe-area-inset-right)) calc(12px + var(--sb)) max(12px,env(safe-area-inset-left));
+  transition:background .4s;
+}
+.app.running{background:#000}
+body.light .app.running{background:#f5f5f7}
+
+/* ── Top bar ── */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:4px 4px clamp(8px,2vh,12px);flex-shrink:0
+}
+.topbar h1{font-size:clamp(1rem,3vw,1.15rem);font-weight:700;letter-spacing:-.2px}
+.topbar .actions{display:flex;gap:6px}
+.topbar .actions button{
+  width:36px;height:36px;border-radius:50%;border:none;
+  background:var(--c2);color:var(--c5);font-size:1rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;transition:.15s
+}
+.topbar .actions button:active{background:var(--c3)}
+.topbar .actions button.on{background:var(--blue);color:#fff}
+.topbar .actions .lock-dot{width:8px;height:8px;border-radius:50%;background:var(--green);transition:.3s}
+.topbar .actions .lock-dot.locked{background:var(--red)}
+
+/* ── Preset strip ── */
+.preset-strip{
+  display:flex;gap:6px;padding-bottom:clamp(6px,1.5vh,10px);
+  overflow-x:auto;scrollbar-width:none;flex-shrink:0
+}
+.preset-strip::-webkit-scrollbar{display:none}
+.preset-strip button{
+  padding:7px 16px;border-radius:20px;border:1px solid var(--c3);
+  background:transparent;color:var(--c4);font-size:0.78rem;font-weight:600;
+  cursor:pointer;white-space:nowrap;transition:.12s;flex-shrink:0
+}
+.preset-strip button.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+
+/* ── HERO ZONE ── */
+.hero-zone{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;min-height:0
+}
+.ring-container{
+  position:relative;display:flex;align-items:center;justify-content:center
+}
+.ring-container svg{
+  position:absolute;transform:rotate(-90deg);overflow:visible
+}
+.ring-bg{fill:none;stroke:var(--c2);stroke-width:4}
+.ring-fg{fill:none;stroke:var(--green);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .3s linear,stroke .5s}
+.ring-fg.warn{stroke:var(--yellow)}
+.ring-fg.danger{stroke:var(--red)}
+
+.hero{
+  font-size:var(--fs-hero);font-weight:860;font-variant-numeric:tabular-nums;
+  letter-spacing:-1px;line-height:1;text-align:center;
+  transition:color .5s;z-index:1;padding:clamp(20px,6vh,40px) 0
+}
+.hero.warn{color:var(--yellow)}
+.hero.danger{color:var(--red)}
+
+.meta-row{
+  display:flex;gap:clamp(12px,4vw,24px);align-items:center;
+  font-size:clamp(0.7rem,2vw,0.8rem);color:var(--c4)
+}
+.meta-row .zone-indicator{display:flex;align-items:center;gap:4px}
+.meta-row .zone-dot{width:8px;height:8px;border-radius:50%;transition:.5s}
+.meta-row .zone-dot.green{background:var(--green)}
+.meta-row .zone-dot.yellow{background:var(--yellow)}
+.meta-row .zone-dot.red{background:var(--red)}
+.meta-row .elapsed-val{font-variant-numeric:tabular-nums;color:var(--c5);font-weight:600}
+.meta-row .overtime{color:var(--red);font-weight:700;display:none}
+.meta-row .overtime.on{display:inline}
+
+/* ── Bottom bar ── */
+.bottom-bar{
+  display:flex;flex-direction:column;gap:8px;padding-top:clamp(6px,1.5vh,10px);flex-shrink:0
+}
+.ctrl-row{
+  display:flex;gap:8px;align-items:center
+}
+.ctrl-row button{
+  padding:clamp(10px,2.5vh,14px) 8px;border-radius:14px;border:none;
+  font-size:clamp(0.85rem,2.5vw,0.95rem);font-weight:700;cursor:pointer;
+  transition:transform .1s,opacity .15s;min-height:48px
+}
+.ctrl-row button:active{transform:scale(.96)}
+.ctrl-row button:disabled{opacity:.25;pointer-events:none}
+.btn-play{flex:2;background:var(--green);color:#000}
+.btn-pause{flex:1;background:var(--yellow);color:#000}
+.btn-reset{flex:1;background:var(--c2);color:var(--c5)}
+.btn-adj{
+  width:48px;height:48px;border-radius:50%!important;padding:0!important;
+  background:var(--c2)!important;color:var(--c5)!important;font-size:1.3rem!important;
+  flex:0 0 48px!important;display:flex;align-items:center;justify-content:center
 }
 
-/* ── header ── */
-.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:clamp(10px,2.5vh,14px)}
-.header h1{font-size:clamp(1.05rem,3.5vw,1.2rem);font-weight:700;letter-spacing:-0.3px}
-.lock-tag{
-  display:flex;align-items:center;gap:5px;font-size:0.72rem;color:var(--muted);
-  padding:5px 12px;border-radius:16px;background:var(--surface);border:1px solid var(--border);
-  cursor:pointer;transition:.15s;min-height:32px
+/* ── Settings drawer ── */
+.drawer-handle{
+  text-align:center;cursor:pointer;padding:4px 0;color:var(--c4);font-size:0.7rem;
+  user-select:none;-webkit-user-select:none
 }
-.lock-tag.locked{color:var(--red);border-color:var(--red)}
-
-/* ── presets ── */
-.presets{display:flex;gap:6px;margin-bottom:6px}
-.presets button{
-  flex:1;padding:7px 0;border-radius:10px;border:1px solid var(--border);
-  background:transparent;color:var(--muted);font-size:clamp(0.72rem,2.2vw,0.78rem);font-weight:600;
-  cursor:pointer;transition:.12s;min-height:34px
+.drawer{
+  display:grid;grid-template-rows:0fr;transition:grid-template-rows .3s
 }
-.presets button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
-
-/* ── custom row ── */
-.custom{display:flex;gap:5px;align-items:center;justify-content:center;margin-bottom:clamp(8px,2vh,10px)}
-.custom span{font-size:0.68rem;color:var(--muted)}
-.custom input{
-  width:46px;padding:6px 2px;text-align:center;font-size:0.82rem;font-weight:600;
-  border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);outline:none
+.drawer.open{grid-template-rows:1fr}
+.drawer-inner{overflow:hidden}
+.drawer-content{
+  display:flex;flex-direction:column;gap:8px;padding:4px 0 8px
 }
-.custom input:focus{border-color:var(--accent)}
-
-/* ── timer panel ── */
-.panel{
-  flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;
-  background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);
-  padding:clamp(16px,4vh,28px) clamp(12px,3vw,20px);
-  margin-bottom:clamp(10px,2.5vh,14px);position:relative;overflow:hidden;min-height:0
+.scene-row{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.scene-row button{
+  padding:4px 11px;border-radius:14px;border:1px solid var(--c3);
+  background:transparent;color:var(--c4);font-size:0.68rem;cursor:pointer;transition:.12s
 }
-.panel .ring-wrap{position:relative;margin-bottom:clamp(8px,2vh,12px)}
-.panel .ring-wrap svg{display:block;transform:rotate(-90deg)}
-.panel .ring-wrap .ring-bg{fill:none;stroke:var(--border);stroke-width:6}
-.panel .ring-wrap .ring-fg{fill:none;stroke:var(--accent);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .3s linear}
-.panel .ring-wrap .ring-fg.warn{stroke:var(--orange)}
-.panel .ring-wrap .ring-fg.danger{stroke:var(--red)}
-
-.panel .countdown{
-  font-size:clamp(3.2rem,14vw,6rem);font-weight:800;font-variant-numeric:tabular-nums;
-  letter-spacing:1px;line-height:1;transition:color .3s
-}
-.panel .countdown.warn{color:var(--orange)}
-.panel .countdown.danger{color:var(--red)}
-
-.panel .elapsed-label{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-top:clamp(6px,1.5vh,10px)}
-.panel .elapsed{font-size:clamp(0.95rem,3vw,1.15rem);font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;margin-bottom:clamp(8px,2vh,12px)}
-
-.panel .bar{width:80%;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
-.panel .bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s linear;width:100%}
-.panel .bar-fill.warn{background:var(--orange)}
-.panel .bar-fill.danger{background:var(--red)}
-
-/* ── controls ── */
-.ctrls{display:flex;gap:8px;margin-bottom:clamp(6px,1.5vh,10px)}
-.ctrls button{
-  flex:1;padding:clamp(9px,2vh,12px) 6px;border-radius:12px;border:none;
-  font-size:clamp(0.82rem,2.5vw,0.9rem);font-weight:700;cursor:pointer;
-  transition:transform .1s,opacity .15s;min-height:44px
-}
-.ctrls button:active{transform:scale(.96)}
-.ctrls button:disabled{opacity:.3;pointer-events:none}
-.btn-play{background:var(--green);color:#000}
-.btn-pause{background:var(--orange);color:#000}
-.btn-reset{background:#30363d;color:var(--text)}
-
-/* ── scenes ── */
-.scenes{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:4px}
-.scenes button{
-  padding:4px 10px;border-radius:14px;border:1px solid var(--border);
-  background:transparent;color:var(--muted);font-size:0.68rem;cursor:pointer;
-  transition:.12s;min-height:28px;white-space:nowrap
-}
-.scenes button.on{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
-.voice-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px}
-.voice-row span{font-size:0.65rem;color:var(--muted)}
+.scene-row button.on{background:var(--blue);color:#fff;border-color:var(--blue);font-weight:600}
+.voice-row{display:flex;align-items:center;justify-content:center;gap:6px;font-size:0.68rem;color:var(--c4)}
 .voice-row select{
-  padding:3px 6px;border-radius:6px;border:1px solid var(--border);
-  background:var(--surface);color:var(--text);font-size:0.65rem;max-width:140px;outline:none
+  padding:3px 6px;border-radius:6px;border:1px solid var(--c3);
+  background:var(--c1);color:var(--c5);font-size:0.68rem;max-width:140px;outline:none
 }
 .voice-row .btn-test{
-  padding:3px 10px;border-radius:6px;border:1px solid var(--border);
-  background:transparent;color:var(--muted);font-size:0.65rem;cursor:pointer
+  padding:3px 10px;border-radius:6px;border:1px solid var(--c3);
+  background:transparent;color:var(--c4);font-size:0.68rem;cursor:pointer
 }
+.checkpoint-row{display:flex;gap:6px;align-items:center;justify-content:center;font-size:0.68rem;color:var(--c4);flex-wrap:wrap}
+.checkpoint-row label{cursor:pointer;display:flex;align-items:center;gap:3px}
+.checkpoint-row input[type=checkbox]{accent-color:var(--blue)}
 
-/* ── status ── */
-.status{text-align:center;font-size:0.7rem;color:var(--muted);min-height:18px}
+/* ── Immersive overlay ── */
+.immersive{
+  position:fixed;inset:0;background:#000;z-index:50;
+  display:none;flex-direction:column;align-items:center;justify-content:center
+}
+.immersive.on{display:flex}
+.immersive .imm-hero{
+  font-size:clamp(6rem,25vw,16rem);font-weight:900;
+  font-variant-numeric:tabular-nums;letter-spacing:-2px;
+  line-height:1;color:#fff;transition:color .5s;text-align:center
+}
+.immersive .imm-hero.warn{color:var(--yellow)}
+.immersive .imm-hero.danger{color:var(--red)}
+.immersive .imm-meta{font-size:clamp(0.9rem,3vw,1.2rem);color:var(--c4);margin-top:clamp(8px,2vh,16px)}
+.immersive .imm-hint{position:absolute;bottom:clamp(20px,5vh,40px);font-size:0.65rem;color:var(--c4);animation:fadeHint 3s forwards}
+@keyframes fadeHint{0%,70%{opacity:1}to{opacity:0}}
+.immersive .imm-zone{width:clamp(16px,4vw,24px);height:clamp(16px,4vw,24px);border-radius:50%;margin-bottom:clamp(12px,3vh,24px);transition:.5s}
+.imm-zone.green{background:var(--green);box-shadow:0 0 30px rgba(48,209,88,.5)}
+.imm-zone.yellow{background:var(--yellow);box-shadow:0 0 30px rgba(255,214,10,.5)}
+.imm-zone.red{background:var(--red);box-shadow:0 0 30px rgba(255,69,58,.5)}
 
-/* ═══ OVERLAYS ═══ */
+/* ── Overlays ── */
 .overlay{
-  position:fixed;inset:0;background:rgba(13,17,23,.96);
-  z-index:80;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px
+  position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:80;
+  display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px
 }
 .overlay.on{display:flex}
 
-/* lock */
-#lockOverlay{z-index:100}
-#lockOverlay .lock-icon{font-size:2.8rem}
-#lockOverlay h2{font-size:1.15rem;font-weight:700}
-#lockOverlay p{font-size:0.78rem;color:var(--muted);text-align:center;line-height:1.6}
+/* Alert */
+#alertOv .al-label{font-size:clamp(0.9rem,3vw,1.2rem);font-weight:700;color:var(--red);animation:flash .6s infinite alternate}
+@keyframes flash{to{opacity:.2}}
+#alertOv .al-time{font-size:clamp(5rem,22vw,14rem);font-weight:900;color:var(--red);letter-spacing:2px;animation:breathe .8s infinite;text-shadow:0 0 60px rgba(255,69,58,.5)}
+@keyframes breathe{50%{opacity:.4;transform:scale(1.06)}}
+#alertOv .al-sub{font-size:0.78rem;color:var(--c4)}
+#alertOv button{padding:8px 28px;border-radius:20px;border:2px solid var(--red);background:transparent;color:var(--red);font-size:.85rem;font-weight:600;cursor:pointer;margin-top:8px}
+
+/* Finish */
+#finishOv h2{font-size:clamp(1.5rem,5vw,2.2rem);font-weight:800;color:var(--red)}
+#finishOv .fin-sub{font-size:clamp(0.9rem,3vw,1.1rem);color:var(--c4)}
+#finishOv button{padding:12px 40px;border-radius:20px;border:none;background:var(--blue);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;margin-top:12px}
+#finishOv .fin-overtime{color:var(--red);font-weight:700;margin-top:4px;display:none}
+#finishOv .fin-overtime.on{display:block}
+
+/* Lock */
+#lockOv{z-index:100}
+#lockOv .lk-icon{font-size:2.5rem}
+#lockOv h2{font-size:1.1rem;font-weight:700}
+#lockOv p{font-size:0.75rem;color:var(--c4);text-align:center;line-height:1.5}
 #unlockBtn{
-  width:68px;height:68px;border-radius:50%;border:3px solid var(--border);
-  background:transparent;color:var(--muted);font-size:1.5rem;cursor:pointer;
+  width:64px;height:64px;border-radius:50%;border:3px solid var(--c3);
+  background:transparent;color:var(--c4);font-size:1.4rem;cursor:pointer;
   display:flex;align-items:center;justify-content:center;position:relative
 }
-#unlockBtn:active{border-color:var(--accent);color:var(--accent)}
+#unlockBtn:active{border-color:var(--blue);color:var(--blue)}
 #unlockRing{
-  position:absolute;inset:-5px;border-radius:50%;border:5px solid transparent;border-top-color:var(--accent)
+  position:absolute;inset:-5px;border-radius:50%;border:5px solid transparent;border-top-color:var(--blue)
 }
 #unlockRing.spin{animation:spin 3s linear forwards}
 @keyframes spin{to{transform:rotate(360deg)}}
 
-/* last 60s alert */
-#alertOverlay{z-index:90}
-#alertOverlay .alert-label{font-size:clamp(0.9rem,3vw,1.2rem);font-weight:700;color:var(--red);animation:flash .6s infinite alternate}
-@keyframes flash{to{opacity:.25}}
-#alertOverlay .alert-num{
-  font-size:clamp(5rem,22vw,12rem);font-weight:900;color:var(--red);letter-spacing:3px;
-  animation:breathe .8s infinite;text-shadow:0 0 40px rgba(248,81,73,.5),0 0 80px rgba(248,81,73,.25)
-}
-@keyframes breathe{50%{opacity:.45;transform:scale(1.06)}}
-#alertOverlay .alert-sub{font-size:0.78rem;color:var(--muted)}
-#alertOverlay button{
-  padding:8px 28px;border-radius:20px;border:2px solid var(--red);background:transparent;
-  color:var(--red);font-size:0.85rem;font-weight:600;cursor:pointer;margin-top:8px
+/* Landscape tweaks */
+@media(orientation:landscape){
+  .hero{font-size:var(--fs-hero-landscape);padding:clamp(8px,3vh,20px) 0}
+  .preset-strip{padding-bottom:4px}
+  .bottom-bar{gap:4px}
+  .ctrl-row button{min-height:40px}
 }
 
-/* finish */
-#finishOverlay{z-index:95}
-#finishOverlay .finish-icon{font-size:3.5rem}
-#finishOverlay h2{font-size:clamp(1.4rem,5vw,2rem);font-weight:800;color:var(--red)}
-#finishOverlay .finish-sub{font-size:clamp(0.9rem,3vw,1.1rem);color:var(--muted)}
-#finishOverlay button{
-  padding:10px 36px;border-radius:20px;border:none;background:var(--accent);color:#fff;
-  font-size:0.95rem;font-weight:700;cursor:pointer;margin-top:12px
+/* Timer zone background transition */
+.hero-zone .zone-bg{
+  position:absolute;inset:0;border-radius:24px;transition:background .6s;pointer-events:none
 }
+.hero-zone .zone-bg.warn{background:rgba(255,214,10,.03)}
+.hero-zone .zone-bg.danger{background:rgba(255,69,58,.04)}
 </style>
 </head>
 <body>
 
 <div class="app" id="app">
-
-  <div class="header">
-    <h1>演讲计时器</h1>
-    <div class="lock-tag" id="lockTag">🔓 未锁定</div>
+  <!-- Top bar -->
+  <div class="topbar">
+    <h1>演讲计时器 Pro</h1>
+    <div class="actions">
+      <button id="btnTheme" title="主题">☀</button>
+      <button id="btnImmersive" title="全屏">⛶</button>
+      <button id="btnLockTop" title="锁定">🔓</button>
+    </div>
   </div>
 
-  <div class="presets" id="presets">
+  <!-- Presets -->
+  <div class="preset-strip" id="presetStrip">
+    <button data-m="1">1分</button>
     <button data-m="3">3分</button>
     <button data-m="5" class="on">5分</button>
     <button data-m="8">8分</button>
     <button data-m="10">10分</button>
+    <button data-m="15">15分</button>
+    <button data-m="20">20分</button>
     <button data-custom>自定义</button>
   </div>
 
-  <div class="custom" id="customRow" style="display:none">
-    <span>时</span><input id="ch" type="number" value="0" min="0" max="99" inputmode="numeric">
-    <span>分</span><input id="cm" type="number" value="5" min="0" max="59" inputmode="numeric">
-    <span>秒</span><input id="cs" type="number" value="0" min="0" max="59" inputmode="numeric">
+  <!-- Custom input (hidden by default) -->
+  <div class="custom" id="customRow" style="display:none;gap:5px;align-items:center;justify-content:center;padding-bottom:clamp(4px,1vh,8px);flex-shrink:0">
+    <span style="font-size:0.68rem;color:var(--c4)">时</span><input id="ch" type="number" value="0" min="0" max="99" inputmode="numeric" style="width:40px;padding:4px 2px;text-align:center;font-size:0.76rem;font-weight:600;border:1px solid var(--c3);border-radius:8px;background:var(--c1);color:var(--c5);outline:none">
+    <span style="font-size:0.68rem;color:var(--c4)">分</span><input id="cm" type="number" value="5" min="0" max="59" inputmode="numeric" style="width:40px;padding:4px 2px;text-align:center;font-size:0.76rem;font-weight:600;border:1px solid var(--c3);border-radius:8px;background:var(--c1);color:var(--c5);outline:none">
+    <span style="font-size:0.68rem;color:var(--c4)">秒</span><input id="cs" type="number" value="0" min="0" max="59" inputmode="numeric" style="width:40px;padding:4px 2px;text-align:center;font-size:0.76rem;font-weight:600;border:1px solid var(--c3);border-radius:8px;background:var(--c1);color:var(--c5);outline:none">
   </div>
 
-  <div class="panel" id="panel">
-    <div class="ring-wrap">
-      <svg id="ringSvg" viewBox="0 0 200 200"><circle class="ring-bg" cx="100" cy="100" r="88"/><circle class="ring-fg" id="ringFg" cx="100" cy="100" r="88" stroke-dasharray="552.92" stroke-dashoffset="0"/></svg>
+  <!-- HERO -->
+  <div class="hero-zone" id="heroZone">
+    <div class="zone-bg" id="zoneBg"></div>
+    <div class="ring-container" id="ringContainer">
+      <svg id="ringSvg" viewBox="0 0 300 300"><circle class="ring-bg" cx="150" cy="150" r="138"/><circle class="ring-fg" id="ringFg" cx="150" cy="150" r="138" stroke-dasharray="867.08" stroke-dashoffset="0"/></svg>
     </div>
-    <div class="countdown" id="cd">05:00</div>
-    <div class="elapsed-label">已用时</div>
-    <div class="elapsed" id="et">00:00</div>
-    <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+    <div class="hero" id="hero">05:00</div>
+    <div class="meta-row">
+      <div class="zone-indicator"><div class="zone-dot green" id="zoneDot"></div><span id="zoneLabel">充裕</span></div>
+      <span>已用 <span class="elapsed-val" id="elapsedVal">00:00</span></span>
+      <span class="overtime" id="overtimeTag">超时 +0:00</span>
+    </div>
   </div>
 
-  <div class="ctrls" id="ctrls">
-    <button class="btn-play" id="btnPlay">开始</button>
-    <button class="btn-pause" id="btnPause" disabled>暂停</button>
-    <button class="btn-reset" id="btnReset">重置</button>
+  <!-- Bottom -->
+  <div class="bottom-bar">
+    <div class="ctrl-row">
+      <button class="btn-adj" id="btnMinus30" title="-30秒">−30</button>
+      <button class="btn-play" id="btnPlay">开始</button>
+      <button class="btn-pause" id="btnPause" disabled>暂停</button>
+      <button class="btn-reset" id="btnReset">重置</button>
+      <button class="btn-adj" id="btnPlus30" title="+30秒">+30</button>
+    </div>
+    <div class="drawer-handle" id="drawerHandle">场景 · 音色 · 提醒 ▸</div>
+    <div class="drawer" id="drawer">
+      <div class="drawer-inner"><div class="drawer-content">
+        <div class="scene-row" id="sceneRow"></div>
+        <div class="voice-row">
+          <span>语音</span><select id="voiceSel"></select>
+          <button class="btn-test" id="btnTest">试听</button>
+        </div>
+        <div class="checkpoint-row" id="checkpointRow">
+          <span>节点提醒:</span>
+          <label><input type="checkbox" data-sec="180">3分</label>
+          <label><input type="checkbox" data-sec="120">2分</label>
+          <label><input type="checkbox" data-sec="60" checked>1分</label>
+          <label><input type="checkbox" data-sec="30">30秒</label>
+          <label><input type="checkbox" data-sec="10">10秒</label>
+        </div>
+      </div></div>
+    </div>
   </div>
+</div>
 
-  <div class="scenes" id="scenes"></div>
-  <div class="voice-row">
-    <span>语音</span>
-    <select id="voiceSel"></select>
-    <button class="btn-test" id="btnTest">试听</button>
-  </div>
-
-  <div class="status" id="statusBar">就绪 · 5 分钟</div>
+<!-- Immersive -->
+<div class="immersive" id="immersive">
+  <div class="imm-zone green" id="immZone"></div>
+  <div class="imm-hero" id="immHero">05:00</div>
+  <div class="imm-meta" id="immMeta">已用 00:00</div>
+  <div class="imm-hint" id="immHint">轻触退出全屏</div>
 </div>
 
 <!-- Overlays -->
-<div class="overlay" id="lockOverlay">
-  <div class="lock-icon">🔒</div>
-  <h2>计时器已锁定</h2>
-  <p>长按下方按钮 3 秒解锁</p>
+<div class="overlay" id="alertOv">
+  <div class="al-label">⚠ 时间节点提醒</div>
+  <div class="al-time" id="alTime">1:00</div>
+  <div class="al-sub" id="alSub"></div>
+  <button id="alertDismiss">知道了</button>
+</div>
+<div class="overlay" id="finishOv">
+  <h2>⏰ 时间到！</h2>
+  <div class="fin-sub" id="finSub"></div>
+  <div class="fin-overtime" id="finOvertime"></div>
+  <button id="finishDismiss">确定</button>
+</div>
+<div class="overlay" id="lockOv">
+  <div class="lk-icon">🔒</div>
+  <h2>已锁定</h2>
+  <p>长按 3 秒解锁</p>
   <button id="unlockBtn">🔓<div id="unlockRing"></div></button>
 </div>
 
-<div class="overlay" id="alertOverlay">
-  <div class="alert-label">⚠ 剩余时间</div>
-  <div class="alert-num" id="alertNum">1:00</div>
-  <div class="alert-sub" id="alertSub"></div>
-  <button id="alertDismiss">知道了</button>
-</div>
-
-<div class="overlay" id="finishOverlay">
-  <div class="finish-icon">⏰</div>
-  <h2>时间到！</h2>
-  <div class="finish-sub" id="finishSub"></div>
-  <button id="finishDismiss">确定</button>
-</div>
-
 <script>
-(function(){
-"use strict";
+(function(){"use strict";
 
-// ── DOM ──
-const E = id => document.getElementById(id);
-const cdEl     = E('cd');
-const etEl     = E('et');
-const ringFg   = E('ringFg');
-const barFill  = E('barFill');
-const btnPlay  = E('btnPlay');
-const btnPause = E('btnPause');
-const btnReset = E('btnReset');
-const statusBar= E('statusBar');
-const lockTag  = E('lockTag');
-const lockOv   = E('lockOverlay');
-const alertOv  = E('alertOverlay');
-const alertNum = E('alertNum');
-const alertSub = E('alertSub');
-const finishOv = E('finishOverlay');
-const finishSub= E('finishSub');
-const customRow= E('customRow');
-const chI = E('ch'), cmI = E('cm'), csI = E('cs');
-const unlockBtn = E('unlockBtn');
-const unlockRing= E('unlockRing');
-const presets   = E('presets');
-const scenes    = E('scenes');
-const voiceSel  = E('voiceSel');
-const ringSvg   = E('ringSvg');
+// ═══════════════ DOM ═══════════════
+const Q = id => document.getElementById(id);
+const hero       = Q('hero');
+const elapsedVal = Q('elapsedVal');
+const overtimeTag= Q('overtimeTag');
+const ringFg     = Q('ringFg');
+const ringContainer=Q('ringContainer');
+const ringSvg    = Q('ringSvg');
+const zoneDot    = Q('zoneDot');
+const zoneLabel  = Q('zoneLabel');
+const zoneBg     = Q('zoneBg');
+const btnPlay    = Q('btnPlay');
+const btnPause   = Q('btnPause');
+const btnReset   = Q('btnReset');
+const btnMinus30 = Q('btnMinus30');
+const btnPlus30  = Q('btnPlus30');
+const btnLockTop = Q('btnLockTop');
+const btnTheme   = Q('btnTheme');
+const btnImmersive=Q('btnImmersive');
+const presetStrip= Q('presetStrip');
+const sceneRow   = Q('sceneRow');
+const voiceSel   = Q('voiceSel');
+const drawer     = Q('drawer');
+const drawerHandle=Q('drawerHandle');
+const heroZone   = Q('heroZone');
+const app        = Q('app');
+const immersive  = Q('immersive');
+const immHero    = Q('immHero');
+const immMeta    = Q('immMeta');
+const immZone    = Q('immZone');
+const immHint    = Q('immHint');
+const alertOv    = Q('alertOv');
+const alTime     = Q('alTime');
+const alSub      = Q('alSub');
+const finishOv   = Q('finishOv');
+const finSub     = Q('finSub');
+const finOvertime= Q('finOvertime');
+const lockOv     = Q('lockOv');
+const unlockBtn  = Q('unlockBtn');
+const unlockRing = Q('unlockRing');
 
-const CIRC = 2 * Math.PI * 88; // 552.92
+const CIRC = 2 * Math.PI * 138;
 
-// ── State ──
-const ST = { IDLE:0, RUN:1, PAUSE:2, DONE:3 };
-let state   = ST.IDLE;
-let total   = 300;  // seconds
-let remain  = 300;
-let elapsed = 0;
-let timer   = null;
-let locked  = false;
-let alertShown = false;
-let alertDismissed = false;
-let finished = false;
+// ═══════════════ STATE ═══════════════
+const ST = {IDLE:0,RUN:1,PAUSE:2,DONE:3};
+let state    = ST.IDLE;
+let total    = 300;
+let remain   = 300;
+let elapsed  = 0;
+let overtime = 0;
+let timer    = null;
+let locked   = false;
+let immersiveOn = false;
+let darkMode = true;
+let finishedNotified = false;
+let firedCheckpoints = new Set();
 
-// ── Voice / Scene ──
+// Color zone thresholds
+function zone(){
+  if(remain>total*.25||total<=0) return 'green';
+  if(remain>total*.1) return 'yellow';
+  if(remain>0) return 'red';
+  return 'overtime';
+}
+
+// ═══════════════ VOICE ═══════════════
 const SCENES = [
-  { id:'speech',  name:'演讲答辩', pref:{gender:'female',pitch:'norm',rate:'norm'},phrase:'演讲时间到，谢谢大家的倾听。' },
-  { id:'leader',  name:'领导竞聘', pref:{gender:'male',  pitch:'low', rate:'slow'},phrase:'时间到，请各位评委注意。' },
-  { id:'student', name:'学习考试', pref:{gender:'female',pitch:'norm',rate:'norm'},phrase:'考试时间结束，请立即停笔。' },
-  { id:'meeting', name:'会议发言', pref:{gender:'male',  pitch:'norm',rate:'slow'},phrase:'发言时间已到，请注意控制时间。' },
-  { id:'fun',     name:'娱乐休闲', pref:{gender:'female',pitch:'high',rate:'fast'},phrase:'时间到啦！快来看看吧！' },
-  { id:'kitchen', name:'厨房烹饪', pref:{gender:'female',pitch:'norm',rate:'norm'},phrase:'时间到了，请关火出锅！' },
-  { id:'sport',   name:'运动健身', pref:{gender:'male',  pitch:'norm',rate:'fast'},phrase:'时间到！休息一下！' },
+  {id:'speech',name:'演讲答辩',pref:{g:'female',p:'norm',r:'norm'},phrase:'演讲时间到，谢谢大家的倾听。'},
+  {id:'leader',name:'领导竞聘',pref:{g:'male',p:'low',r:'slow'},phrase:'时间到，请各位评委注意。'},
+  {id:'student',name:'学习考试',pref:{g:'female',p:'norm',r:'norm'},phrase:'考试时间结束，请立即停笔。'},
+  {id:'meeting',name:'会议发言',pref:{g:'male',p:'norm',r:'slow'},phrase:'发言时间已到，请注意控制时间。'},
+  {id:'fun',name:'娱乐休闲',pref:{g:'female',p:'high',r:'fast'},phrase:'时间到啦！'},
+  {id:'kitchen',name:'厨房烹饪',pref:{g:'female',p:'norm',r:'norm'},phrase:'时间到了，请关火出锅！'},
+  {id:'sport',name:'运动健身',pref:{g:'male',p:'norm',r:'fast'},phrase:'时间到！休息一下！'},
 ];
-let curScene = SCENES[0];
-let allVoices = [], cnVoices = [], selVoice = null;
+let curScene=SCENES[0],allVoices=[],cnVoices=[],selVoice=null;
 
 function loadVoices(){
-  allVoices = speechSynthesis.getVoices();
-  cnVoices = allVoices.filter(v=>v.lang.startsWith('zh'));
-  if(!cnVoices.length) cnVoices = allVoices.slice();
-  refreshVoiceUI();
-  applyScene(curScene);
+  allVoices=speechSynthesis.getVoices();
+  cnVoices=allVoices.filter(v=>v.lang.startsWith('zh'));
+  if(!cnVoices.length) cnVoices=allVoices.slice();
+  refreshVoiceUI();applyScene(curScene);
 }
-speechSynthesis.onvoiceschanged = loadVoices;
+speechSynthesis.onvoiceschanged=loadVoices;
 setTimeout(loadVoices,200);
 
 function refreshVoiceUI(){
-  const pool = cnVoices.length ? cnVoices : allVoices;
-  voiceSel.innerHTML = '';
-  pool.forEach((v,i)=>{ const o=document.createElement('option');o.value=i;o.text=v.name+' ('+v.lang+')';voiceSel.appendChild(o); });
-  voiceSel.onchange = function(){
-    selVoice = pool[this.value]; curScene = null; refreshSceneUI();
-  };
+  const p=cnVoices.length?cnVoices:allVoices;
+  voiceSel.innerHTML='';
+  p.forEach((v,i)=>{const o=document.createElement('option');o.value=i;o.text=v.name+' ('+v.lang+')';voiceSel.appendChild(o);});
+  voiceSel.onchange=function(){selVoice=p[this.value];curScene=null;refreshSceneUI();};
 }
-
 function refreshSceneUI(){
-  scenes.innerHTML = '';
+  sceneRow.innerHTML='';
   SCENES.forEach(s=>{
-    const b = document.createElement('button');
-    b.textContent = s.name; b.dataset.sid = s.id;
-    if(curScene && curScene.id===s.id) b.classList.add('on');
-    b.addEventListener('click',()=>{ curScene=s; applyScene(s); refreshSceneUI(); });
-    scenes.appendChild(b);
+    const b=document.createElement('button');b.textContent=s.name;b.dataset.sid=s.id;
+    if(curScene&&curScene.id===s.id) b.classList.add('on');
+    b.addEventListener('click',()=>{curScene=s;applyScene(s);refreshSceneUI();});
+    sceneRow.appendChild(b);
   });
 }
-
 function bestVoice(pref){
-  const pool = cnVoices.length ? cnVoices : allVoices;
-  let male=[], female=[], other=[];
-  pool.forEach(v=>{
-    const n=v.name.toLowerCase();
+  const p=cnVoices.length?cnVoices:allVoices;
+  let male=[],female=[],other=[];
+  p.forEach(v=>{const n=v.name.toLowerCase();
     if(/kang|male|qiang|nan|liang|yun|feng/.test(n)) male.push(v);
     else if(/hui|yao|female|nv|xia|tong|ling|mei|han|dan/.test(n)) female.push(v);
     else other.push(v);
   });
-  let cand=pool;
-  if(pref.gender==='male') cand=male.length?male:(other.length?other:pool);
-  else if(pref.gender==='female') cand=female.length?female:(other.length?other:pool);
-  return cand[0]||pool[0]||null;
+  let c=p;
+  if(pref.g==='male') c=male.length?male:(other.length?other:p);
+  else if(pref.g==='female') c=female.length?female:(other.length?other:p);
+  return c[0]||p[0]||null;
 }
-
-function applyScene(s){
-  if(!s) return;
-  selVoice = bestVoice(s.pref);
-  const pool = cnVoices.length ? cnVoices : allVoices;
-  for(let i=0;i<pool.length;i++){ if(pool[i]===selVoice){voiceSel.value=i;break;} }
-}
-
+function applyScene(s){if(!s)return;selVoice=bestVoice(s.pref);const p=cnVoices.length?cnVoices:allVoices;for(let i=0;i<p.length;i++){if(p[i]===selVoice){voiceSel.value=i;break;}}}
 function voiceParams(){
-  const pool = cnVoices.length ? cnVoices : allVoices;
-  let v=selVoice||pool[0]||null, rate=.95, pitch=1, phrase='时间到了。';
-  if(curScene){
-    const p=curScene.pref;
-    rate = p.rate==='slow'?.8 : p.rate==='fast'?1.15 : .95;
-    pitch= p.pitch==='low'?.78 : p.pitch==='high'?1.25 : 1;
-    phrase=curScene.phrase;
-  }
+  const p=cnVoices.length?cnVoices:allVoices;
+  let v=selVoice||p[0]||null,rate=.95,pitch=1,phrase='时间到了。';
+  if(curScene){const pf=curScene.pref;rate=pf.r==='slow'?.8:pf.r==='fast'?1.15:.95;pitch=pf.p==='low'?.78:pf.p==='high'?1.25:1;phrase=curScene.phrase;}
   return {voice:v,rate,pitch,phrase};
 }
-
-function speak(txt,rate0,pitch0){
-  if(!('speechSynthesis' in window)) return;
+function speak(txt,r0,p0){
+  if(!('speechSynthesis' in window))return;
   const {voice,rate,pitch}=voiceParams();
   speechSynthesis.cancel();
   const u=new SpeechSynthesisUtterance(txt);
   if(voice){u.voice=voice;u.lang=voice.lang;}
-  u.rate=rate0||rate; u.pitch=pitch0||pitch; u.volume=1;
+  u.rate=r0||rate;u.pitch=p0||pitch;u.volume=1;
   speechSynthesis.speak(u);
 }
-
-function testVoice(){
+Q('btnTest').addEventListener('click',()=>{
   const {voice,phrase}=voiceParams();
-  if(!voice){statusBar.textContent='无可用语音';return;}
+  if(!voice)return;
   speak(phrase);
-  statusBar.textContent='试听: '+voice.name;
-}
-E('btnTest').addEventListener('click',testVoice);
+});
 
-// ── Format ──
+// ═══════════════ CHECKPOINTS ═══════════════
+function getCheckpoints(){
+  const cbs=document.querySelectorAll('#checkpointRow input[type=checkbox]:checked');
+  return Array.from(cbs).map(cb=>parseInt(cb.dataset.sec)).sort((a,b)=>b-a);
+}
+
+// ═══════════════ HELPERS ═══════════════
 function fmt(sec){
   sec=Math.max(0,sec);
-  const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+  const h=Math.floor(sec/3600),m=Math.floor((sec%3600)/60),s=sec%60;
   if(h>0) return h+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
   return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
 }
-function fmtShort(sec){
-  sec=Math.max(0,sec);
-  return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');
-}
+function fmtShort(sec){sec=Math.max(0,sec);return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');}
 
-// ── Render ──
+// ═══════════════ RENDER ═══════════════
 function render(){
-  cdEl.textContent = fmt(remain);
-  etEl.textContent = fmt(elapsed);
-  // ring
-  if(total>0) ringFg.style.strokeDashoffset = CIRC * (1 - remain/total);
-  else ringFg.style.strokeDashoffset = 0;
-  // bar
-  const pct = total>0 ? (remain/total)*100 : 100;
-  barFill.style.width = pct+'%';
-  // colors
-  const cls=['warn','danger'];
-  [cdEl,ringFg,barFill].forEach(el=>el.classList.remove(...cls));
-  if(remain<=0){ cdEl.classList.add('danger');ringFg.classList.add('danger');barFill.classList.add('danger'); }
-  else if(remain<=60){ cdEl.classList.add('danger');ringFg.classList.add('danger');barFill.classList.add('danger'); }
-  else if(remain<=120){ cdEl.classList.add('warn');ringFg.classList.add('warn');barFill.classList.add('warn'); }
+  hero.textContent=remain>0?fmt(remain):'0:00';
+  elapsedVal.textContent=fmt(elapsed);
+  if(overtime>0){overtimeTag.textContent='超时 +'+fmt(overtime);overtimeTag.classList.add('on');}
+  else overtimeTag.classList.remove('on');
+
+  // Ring
+  if(total>0&&remain>=0){ringFg.style.strokeDashoffset=CIRC*(1-remain/total);}
+  else{ringFg.style.strokeDashoffset=CIRC;}
+  // Ring size responsive
+  const rw=heroZone.clientWidth*.8;
+  const sz=Math.min(Math.max(rw,180),300);
+  ringSvg.setAttribute('width',sz);ringSvg.setAttribute('height',sz);
+
+  // Zone colors
+  const z=zone();
+  [hero,ringFg].forEach(el=>{el.classList.remove('warn','danger');});
+  zoneDot.classList.remove('green','yellow','red');
+  zoneBg.classList.remove('warn','danger');
+  if(z==='green'){zoneDot.classList.add('green');zoneLabel.textContent='充裕';}
+  else if(z==='yellow'){hero.classList.add('warn');ringFg.classList.add('warn');zoneDot.classList.add('yellow');zoneLabel.textContent='注意';zoneBg.classList.add('warn');}
+  else{hero.classList.add('danger');ringFg.classList.add('danger');zoneDot.classList.add('red');zoneLabel.textContent='紧迫';zoneBg.classList.add('danger');}
+
+  // Immersive
+  if(immersiveOn){
+    immHero.textContent=remain>0?fmt(remain):'0:00';
+    immMeta.textContent='已用 '+fmt(elapsed)+(overtime>0?' · 超时 +'+fmt(overtime):'');
+    immHero.classList.remove('warn','danger');
+    immZone.classList.remove('green','yellow','red');
+    if(z==='green') immZone.classList.add('green');
+    else if(z==='yellow'){immHero.classList.add('warn');immZone.classList.add('yellow');}
+    else{immHero.classList.add('danger');immZone.classList.add('red');}
+  }
 }
 
 function renderBtns(){
   switch(state){
-    case ST.IDLE:
-      btnPlay.disabled=false;btnPlay.textContent='开始';
-      btnPause.disabled=true;btnPause.textContent='暂停';
-      btnReset.disabled=false; break;
-    case ST.RUN:
-      btnPlay.disabled=true;
-      btnPause.disabled=false;btnPause.textContent='暂停';
-      btnReset.disabled=false; break;
-    case ST.PAUSE:
-      btnPlay.disabled=false;btnPlay.textContent='继续';
-      btnPause.disabled=true;btnPause.textContent='暂停';
-      btnReset.disabled=false; break;
-    case ST.DONE:
-      btnPlay.disabled=true;
-      btnPause.disabled=true;
-      btnReset.disabled=false; break;
+    case ST.IDLE:btnPlay.disabled=false;btnPlay.textContent='开始';btnPause.disabled=true;btnPause.textContent='暂停';btnReset.disabled=false;btnMinus30.disabled=false;btnPlus30.disabled=false;break;
+    case ST.RUN:btnPlay.disabled=true;btnPause.disabled=false;btnPause.textContent='暂停';btnReset.disabled=false;btnMinus30.disabled=false;btnPlus30.disabled=false;app.classList.add('running');break;
+    case ST.PAUSE:btnPlay.disabled=false;btnPlay.textContent='继续';btnPause.disabled=true;btnPause.textContent='暂停';btnReset.disabled=false;btnMinus30.disabled=false;btnPlus30.disabled=false;app.classList.remove('running');break;
+    case ST.DONE:btnPlay.disabled=true;btnPause.disabled=true;btnReset.disabled=false;btnMinus30.disabled=true;btnPlus30.disabled=true;app.classList.remove('running');break;
   }
-}
-
-function renderLockUI(){
-  if(locked){ lockTag.classList.add('locked');lockTag.innerHTML='🔒 已锁定'; }
-  else { lockTag.classList.remove('locked');lockTag.innerHTML='🔓 未锁定'; }
+  // Lock top button
+  btnLockTop.textContent=locked?'🔒':'🔓';
 }
 
 function refreshPresets(){
-  const btns = presets.querySelectorAll('button');
-  btns.forEach(b=>{
+  presetStrip.querySelectorAll('button').forEach(b=>{
     b.classList.remove('on');
-    if(b.dataset.custom!=null && customRow.style.display!=='none') b.classList.add('on');
-    else if(b.dataset.m && state===ST.IDLE && total===parseInt(b.dataset.m)*60) b.classList.add('on');
+    if(b.dataset.custom!=null&&total===0) b.classList.add('on'); // custom handled separately
+    else if(b.dataset.m&&state===ST.IDLE&&total===parseInt(b.dataset.m)*60) b.classList.add('on');
   });
 }
 
-// ── Timer tick ──
+// ═══════════════ IMMERSIVE ═══════════════
+function toggleImmersive(){
+  if(state!==ST.RUN&&state!==ST.PAUSE) return;
+  immersiveOn=!immersiveOn;
+  if(immersiveOn){
+    immersive.classList.add('on');
+    immHint.style.animation='none';
+    void immHint.offsetWidth;
+    immHint.style.animation='fadeHint 3s forwards';
+    render();
+  } else {
+    immersive.classList.remove('on');
+  }
+}
+immersive.addEventListener('click',toggleImmersive);
+btnImmersive.addEventListener('click',toggleImmersive);
+
+// ═══════════════ THEME ═══════════════
+btnTheme.addEventListener('click',()=>{
+  darkMode=!darkMode;
+  document.body.classList.toggle('light',!darkMode);
+  btnTheme.textContent=darkMode?'☀':'🌙';
+});
+
+// ═══════════════ DRAWER ═══════════════
+let drawerOpen=false;
+drawerHandle.addEventListener('click',()=>{
+  drawerOpen=!drawerOpen;
+  drawer.classList.toggle('open',drawerOpen);
+  drawerHandle.innerHTML=(drawerOpen?'▾':'▸')+' 场景 · 音色 · 提醒';
+});
+
+// ═══════════════ ADJUST TIME ═══════════════
+function adjustTime(delta){
+  if(state===ST.DONE) return;
+  const newTotal=Math.max(1,total+delta);
+  total=newTotal;
+  if(state===ST.IDLE){remain=total;elapsed=0;overtime=0;firedCheckpoints.clear();}
+  else if(state===ST.RUN||state===ST.PAUSE){remain=Math.max(0,remain+delta);}
+  render();refreshPresets();
+}
+btnMinus30.addEventListener('click',()=>adjustTime(-30));
+btnPlus30.addEventListener('click',()=>adjustTime(30));
+
+// ═══════════════ TIMER ═══════════════
 function tick(){
   if(state!==ST.RUN) return;
-  remain--; elapsed++;
-  render();
-  // last 60s
-  if(remain===60 && !alertDismissed){ showAlert(); speak('剩余最后一分钟',.85,1); }
-  // update alert if visible
-  if(alertOv.classList.contains('on') && remain>0){
-    alertNum.textContent=fmtShort(remain);
-    alertSub.textContent='已用时 '+fmt(elapsed);
+  if(remain>0){
+    remain--;
+    elapsed++;
+    // Checkpoint alerts
+    const cpts=getCheckpoints();
+    for(const cp of cpts){
+      if(remain===cp && !firedCheckpoints.has(cp)){
+        firedCheckpoints.add(cp);
+        if(cp===60) showAlert('剩余最后 1 分钟',fmtShort(remain));
+        else if(cp===30) showAlert('剩余 30 秒',fmtShort(remain));
+        else if(cp===10) showAlert('剩余 10 秒！',fmtShort(remain));
+        else showAlert('剩余 '+fmtShort(remain),fmtShort(remain));
+        speak(remain===60?'剩余最后一分钟':'剩余'+fmtShort(remain),.85,1);
+        break;
+      }
+    }
+  } else {
+    // Overtime
+    overtime++;
+    elapsed++;
   }
-  // finish
-  if(remain<=0){ finish(); }
+  render();
+  if(remain<=0 && !finishedNotified && overtime>=1){
+    finish();
+  }
 }
 
-// ── Actions ──
 function startTimer(){
   if(state===ST.RUN) return;
   if(customRow.style.display!=='none'){
-    const h=Math.max(0,parseInt(chI.value)||0);
-    const m=Math.max(0,Math.min(59,parseInt(cmI.value)||0));
-    const s=Math.max(0,Math.min(59,parseInt(csI.value)||0));
+    const h=Math.max(0,parseInt(Q('ch').value)||0);
+    const m=Math.max(0,Math.min(59,parseInt(Q('cm').value)||0));
+    const s=Math.max(0,Math.min(59,parseInt(Q('cs').value)||0));
     total=h*3600+m*60+s;
-    if(total<=0){statusBar.textContent='请设置大于0的时长';return;}
+    if(total<=0) return;
   }
-  if(state===ST.DONE){
-    remain=total;elapsed=0;alertShown=false;alertDismissed=false;finished=false;
-    alertOv.classList.remove('on');finishOv.classList.remove('on');
-  } else if(state===ST.IDLE){
-    remain=total;elapsed=0;
-  }
-  state=ST.RUN;
-  render();renderBtns();refreshPresets();
-  statusBar.textContent='▶ 计时中…';
+  if(state===ST.DONE){remain=total;elapsed=0;overtime=0;finishedNotified=false;firedCheckpoints.clear();alertOv.classList.remove('on');finishOv.classList.remove('on');}
+  else if(state===ST.IDLE){remain=total;elapsed=0;overtime=0;firedCheckpoints.clear();}
+  state=ST.RUN;render();renderBtns();refreshPresets();
   if(timer) clearInterval(timer);
   timer=setInterval(tick,1000);
   requestWakeLock();
@@ -498,183 +640,138 @@ function startTimer(){
 
 function pauseTimer(){
   if(state!==ST.RUN) return;
-  state=ST.PAUSE;
-  if(timer){clearInterval(timer);timer=null;}
-  renderBtns();
-  statusBar.textContent='⏸ 已暂停';
-  releaseWakeLock();
+  state=ST.PAUSE;if(timer){clearInterval(timer);timer=null;}
+  renderBtns();releaseWakeLock();
 }
-
 function resetTimer(){
   if(timer){clearInterval(timer);timer=null;}
-  state=ST.IDLE;remain=total;elapsed=0;
-  alertShown=false;alertDismissed=false;finished=false;
+  state=ST.IDLE;remain=total;elapsed=0;overtime=0;
+  finishedNotified=false;firedCheckpoints.clear();
   alertOv.classList.remove('on');finishOv.classList.remove('on');
-  render();renderBtns();refreshPresets();
-  statusBar.textContent='已重置 · '+fmt(total);
-  releaseWakeLock();
+  render();renderBtns();refreshPresets();releaseWakeLock();
 }
 
 function finish(){
-  if(finished) return;
-  finished=true;
-  state=ST.DONE;
-  if(timer){clearInterval(timer);timer=null;}
-  remain=0;
-  render();renderBtns();
-  statusBar.textContent='⏰ 时间到！';
+  if(finishedNotified) return;
+  finishedNotified=true;
+  state=ST.DONE;if(timer){clearInterval(timer);timer=null;}
+  remain=0;render();renderBtns();
   alertOv.classList.remove('on');
-  finishSub.textContent='总用时 '+fmt(elapsed);
+  finSub.textContent='总用时 '+fmt(elapsed);
+  if(overtime>0){finOvertime.textContent='超时 +'+fmt(overtime);finOvertime.classList.add('on');}
+  else finOvertime.classList.remove('on');
   finishOv.classList.add('on');
-  // speak 3 times
+  // Exit immersive
+  if(immersiveOn) toggleImmersive();
   const {phrase}=voiceParams();
-  speak(phrase,.9,1);
-  setTimeout(()=>speak(phrase,.9,1),2200);
-  setTimeout(()=>speak(phrase,.9,1),4400);
+  speak(phrase,.9,1);setTimeout(()=>speak(phrase,.9,1),2200);setTimeout(()=>speak(phrase,.9,1),4400);
   releaseWakeLock();
   if(navigator.vibrate) navigator.vibrate([400,150,400,150,400]);
 }
 
-// ── Alert ──
-function showAlert(){
-  if(alertShown) return;
-  alertShown=true; alertDismissed=false;
-  alertNum.textContent=fmtShort(remain);
-  alertSub.textContent='已用时 '+fmt(elapsed);
+// ═══════════════ ALERT ═══════════════
+function showAlert(label,timeStr){
+  alertOv.querySelector('.al-label').textContent='⚠ '+label;
+  alTime.textContent=timeStr;
+  alSub.textContent='已用时 '+fmt(elapsed);
   alertOv.classList.add('on');
 }
+function dismissAlert(){alertOv.classList.remove('on');}
+function dismissFinish(){finishOv.classList.remove('on');}
 
-function dismissAlert(){ alertOv.classList.remove('on');alertDismissed=true; }
-function dismissFinish(){ finishOv.classList.remove('on'); }
-
-// ── Lock ──
+// ═══════════════ LOCK ═══════════════
 function doLock(){
-  if(state!==ST.RUN && state!==ST.PAUSE) return;
-  locked=true;renderLockUI();lockOv.classList.add('on');
-  if(alertOv.classList.contains('on')){alertOv.classList.remove('on');alertDismissed=true;}
-  statusBar.textContent='🔒 已锁定 · 后台计时中';
+  if(state!==ST.RUN&&state!==ST.PAUSE) return;
+  locked=true;lockOv.classList.add('on');renderBtns();
+  if(alertOv.classList.contains('on')){alertOv.classList.remove('on');}
 }
-function doUnlock(){
-  locked=false;lockOv.classList.remove('on');renderLockUI();
-  statusBar.textContent=state===ST.RUN?'▶ 计时中…':'已解锁';
-}
+function doUnlock(){locked=false;lockOv.classList.remove('on');renderBtns();}
+let unlockTimer=null,unlocking=false;
+unlockBtn.addEventListener('pointerdown',function(e){e.preventDefault();if(!locked)return;unlocking=true;unlockRing.classList.add('spin');unlockTimer=setTimeout(()=>{unlockTimer=null;unlockRing.classList.remove('spin');doUnlock();},3000);});
+unlockBtn.addEventListener('pointerup',cancelUnlock);unlockBtn.addEventListener('pointerleave',cancelUnlock);unlockBtn.addEventListener('pointercancel',cancelUnlock);unlockBtn.addEventListener('contextmenu',e=>e.preventDefault());
+function cancelUnlock(){if(!unlocking)return;unlocking=false;if(unlockTimer){clearTimeout(unlockTimer);unlockTimer=null;}unlockRing.classList.remove('spin');}
 
-// Lock: long-press 3s
-let unlockTimer=null, unlocking=false;
-unlockBtn.addEventListener('pointerdown',function(e){
-  e.preventDefault();
-  if(!locked) return;
-  unlocking=true; unlockRing.classList.add('spin');
-  statusBar.textContent='持续按住 3 秒解锁…';
-  unlockTimer=setTimeout(()=>{unlockTimer=null;unlockRing.classList.remove('spin');doUnlock();},3000);
-});
-unlockBtn.addEventListener('pointerup',cancelUnlock);
-unlockBtn.addEventListener('pointerleave',cancelUnlock);
-unlockBtn.addEventListener('pointercancel',cancelUnlock);
-unlockBtn.addEventListener('contextmenu',e=>e.preventDefault());
-function cancelUnlock(){
-  if(!unlocking) return;
-  unlocking=false;
-  if(unlockTimer){clearTimeout(unlockTimer);unlockTimer=null;}
-  unlockRing.classList.remove('spin');
-  statusBar.textContent='🔒 已锁定';
-}
-
-// ── Wake Lock ──
+// ═══════════════ WAKE LOCK ═══════════════
 let wakeLock=null;
-async function requestWakeLock(){
-  try{if('wakeLock' in navigator && !wakeLock){wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>{wakeLock=null;});}}catch(e){}
-}
-function releaseWakeLock(){
-  if(wakeLock){wakeLock.release().catch(()=>{});wakeLock=null;}
-}
+async function requestWakeLock(){try{if('wakeLock' in navigator&&!wakeLock){wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>{wakeLock=null;});}}catch(e){}}
+function releaseWakeLock(){if(wakeLock){wakeLock.release().catch(()=>{});wakeLock=null;}}
 
-// ── Visibility ──
+// ═══════════════ VISIBILITY ═══════════════
 let bgTs=null;
 document.addEventListener('visibilitychange',()=>{
-  if(document.hidden && state===ST.RUN) bgTs=Date.now();
-  if(!document.hidden && bgTs && state===ST.RUN){
+  if(document.hidden&&state===ST.RUN) bgTs=Date.now();
+  if(!document.hidden&&bgTs&&state===ST.RUN){
     const sec=Math.floor((Date.now()-bgTs)/1000);
-    for(let i=0;i<sec && remain>0;i++){
-      remain--;elapsed++;
-      if(remain===60 && !alertDismissed && !alertShown){showAlert();speak('剩余最后一分钟',.85,1);}
+    for(let i=0;i<sec;i++){
+      if(remain>0){remain--;elapsed++;}
+      else{overtime++;elapsed++;}
+      const cpts=getCheckpoints();
+      for(const cp of cpts){if(remain===cp&&!firedCheckpoints.has(cp)){firedCheckpoints.add(cp);speak(remain===60?'剩余最后一分钟':'剩余'+fmtShort(remain),.85,1);break;}}
     }
-    if(remain<=0) finish();
-    render();
-    bgTs=null;
+    if(remain<=0&&!finishedNotified) finish();
+    render();bgTs=null;
   }
 });
 
-// ── Button bindings ──
+// ═══════════════ BUTTON BINDINGS ═══════════════
 btnPlay.addEventListener('click',()=>{
-  if(state===ST.PAUSE){ state=ST.RUN; renderBtns(); statusBar.textContent='▶ 计时中…'; timer=setInterval(tick,1000); requestWakeLock(); }
+  if(state===ST.PAUSE){state=ST.RUN;renderBtns();timer=setInterval(tick,1000);requestWakeLock();}
   else startTimer();
 });
 btnPause.addEventListener('click',pauseTimer);
 btnReset.addEventListener('click',resetTimer);
-lockTag.addEventListener('click',doLock);
-E('alertDismiss').addEventListener('click',dismissAlert);
-E('finishDismiss').addEventListener('click',dismissFinish);
+btnLockTop.addEventListener('click',doLock);
+Q('alertDismiss').addEventListener('click',dismissAlert);
+Q('finishDismiss').addEventListener('click',dismissFinish);
 
-// ── Preset bindings ──
-presets.addEventListener('click',function(e){
+// Hero tap → pause/resume
+heroZone.addEventListener('click',e=>{
+  if(e.target.closest('button')) return;
+  if(state===ST.RUN) pauseTimer();
+  else if(state===ST.PAUSE){state=ST.RUN;renderBtns();timer=setInterval(tick,1000);requestWakeLock();}
+});
+
+// ═══════════════ PRESETS ═══════════════
+const customRow = Q('customRow') || document.createElement('div');
+presetStrip.addEventListener('click',function(e){
   const b=e.target.closest('button');
   if(!b) return;
   if(state===ST.RUN||state===ST.PAUSE) return;
   if(b.dataset.custom!=null){
     customRow.style.display='flex';
     const h=Math.floor(total/3600),m=Math.floor((total%3600)/60),s=total%60;
-    chI.value=h;cmI.value=m;csI.value=s;
+    Q('ch').value=h;Q('cm').value=m;Q('cs').value=s;
     refreshPresets();
-    statusBar.textContent='就绪 · 自定义';
-  } else if(b.dataset.m){
-    const mins=parseInt(b.dataset.m);
-    total=mins*60;remain=total;elapsed=0;
-    customRow.style.display='none';chI.value=0;cmI.value=mins;csI.value=0;
-    alertShown=false;alertDismissed=false;finished=false;
+  }else if(b.dataset.m){
+    total=parseInt(b.dataset.m)*60;remain=total;elapsed=0;overtime=0;
+    customRow.style.display='none';
+    firedCheckpoints.clear();finishedNotified=false;
     alertOv.classList.remove('on');finishOv.classList.remove('on');
     render();renderBtns();refreshPresets();
-    statusBar.textContent='就绪 · '+mins+' 分钟';
   }
 });
 
-// ── Custom input live update ──
-[chI,cmI,csI].forEach(el=>el.addEventListener('input',function(){
-  if(state===ST.RUN||state===ST.PAUSE) return;
-  const h=Math.max(0,parseInt(chI.value)||0);
-  const m=Math.max(0,Math.min(59,parseInt(cmI.value)||0));
-  const s=Math.max(0,Math.min(59,parseInt(csI.value)||0));
-  total=h*3600+m*60+s;remain=total;elapsed=0;
-  render();
-  statusBar.textContent=total>0?'就绪 · '+fmt(total):'请设置时长';
-}));
-
-// ── Keyboard ──
+// ═══════════════ KEYBOARD ═══════════════
 document.addEventListener('keydown',function(e){
-  if(locked) return;
-  if(e.key===' '||e.key==='Enter'){
-    e.preventDefault();
-    if(state===ST.RUN) pauseTimer();
-    else if(state===ST.PAUSE||state===ST.IDLE){ if(state===ST.PAUSE){state=ST.RUN;renderBtns();statusBar.textContent='▶ 计时中…';timer=setInterval(tick,1000);requestWakeLock();} else startTimer(); }
-  }
-  if(e.key==='r'||e.key==='R'){ if(!e.ctrlKey&&!e.metaKey) resetTimer(); }
-  if(e.key==='l'||e.key==='L'){ if(!e.ctrlKey&&!e.metaKey) doLock(); }
+  if(locked||e.target.tagName==='INPUT') return;
+  if(e.key===' '||e.key==='Enter'){e.preventDefault();if(state===ST.RUN)pauseTimer();else if(state===ST.PAUSE){state=ST.RUN;renderBtns();timer=setInterval(tick,1000);requestWakeLock();}else startTimer();}
+  if(e.key==='r'||e.key==='R'){if(!e.ctrlKey&&!e.metaKey) resetTimer();}
+  if(e.key==='f'||e.key==='F'){if(!e.ctrlKey&&!e.metaKey) toggleImmersive();}
+  if(e.key==='l'||e.key==='L'){if(!e.ctrlKey&&!e.metaKey) doLock();}
 });
 
-// ── Ring SVG size ──
-function resizeRing(){ const w=ringSvg.parentElement.clientWidth; ringSvg.setAttribute('width',Math.min(w,200));ringSvg.setAttribute('height',Math.min(w,200)); }
-window.addEventListener('resize',resizeRing);
+// ═══════════════ RESIZE ═══════════════
+window.addEventListener('resize',()=>{if(state===ST.IDLE||state===ST.PAUSE||state===ST.RUN) render();});
 
-// ── Init ──
+// ═══════════════ INIT ═══════════════
 function init(){
-  total=300;remain=300;elapsed=0;
-  render();renderBtns();renderLockUI();refreshPresets();
+  total=300;remain=300;elapsed=0;overtime=0;
+  render();renderBtns();refreshPresets();
   refreshSceneUI();refreshVoiceUI();
-  statusBar.textContent='就绪 · 5 分钟';
-  resizeRing();
 }
 init();
 })();
 </script>
+
 </body>
 </html>
