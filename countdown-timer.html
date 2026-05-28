@@ -414,14 +414,22 @@ function zone(){
 
 // ═══════════════ VOICE ═══════════════
 const SCENES = [
-  {id:'speech',name:'演讲答辩',pref:{g:'female',p:'norm',r:'norm'},phrase:'演讲时间到，谢谢大家的倾听。'},
-  {id:'leader',name:'领导竞聘',pref:{g:'male',p:'low',r:'slow'},phrase:'时间到，请各位评委注意。'},
-  {id:'student',name:'学习考试',pref:{g:'female',p:'norm',r:'norm'},phrase:'考试时间结束，请立即停笔。'},
-  {id:'meeting',name:'会议发言',pref:{g:'male',p:'norm',r:'slow'},phrase:'发言时间已到，请注意控制时间。'},
-  {id:'fun',name:'娱乐休闲',pref:{g:'female',p:'high',r:'fast'},phrase:'时间到啦！'},
-  {id:'kitchen',name:'厨房烹饪',pref:{g:'female',p:'norm',r:'norm'},phrase:'时间到了，请关火出锅！'},
-  {id:'sport',name:'运动健身',pref:{g:'male',p:'norm',r:'fast'},phrase:'时间到！休息一下！'},
+  {id:'speech',name:'演讲答辩',pref:{g:'female',p:'norm',r:'norm'},phrase:'演讲时间到，谢谢大家的倾听。',audio:'audio/speech.mp3'},
+  {id:'leader',name:'领导竞聘',pref:{g:'male',p:'low',r:'slow'},phrase:'时间到，请各位评委注意。',audio:'audio/leader.mp3'},
+  {id:'student',name:'学习考试',pref:{g:'female',p:'norm',r:'norm'},phrase:'考试时间结束，请立即停笔。',audio:'audio/exam.mp3'},
+  {id:'meeting',name:'会议发言',pref:{g:'male',p:'norm',r:'slow'},phrase:'发言时间已到，请注意控制时间。',audio:'audio/meeting.mp3'},
+  {id:'fun',name:'娱乐休闲',pref:{g:'female',p:'high',r:'fast'},phrase:'时间到啦！',audio:'audio/fun.mp3'},
+  {id:'kitchen',name:'厨房烹饪',pref:{g:'female',p:'norm',r:'norm'},phrase:'时间到了，请关火出锅！',audio:'audio/kitchen.mp3'},
+  {id:'sport',name:'运动健身',pref:{g:'male',p:'norm',r:'fast'},phrase:'时间到！休息一下！',audio:'audio/sport.mp3'},
 ];
+
+// Audio file map for warnings and generic alerts
+const AUDIO = {
+  warn1min: 'audio/warn_1min.mp3',
+  warn30s:  'audio/warn_30s.mp3',
+  warn10s:  'audio/warn_10s.mp3',
+  generic:  'audio/finish_generic.mp3'
+};
 let curScene=SCENES[0],allVoices=[],cnVoices=[],selVoice=null;
 
 function loadVoices(){
@@ -467,8 +475,30 @@ function voiceParams(){
   if(curScene){const pf=curScene.pref;rate=pf.r==='slow'?.8:pf.r==='fast'?1.15:.95;pitch=pf.p==='low'?.78:pf.p==='high'?1.25:1;phrase=curScene.phrase;}
   return {voice:v,rate,pitch,phrase};
 }
+// Play pre-generated neural voice audio (works on ALL devices)
+const audioCache={};
+function playAudio(src){
+  if(!src) return false;
+  try{
+    if(!audioCache[src]){
+      audioCache[src]=new Audio(src);
+      audioCache[src].preload='auto';
+    }
+    const a=audioCache[src];
+    a.currentTime=0;
+    a.play().catch(()=>{});
+    return true;
+  }catch(e){return false;}
+}
+
 function speak(txt,r0,p0){
-  // Try speech first
+  // 1. Try pre-generated neural voice audio (best quality, works everywhere)
+  if(currentScene && currentScene.audio){
+    if(playAudio(currentScene.audio)) return;
+  }
+  if(playAudio(AUDIO.generic)) return;
+
+  // 2. Try browser speechSynthesis
   if('speechSynthesis' in window){
     try{
       const {voice,rate,pitch}=voiceParams();
@@ -480,7 +510,27 @@ function speak(txt,r0,p0){
       return;
     }catch(e){}
   }
-  // Fallback: beep alarm via Web Audio API
+
+  // 3. Last resort: beep alarm
+  beepAlarm();
+}
+
+// Play checkpoint warning audio
+function speakWarning(type){
+  const src = type==='1min' ? AUDIO.warn1min : type==='30s' ? AUDIO.warn30s : type==='10s' ? AUDIO.warn10s : null;
+  if(playAudio(src)) return;
+  // Fallback: text-to-speech or beep
+  const txt = type==='1min' ? '剩余最后一分钟' : type==='30s' ? '剩余30秒' : '剩余10秒';
+  if('speechSynthesis' in window){
+    try{
+      speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(txt);
+      if(selVoice){u.voice=selVoice;u.lang=selVoice.lang;}
+      u.rate=0.85;u.pitch=1;u.volume=1;
+      speechSynthesis.speak(u);
+      return;
+    }catch(e){}
+  }
   beepAlarm();
 }
 
@@ -630,11 +680,10 @@ function tick(){
     for(const cp of cpts){
       if(remain===cp && !firedCheckpoints.has(cp)){
         firedCheckpoints.add(cp);
-        if(cp===60) showAlert('剩余最后 1 分钟',fmtShort(remain));
-        else if(cp===30) showAlert('剩余 30 秒',fmtShort(remain));
-        else if(cp===10) showAlert('剩余 10 秒！',fmtShort(remain));
-        else showAlert('剩余 '+fmtShort(remain),fmtShort(remain));
-        speak(remain===60?'剩余最后一分钟':'剩余'+fmtShort(remain),.85,1);
+        if(cp===60){showAlert('剩余最后 1 分钟',fmtShort(remain));speakWarning('1min');}
+        else if(cp===30){showAlert('剩余 30 秒',fmtShort(remain));speakWarning('30s');}
+        else if(cp===10){showAlert('剩余 10 秒！',fmtShort(remain));speakWarning('10s');}
+        else{showAlert('剩余 '+fmtShort(remain),fmtShort(remain));}
         break;
       }
     }
@@ -739,7 +788,7 @@ document.addEventListener('visibilitychange',()=>{
       if(remain>0){remain--;elapsed++;}
       else{overtime++;elapsed++;}
       const cpts=getCheckpoints();
-      for(const cp of cpts){if(remain===cp&&!firedCheckpoints.has(cp)){firedCheckpoints.add(cp);speak(remain===60?'剩余最后一分钟':'剩余'+fmtShort(remain),.85,1);break;}}
+      for(const cp of cpts){if(remain===cp&&!firedCheckpoints.has(cp)){firedCheckpoints.add(cp);speakWarning(remain===60?"1min":remain===30?"30s":remain===10?"10s":"");break;}}
     }
     if(remain<=0&&!finishedNotified) finish();
     render();bgTs=null;
