@@ -430,8 +430,7 @@ function loadVoices(){
   if(!cnVoices.length) cnVoices=allVoices.slice();
   refreshVoiceUI();applyScene(curScene);
 }
-speechSynthesis.onvoiceschanged=loadVoices;
-setTimeout(loadVoices,200);
+if(typeof speechSynthesis!=='undefined'){speechSynthesis.onvoiceschanged=loadVoices;setTimeout(loadVoices,200);}
 
 function refreshVoiceUI(){
   const p=cnVoices.length?cnVoices:allVoices;
