@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>演讲计时器 - 扫码使用</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    background: linear-gradient(135deg, #0a0a0f 0%, #14141f 100%);
+    color: #e8e8f0; min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .card {
+    background: #1a1a2e; border-radius: 20px; padding: 36px 28px;
+    width: min(100%, 400px); text-align: center;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  h1 { font-size: 1.4rem; font-weight: 700; margin-bottom: 4px; }
+  .sub  { font-size: 0.8rem; color: #8888a0; margin-bottom: 24px; }
+  .qr-box {
+    background: #fff; border-radius: 16px; padding: 16px;
+    display: inline-block; margin-bottom: 20px;
+  }
+  .qr-box img { width: 200px; height: 200px; display: block; }
+  .url {
+    font-size: 0.85rem; color: #38bdf8; word-break: break-all;
+    background: #0f0f1a; padding: 10px 16px; border-radius: 10px;
+    margin-bottom: 20px; line-height: 1.5;
+  }
+  .steps {
+    text-align: left; font-size: 0.8rem; color: #8888a0; line-height: 2;
+    background: #0f0f1a; border-radius: 12px; padding: 16px 20px;
+    margin-bottom: 20px;
+  }
+  .steps span { color: #38bdf8; font-weight: 700; }
+  .note {
+    font-size: 0.72rem; color: #f59e0b;
+    background: rgba(245,158,11,0.1); border-radius: 10px;
+    padding: 10px 14px;
+  }
+</style>
+</head>
+<body>
+<div class="card">
+  <h1>演讲计时器</h1>
+  <div class="sub">语音播报 · 防误触 · 双计时</div>
+
+  <div class="qr-box">
+    <img src="qrcode.png" alt="扫码使用演讲计时器">
+  </div>
+
+  <div class="url">
+    https://lyf2136441.github.io/speech-timer/
+  </div>
+
+  <div class="steps">
+    <span>1</span> 手机相机扫二维码<br>
+    <span>2</span> 浏览器打开链接<br>
+    <span>3</span> 添加到主屏幕，像 App 一样使用
+  </div>
+
+  <div class="note">
+    ✅ 永久有效 · HTTPS 加密 · 扫码即用
+  </div>
+</div>
+</body>
+</html>
