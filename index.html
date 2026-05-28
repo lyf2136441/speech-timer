@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>演讲计时器</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="演讲计时">
+<meta name="theme-color" content="#0d1117">
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --border: #30363d;
+  --text: #f0f6fc;
+  --muted: #8b949e;
+  --accent: #58a6ff;
+  --green: #3fb950;
+  --orange: #d2991d;
+  --red: #f85149;
+  --radius: 14px;
+  --sb: env(safe-area-inset-bottom, 0px);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden}
+body{
+  font-family:-apple-system,'SF Pro Display','PingFang SC','Microsoft YaHei',sans-serif;
+  background:var(--bg);color:var(--text);
+  display:flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;-webkit-user-select:none;
+}
+
+.app{
+  width:min(100%,440px);height:100dvh;
+  display:flex;flex-direction:column;
+  padding:clamp(12px,3vh,20px) clamp(14px,4vw,20px);
+  padding-bottom:calc(clamp(12px,3vh,20px) + var(--sb));
+}
+
+/* ── header ── */
+.header{display:flex;align-items:center;justify-content:space-between;margin-bottom:clamp(10px,2.5vh,14px)}
+.header h1{font-size:clamp(1.05rem,3.5vw,1.2rem);font-weight:700;letter-spacing:-0.3px}
+.lock-tag{
+  display:flex;align-items:center;gap:5px;font-size:0.72rem;color:var(--muted);
+  padding:5px 12px;border-radius:16px;background:var(--surface);border:1px solid var(--border);
+  cursor:pointer;transition:.15s;min-height:32px
+}
+.lock-tag.locked{color:var(--red);border-color:var(--red)}
+
+/* ── presets ── */
+.presets{display:flex;gap:6px;margin-bottom:6px}
+.presets button{
+  flex:1;padding:7px 0;border-radius:10px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-size:clamp(0.72rem,2.2vw,0.78rem);font-weight:600;
+  cursor:pointer;transition:.12s;min-height:34px
+}
+.presets button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ── custom row ── */
+.custom{display:flex;gap:5px;align-items:center;justify-content:center;margin-bottom:clamp(8px,2vh,10px)}
+.custom span{font-size:0.68rem;color:var(--muted)}
+.custom input{
+  width:46px;padding:6px 2px;text-align:center;font-size:0.82rem;font-weight:600;
+  border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);outline:none
+}
+.custom input:focus{border-color:var(--accent)}
+
+/* ── timer panel ── */
+.panel{
+  flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center;
+  background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);
+  padding:clamp(16px,4vh,28px) clamp(12px,3vw,20px);
+  margin-bottom:clamp(10px,2.5vh,14px);position:relative;overflow:hidden;min-height:0
+}
+.panel .ring-wrap{position:relative;margin-bottom:clamp(8px,2vh,12px)}
+.panel .ring-wrap svg{display:block;transform:rotate(-90deg)}
+.panel .ring-wrap .ring-bg{fill:none;stroke:var(--border);stroke-width:6}
+.panel .ring-wrap .ring-fg{fill:none;stroke:var(--accent);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .3s linear}
+.panel .ring-wrap .ring-fg.warn{stroke:var(--orange)}
+.panel .ring-wrap .ring-fg.danger{stroke:var(--red)}
+
+.panel .countdown{
+  font-size:clamp(3.2rem,14vw,6rem);font-weight:800;font-variant-numeric:tabular-nums;
+  letter-spacing:1px;line-height:1;transition:color .3s
+}
+.panel .countdown.warn{color:var(--orange)}
+.panel .countdown.danger{color:var(--red)}
+
+.panel .elapsed-label{font-size:0.68rem;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-top:clamp(6px,1.5vh,10px)}
+.panel .elapsed{font-size:clamp(0.95rem,3vw,1.15rem);font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;margin-bottom:clamp(8px,2vh,12px)}
+
+.panel .bar{width:80%;height:3px;background:var(--border);border-radius:2px;overflow:hidden}
+.panel .bar-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .3s linear;width:100%}
+.panel .bar-fill.warn{background:var(--orange)}
+.panel .bar-fill.danger{background:var(--red)}
+
+/* ── controls ── */
+.ctrls{display:flex;gap:8px;margin-bottom:clamp(6px,1.5vh,10px)}
+.ctrls button{
+  flex:1;padding:clamp(9px,2vh,12px) 6px;border-radius:12px;border:none;
+  font-size:clamp(0.82rem,2.5vw,0.9rem);font-weight:700;cursor:pointer;
+  transition:transform .1s,opacity .15s;min-height:44px
+}
+.ctrls button:active{transform:scale(.96)}
+.ctrls button:disabled{opacity:.3;pointer-events:none}
+.btn-play{background:var(--green);color:#000}
+.btn-pause{background:var(--orange);color:#000}
+.btn-reset{background:#30363d;color:var(--text)}
+
+/* ── scenes ── */
+.scenes{display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:4px}
+.scenes button{
+  padding:4px 10px;border-radius:14px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-size:0.68rem;cursor:pointer;
+  transition:.12s;min-height:28px;white-space:nowrap
+}
+.scenes button.on{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:600}
+.voice-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px}
+.voice-row span{font-size:0.65rem;color:var(--muted)}
+.voice-row select{
+  padding:3px 6px;border-radius:6px;border:1px solid var(--border);
+  background:var(--surface);color:var(--text);font-size:0.65rem;max-width:140px;outline:none
+}
+.voice-row .btn-test{
+  padding:3px 10px;border-radius:6px;border:1px solid var(--border);
+  background:transparent;color:var(--muted);font-size:0.65rem;cursor:pointer
+}
+
+/* ── status ── */
+.status{text-align:center;font-size:0.7rem;color:var(--muted);min-height:18px}
+
+/* ═══ OVERLAYS ═══ */
+.overlay{
+  position:fixed;inset:0;background:rgba(13,17,23,.96);
+  z-index:80;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px
+}
+.overlay.on{display:flex}
+
+/* lock */
+#lockOverlay{z-index:100}
+#lockOverlay .lock-icon{font-size:2.8rem}
+#lockOverlay h2{font-size:1.15rem;font-weight:700}
+#lockOverlay p{font-size:0.78rem;color:var(--muted);text-align:center;line-height:1.6}
+#unlockBtn{
+  width:68px;height:68px;border-radius:50%;border:3px solid var(--border);
+  background:transparent;color:var(--muted);font-size:1.5rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;position:relative
+}
+#unlockBtn:active{border-color:var(--accent);color:var(--accent)}
+#unlockRing{
+  position:absolute;inset:-5px;border-radius:50%;border:5px solid transparent;border-top-color:var(--accent)
+}
+#unlockRing.spin{animation:spin 3s linear forwards}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* last 60s alert */
+#alertOverlay{z-index:90}
+#alertOverlay .alert-label{font-size:clamp(0.9rem,3vw,1.2rem);font-weight:700;color:var(--red);animation:flash .6s infinite alternate}
+@keyframes flash{to{opacity:.25}}
+#alertOverlay .alert-num{
+  font-size:clamp(5rem,22vw,12rem);font-weight:900;color:var(--red);letter-spacing:3px;
+  animation:breathe .8s infinite;text-shadow:0 0 40px rgba(248,81,73,.5),0 0 80px rgba(248,81,73,.25)
+}
+@keyframes breathe{50%{opacity:.45;transform:scale(1.06)}}
+#alertOverlay .alert-sub{font-size:0.78rem;color:var(--muted)}
+#alertOverlay button{
+  padding:8px 28px;border-radius:20px;border:2px solid var(--red);background:transparent;
+  color:var(--red);font-size:0.85rem;font-weight:600;cursor:pointer;margin-top:8px
+}
+
+/* finish */
+#finishOverlay{z-index:95}
+#finishOverlay .finish-icon{font-size:3.5rem}
+#finishOverlay h2{font-size:clamp(1.4rem,5vw,2rem);font-weight:800;color:var(--red)}
+#finishOverlay .finish-sub{font-size:clamp(0.9rem,3vw,1.1rem);color:var(--muted)}
+#finishOverlay button{
+  padding:10px 36px;border-radius:20px;border:none;background:var(--accent);color:#fff;
+  font-size:0.95rem;font-weight:700;cursor:pointer;margin-top:12px
+}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+
+  <div class="header">
+    <h1>演讲计时器</h1>
+    <div class="lock-tag" id="lockTag">🔓 未锁定</div>
+  </div>
+
+  <div class="presets" id="presets">
+    <button data-m="3">3分</button>
+    <button data-m="5" class="on">5分</button>
+    <button data-m="8">8分</button>
+    <button data-m="10">10分</button>
+    <button data-custom>自定义</button>
+  </div>
+
+  <div class="custom" id="customRow" style="display:none">
+    <span>时</span><input id="ch" type="number" value="0" min="0" max="99" inputmode="numeric">
+    <span>分</span><input id="cm" type="number" value="5" min="0" max="59" inputmode="numeric">
+    <span>秒</span><input id="cs" type="number" value="0" min="0" max="59" inputmode="numeric">
+  </div>
+
+  <div class="panel" id="panel">
+    <div class="ring-wrap">
+      <svg id="ringSvg" viewBox="0 0 200 200"><circle class="ring-bg" cx="100" cy="100" r="88"/><circle class="ring-fg" id="ringFg" cx="100" cy="100" r="88" stroke-dasharray="552.92" stroke-dashoffset="0"/></svg>
+    </div>
+    <div class="countdown" id="cd">05:00</div>
+    <div class="elapsed-label">已用时</div>
+    <div class="elapsed" id="et">00:00</div>
+    <div class="bar"><div class="bar-fill" id="barFill"></div></div>
+  </div>
+
+  <div class="ctrls" id="ctrls">
+    <button class="btn-play" id="btnPlay">开始</button>
+    <button class="btn-pause" id="btnPause" disabled>暂停</button>
+    <button class="btn-reset" id="btnReset">重置</button>
+  </div>
+
+  <div class="scenes" id="scenes"></div>
+  <div class="voice-row">
+    <span>语音</span>
+    <select id="voiceSel"></select>
+    <button class="btn-test" id="btnTest">试听</button>
+  </div>
+
+  <div class="status" id="statusBar">就绪 · 5 分钟</div>
+</div>
+
+<!-- Overlays -->
+<div class="overlay" id="lockOverlay">
+  <div class="lock-icon">🔒</div>
+  <h2>计时器已锁定</h2>
+  <p>长按下方按钮 3 秒解锁</p>
+  <button id="unlockBtn">🔓<div id="unlockRing"></div></button>
+</div>
+
+<div class="overlay" id="alertOverlay">
+  <div class="alert-label">⚠ 剩余时间</div>
+  <div class="alert-num" id="alertNum">1:00</div>
+  <div class="alert-sub" id="alertSub"></div>
+  <button id="alertDismiss">知道了</button>
+</div>
+
+<div class="overlay" id="finishOverlay">
+  <div class="finish-icon">⏰</div>
+  <h2>时间到！</h2>
+  <div class="finish-sub" id="finishSub"></div>
+  <button id="finishDismiss">确定</button>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+// ── DOM ──
+const E = id => document.getElementById(id);
+const cdEl     = E('cd');
+const etEl     = E('et');
+const ringFg   = E('ringFg');
+const barFill  = E('barFill');
+const btnPlay  = E('btnPlay');
+const btnPause = E('btnPause');
+const btnReset = E('btnReset');
+const statusBar= E('statusBar');
+const lockTag  = E('lockTag');
+const lockOv   = E('lockOverlay');
+const alertOv  = E('alertOverlay');
+const alertNum = E('alertNum');
+const alertSub = E('alertSub');
+const finishOv = E('finishOverlay');
+const finishSub= E('finishSub');
+const customRow= E('customRow');
+const chI = E('ch'), cmI = E('cm'), csI = E('cs');
+const unlockBtn = E('unlockBtn');
+const unlockRing= E('unlockRing');
+const presets   = E('presets');
+const scenes    = E('scenes');
+const voiceSel  = E('voiceSel');
+const ringSvg   = E('ringSvg');
+
+const CIRC = 2 * Math.PI * 88; // 552.92
+
+// ── State ──
+const ST = { IDLE:0, RUN:1, PAUSE:2, DONE:3 };
+let state   = ST.IDLE;
+let total   = 300;  // seconds
+let remain  = 300;
+let elapsed = 0;
+let timer   = null;
+let locked  = false;
+let alertShown = false;
+let alertDismissed = false;
+let finished = false;
+
+// ── Voice / Scene ──
+const SCENES = [
+  { id:'speech',  name:'演讲答辩', pref:{gender:'female',pitch:'norm',rate:'norm'},phrase:'演讲时间到，谢谢大家的倾听。' },
+  { id:'leader',  name:'领导竞聘', pref:{gender:'male',  pitch:'low', rate:'slow'},phrase:'时间到，请各位评委注意。' },
+  { id:'student', name:'学习考试', pref:{gender:'female',pitch:'norm',rate:'norm'},phrase:'考试时间结束，请立即停笔。' },
+  { id:'meeting', name:'会议发言', pref:{gender:'male',  pitch:'norm',rate:'slow'},phrase:'发言时间已到，请注意控制时间。' },
+  { id:'fun',     name:'娱乐休闲', pref:{gender:'female',pitch:'high',rate:'fast'},phrase:'时间到啦！快来看看吧！' },
+  { id:'kitchen', name:'厨房烹饪', pref:{gender:'female',pitch:'norm',rate:'norm'},phrase:'时间到了，请关火出锅！' },
+  { id:'sport',   name:'运动健身', pref:{gender:'male',  pitch:'norm',rate:'fast'},phrase:'时间到！休息一下！' },
+];
+let curScene = SCENES[0];
+let allVoices = [], cnVoices = [], selVoice = null;
+
+function loadVoices(){
+  allVoices = speechSynthesis.getVoices();
+  cnVoices = allVoices.filter(v=>v.lang.startsWith('zh'));
+  if(!cnVoices.length) cnVoices = allVoices.slice();
+  refreshVoiceUI();
+  applyScene(curScene);
+}
+speechSynthesis.onvoiceschanged = loadVoices;
+setTimeout(loadVoices,200);
+
+function refreshVoiceUI(){
+  const pool = cnVoices.length ? cnVoices : allVoices;
+  voiceSel.innerHTML = '';
+  pool.forEach((v,i)=>{ const o=document.createElement('option');o.value=i;o.text=v.name+' ('+v.lang+')';voiceSel.appendChild(o); });
+  voiceSel.onchange = function(){
+    selVoice = pool[this.value]; curScene = null; refreshSceneUI();
+  };
+}
+
+function refreshSceneUI(){
+  scenes.innerHTML = '';
+  SCENES.forEach(s=>{
+    const b = document.createElement('button');
+    b.textContent = s.name; b.dataset.sid = s.id;
+    if(curScene && curScene.id===s.id) b.classList.add('on');
+    b.addEventListener('click',()=>{ curScene=s; applyScene(s); refreshSceneUI(); });
+    scenes.appendChild(b);
+  });
+}
+
+function bestVoice(pref){
+  const pool = cnVoices.length ? cnVoices : allVoices;
+  let male=[], female=[], other=[];
+  pool.forEach(v=>{
+    const n=v.name.toLowerCase();
+    if(/kang|male|qiang|nan|liang|yun|feng/.test(n)) male.push(v);
+    else if(/hui|yao|female|nv|xia|tong|ling|mei|han|dan/.test(n)) female.push(v);
+    else other.push(v);
+  });
+  let cand=pool;
+  if(pref.gender==='male') cand=male.length?male:(other.length?other:pool);
+  else if(pref.gender==='female') cand=female.length?female:(other.length?other:pool);
+  return cand[0]||pool[0]||null;
+}
+
+function applyScene(s){
+  if(!s) return;
+  selVoice = bestVoice(s.pref);
+  const pool = cnVoices.length ? cnVoices : allVoices;
+  for(let i=0;i<pool.length;i++){ if(pool[i]===selVoice){voiceSel.value=i;break;} }
+}
+
+function voiceParams(){
+  const pool = cnVoices.length ? cnVoices : allVoices;
+  let v=selVoice||pool[0]||null, rate=.95, pitch=1, phrase='时间到了。';
+  if(curScene){
+    const p=curScene.pref;
+    rate = p.rate==='slow'?.8 : p.rate==='fast'?1.15 : .95;
+    pitch= p.pitch==='low'?.78 : p.pitch==='high'?1.25 : 1;
+    phrase=curScene.phrase;
+  }
+  return {voice:v,rate,pitch,phrase};
+}
+
+function speak(txt,rate0,pitch0){
+  if(!('speechSynthesis' in window)) return;
+  const {voice,rate,pitch}=voiceParams();
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(txt);
+  if(voice){u.voice=voice;u.lang=voice.lang;}
+  u.rate=rate0||rate; u.pitch=pitch0||pitch; u.volume=1;
+  speechSynthesis.speak(u);
+}
+
+function testVoice(){
+  const {voice,phrase}=voiceParams();
+  if(!voice){statusBar.textContent='无可用语音';return;}
+  speak(phrase);
+  statusBar.textContent='试听: '+voice.name;
+}
+E('btnTest').addEventListener('click',testVoice);
+
+// ── Format ──
+function fmt(sec){
+  sec=Math.max(0,sec);
+  const h=Math.floor(sec/3600), m=Math.floor((sec%3600)/60), s=sec%60;
+  if(h>0) return h+':'+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+  return String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');
+}
+function fmtShort(sec){
+  sec=Math.max(0,sec);
+  return Math.floor(sec/60)+':'+String(sec%60).padStart(2,'0');
+}
+
+// ── Render ──
+function render(){
+  cdEl.textContent = fmt(remain);
+  etEl.textContent = fmt(elapsed);
+  // ring
+  if(total>0) ringFg.style.strokeDashoffset = CIRC * (1 - remain/total);
+  else ringFg.style.strokeDashoffset = 0;
+  // bar
+  const pct = total>0 ? (remain/total)*100 : 100;
+  barFill.style.width = pct+'%';
+  // colors
+  const cls=['warn','danger'];
+  [cdEl,ringFg,barFill].forEach(el=>el.classList.remove(...cls));
+  if(remain<=0){ cdEl.classList.add('danger');ringFg.classList.add('danger');barFill.classList.add('danger'); }
+  else if(remain<=60){ cdEl.classList.add('danger');ringFg.classList.add('danger');barFill.classList.add('danger'); }
+  else if(remain<=120){ cdEl.classList.add('warn');ringFg.classList.add('warn');barFill.classList.add('warn'); }
+}
+
+function renderBtns(){
+  switch(state){
+    case ST.IDLE:
+      btnPlay.disabled=false;btnPlay.textContent='开始';
+      btnPause.disabled=true;btnPause.textContent='暂停';
+      btnReset.disabled=false; break;
+    case ST.RUN:
+      btnPlay.disabled=true;
+      btnPause.disabled=false;btnPause.textContent='暂停';
+      btnReset.disabled=false; break;
+    case ST.PAUSE:
+      btnPlay.disabled=false;btnPlay.textContent='继续';
+      btnPause.disabled=true;btnPause.textContent='暂停';
+      btnReset.disabled=false; break;
+    case ST.DONE:
+      btnPlay.disabled=true;
+      btnPause.disabled=true;
+      btnReset.disabled=false; break;
+  }
+}
+
+function renderLockUI(){
+  if(locked){ lockTag.classList.add('locked');lockTag.innerHTML='🔒 已锁定'; }
+  else { lockTag.classList.remove('locked');lockTag.innerHTML='🔓 未锁定'; }
+}
+
+function refreshPresets(){
+  const btns = presets.querySelectorAll('button');
+  btns.forEach(b=>{
+    b.classList.remove('on');
+    if(b.dataset.custom!=null && customRow.style.display!=='none') b.classList.add('on');
+    else if(b.dataset.m && state===ST.IDLE && total===parseInt(b.dataset.m)*60) b.classList.add('on');
+  });
+}
+
+// ── Timer tick ──
+function tick(){
+  if(state!==ST.RUN) return;
+  remain--; elapsed++;
+  render();
+  // last 60s
+  if(remain===60 && !alertDismissed){ showAlert(); speak('剩余最后一分钟',.85,1); }
+  // update alert if visible
+  if(alertOv.classList.contains('on') && remain>0){
+    alertNum.textContent=fmtShort(remain);
+    alertSub.textContent='已用时 '+fmt(elapsed);
+  }
+  // finish
+  if(remain<=0){ finish(); }
+}
+
+// ── Actions ──
+function startTimer(){
+  if(state===ST.RUN) return;
+  if(customRow.style.display!=='none'){
+    const h=Math.max(0,parseInt(chI.value)||0);
+    const m=Math.max(0,Math.min(59,parseInt(cmI.value)||0));
+    const s=Math.max(0,Math.min(59,parseInt(csI.value)||0));
+    total=h*3600+m*60+s;
+    if(total<=0){statusBar.textContent='请设置大于0的时长';return;}
+  }
+  if(state===ST.DONE){
+    remain=total;elapsed=0;alertShown=false;alertDismissed=false;finished=false;
+    alertOv.classList.remove('on');finishOv.classList.remove('on');
+  } else if(state===ST.IDLE){
+    remain=total;elapsed=0;
+  }
+  state=ST.RUN;
+  render();renderBtns();refreshPresets();
+  statusBar.textContent='▶ 计时中…';
+  if(timer) clearInterval(timer);
+  timer=setInterval(tick,1000);
+  requestWakeLock();
+}
+
+function pauseTimer(){
+  if(state!==ST.RUN) return;
+  state=ST.PAUSE;
+  if(timer){clearInterval(timer);timer=null;}
+  renderBtns();
+  statusBar.textContent='⏸ 已暂停';
+  releaseWakeLock();
+}
+
+function resetTimer(){
+  if(timer){clearInterval(timer);timer=null;}
+  state=ST.IDLE;remain=total;elapsed=0;
+  alertShown=false;alertDismissed=false;finished=false;
+  alertOv.classList.remove('on');finishOv.classList.remove('on');
+  render();renderBtns();refreshPresets();
+  statusBar.textContent='已重置 · '+fmt(total);
+  releaseWakeLock();
+}
+
+function finish(){
+  if(finished) return;
+  finished=true;
+  state=ST.DONE;
+  if(timer){clearInterval(timer);timer=null;}
+  remain=0;
+  render();renderBtns();
+  statusBar.textContent='⏰ 时间到！';
+  alertOv.classList.remove('on');
+  finishSub.textContent='总用时 '+fmt(elapsed);
+  finishOv.classList.add('on');
+  // speak 3 times
+  const {phrase}=voiceParams();
+  speak(phrase,.9,1);
+  setTimeout(()=>speak(phrase,.9,1),2200);
+  setTimeout(()=>speak(phrase,.9,1),4400);
+  releaseWakeLock();
+  if(navigator.vibrate) navigator.vibrate([400,150,400,150,400]);
+}
+
+// ── Alert ──
+function showAlert(){
+  if(alertShown) return;
+  alertShown=true; alertDismissed=false;
+  alertNum.textContent=fmtShort(remain);
+  alertSub.textContent='已用时 '+fmt(elapsed);
+  alertOv.classList.add('on');
+}
+
+function dismissAlert(){ alertOv.classList.remove('on');alertDismissed=true; }
+function dismissFinish(){ finishOv.classList.remove('on'); }
+
+// ── Lock ──
+function doLock(){
+  if(state!==ST.RUN && state!==ST.PAUSE) return;
+  locked=true;renderLockUI();lockOv.classList.add('on');
+  if(alertOv.classList.contains('on')){alertOv.classList.remove('on');alertDismissed=true;}
+  statusBar.textContent='🔒 已锁定 · 后台计时中';
+}
+function doUnlock(){
+  locked=false;lockOv.classList.remove('on');renderLockUI();
+  statusBar.textContent=state===ST.RUN?'▶ 计时中…':'已解锁';
+}
+
+// Lock: long-press 3s
+let unlockTimer=null, unlocking=false;
+unlockBtn.addEventListener('pointerdown',function(e){
+  e.preventDefault();
+  if(!locked) return;
+  unlocking=true; unlockRing.classList.add('spin');
+  statusBar.textContent='持续按住 3 秒解锁…';
+  unlockTimer=setTimeout(()=>{unlockTimer=null;unlockRing.classList.remove('spin');doUnlock();},3000);
+});
+unlockBtn.addEventListener('pointerup',cancelUnlock);
+unlockBtn.addEventListener('pointerleave',cancelUnlock);
+unlockBtn.addEventListener('pointercancel',cancelUnlock);
+unlockBtn.addEventListener('contextmenu',e=>e.preventDefault());
+function cancelUnlock(){
+  if(!unlocking) return;
+  unlocking=false;
+  if(unlockTimer){clearTimeout(unlockTimer);unlockTimer=null;}
+  unlockRing.classList.remove('spin');
+  statusBar.textContent='🔒 已锁定';
+}
+
+// ── Wake Lock ──
+let wakeLock=null;
+async function requestWakeLock(){
+  try{if('wakeLock' in navigator && !wakeLock){wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>{wakeLock=null;});}}catch(e){}
+}
+function releaseWakeLock(){
+  if(wakeLock){wakeLock.release().catch(()=>{});wakeLock=null;}
+}
+
+// ── Visibility ──
+let bgTs=null;
+document.addEventListener('visibilitychange',()=>{
+  if(document.hidden && state===ST.RUN) bgTs=Date.now();
+  if(!document.hidden && bgTs && state===ST.RUN){
+    const sec=Math.floor((Date.now()-bgTs)/1000);
+    for(let i=0;i<sec && remain>0;i++){
+      remain--;elapsed++;
+      if(remain===60 && !alertDismissed && !alertShown){showAlert();speak('剩余最后一分钟',.85,1);}
+    }
+    if(remain<=0) finish();
+    render();
+    bgTs=null;
+  }
+});
+
+// ── Button bindings ──
+btnPlay.addEventListener('click',()=>{
+  if(state===ST.PAUSE){ state=ST.RUN; renderBtns(); statusBar.textContent='▶ 计时中…'; timer=setInterval(tick,1000); requestWakeLock(); }
+  else startTimer();
+});
+btnPause.addEventListener('click',pauseTimer);
+btnReset.addEventListener('click',resetTimer);
+lockTag.addEventListener('click',doLock);
+E('alertDismiss').addEventListener('click',dismissAlert);
+E('finishDismiss').addEventListener('click',dismissFinish);
+
+// ── Preset bindings ──
+presets.addEventListener('click',function(e){
+  const b=e.target.closest('button');
+  if(!b) return;
+  if(state===ST.RUN||state===ST.PAUSE) return;
+  if(b.dataset.custom!=null){
+    customRow.style.display='flex';
+    const h=Math.floor(total/3600),m=Math.floor((total%3600)/60),s=total%60;
+    chI.value=h;cmI.value=m;csI.value=s;
+    refreshPresets();
+    statusBar.textContent='就绪 · 自定义';
+  } else if(b.dataset.m){
+    const mins=parseInt(b.dataset.m);
+    total=mins*60;remain=total;elapsed=0;
+    customRow.style.display='none';chI.value=0;cmI.value=mins;csI.value=0;
+    alertShown=false;alertDismissed=false;finished=false;
+    alertOv.classList.remove('on');finishOv.classList.remove('on');
+    render();renderBtns();refreshPresets();
+    statusBar.textContent='就绪 · '+mins+' 分钟';
+  }
+});
+
+// ── Custom input live update ──
+[chI,cmI,csI].forEach(el=>el.addEventListener('input',function(){
+  if(state===ST.RUN||state===ST.PAUSE) return;
+  const h=Math.max(0,parseInt(chI.value)||0);
+  const m=Math.max(0,Math.min(59,parseInt(cmI.value)||0));
+  const s=Math.max(0,Math.min(59,parseInt(csI.value)||0));
+  total=h*3600+m*60+s;remain=total;elapsed=0;
+  render();
+  statusBar.textContent=total>0?'就绪 · '+fmt(total):'请设置时长';
+}));
+
+// ── Keyboard ──
+document.addEventListener('keydown',function(e){
+  if(locked) return;
+  if(e.key===' '||e.key==='Enter'){
+    e.preventDefault();
+    if(state===ST.RUN) pauseTimer();
+    else if(state===ST.PAUSE||state===ST.IDLE){ if(state===ST.PAUSE){state=ST.RUN;renderBtns();statusBar.textContent='▶ 计时中…';timer=setInterval(tick,1000);requestWakeLock();} else startTimer(); }
+  }
+  if(e.key==='r'||e.key==='R'){ if(!e.ctrlKey&&!e.metaKey) resetTimer(); }
+  if(e.key==='l'||e.key==='L'){ if(!e.ctrlKey&&!e.metaKey) doLock(); }
+});
+
+// ── Ring SVG size ──
+function resizeRing(){ const w=ringSvg.parentElement.clientWidth; ringSvg.setAttribute('width',Math.min(w,200));ringSvg.setAttribute('height',Math.min(w,200)); }
+window.addEventListener('resize',resizeRing);
+
+// ── Init ──
+function init(){
+  total=300;remain=300;elapsed=0;
+  render();renderBtns();renderLockUI();refreshPresets();
+  refreshSceneUI();refreshVoiceUI();
+  statusBar.textContent='就绪 · 5 分钟';
+  resizeRing();
+}
+init();
+})();
+</script>
+</body>
+</html>
