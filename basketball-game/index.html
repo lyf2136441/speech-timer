@@ -547,6 +547,84 @@ class GameEngine{
     this.foulCooldown=5000;this.defEnergy-=15;this.ftShooter=this.poss;this.ftCount=2;this.ftMade=0;this.phase='freethrow';this._msg('犯规！对方罚球2次');this._resetFreeThrow();}
 
   // 渲染（供单机模式用）
+  // === 渲染(与cba-game.html完全一致) ===
+  render(ctx){
+    this._drawCourt(ctx);this._drawPlayers(ctx);this._drawBall(ctx);this._drawUI(ctx);
+  }
+  _drawCourt(ctx){
+    var cx=this._s(375);
+    ctx.fillStyle='#c68642';ctx.fillRect(0,0,this.w,this.h);
+    ctx.strokeStyle='rgba(180,130,80,0.2)';ctx.lineWidth=1;
+    for(var y=0;y<this.h;y+=this._s(25)){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(this.w,y);ctx.stroke()}
+    var rx=cx,ry=this._s(60);
+    ctx.fillStyle='#ddd';ctx.fillRect(rx-this._s(50),ry-this._s(20),this._s(100),this._s(8));
+    ctx.strokeStyle='#ff4444';ctx.lineWidth=3;ctx.beginPath();ctx.arc(rx,ry,this._s(12),0,Math.PI*2);ctx.stroke();
+    ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=0.5;
+    for(var i=0;i<4;i++){ctx.beginPath();ctx.moveTo(rx+Math.cos(-1.9+i*0.25)*this._s(10),ry+Math.sin(-1.9+i*0.25)*this._s(10));ctx.lineTo(rx,ry+this._s(30));ctx.stroke()}
+    var tr=this._s(280);ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(rx,ry,tr,Math.PI*0.5,Math.PI*1.5);ctx.stroke();
+    var pw=this._s(160),ph=this._s(200);ctx.fillStyle='#b87a3a';ctx.fillRect(rx-pw/2,ry,pw,ph);
+    ctx.strokeStyle='#fff';ctx.strokeRect(rx-pw/2,ry,pw,ph);ctx.beginPath();ctx.moveTo(rx-pw/2,ry+ph);ctx.lineTo(rx+pw/2,ry+ph);ctx.stroke();
+    ctx.beginPath();ctx.arc(cx,this.h-this._s(30),this._s(60),0,Math.PI);ctx.stroke();
+  }
+  _drawPlayers(ctx){
+    var o=this.getOffPlayer(),d=this.getDefPlayer();
+    if(this.phase==='freethrow'){var sd=this.ftShooter===0?o:d;
+      if(this.ftShooter===0){this._drawP(ctx,this.off,o,'#1a6dd4','罚');this._drawP(ctx,this.def,d,'#e03030','')}
+      else{this._drawP(ctx,this.def,d,'#e03030','罚');this._drawP(ctx,this.off,o,'#1a6dd4','')}
+    }else{this._drawP(ctx,this.def,d,'#e03030','守');this._drawP(ctx,this.off,o,'#1a6dd4','攻')}
+    if(this.blockAnim>0){var bp=this.blockAnim/500;ctx.fillStyle='rgba(255,200,0,0.5)';ctx.beginPath();ctx.arc(this.def.x,this.def.y-this.def.r-bp*this._s(60),this._s(15)*(1-bp),0,Math.PI*2);ctx.fill()}
+    if(this.stealAnim>0){var sp=this.stealAnim/400;ctx.strokeStyle='rgba(255,255,0,0.6)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(this.def.x,this.def.y,this._s(35)*(1+sp),0,Math.PI*2);ctx.stroke()}
+    if(this.driveAnim>0){ctx.strokeStyle='rgba(0,136,255,0.5)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(this.off.x,this.off.y);ctx.lineTo(this.off.x,this.off.y-this._s(50));ctx.stroke()}
+  }
+  _drawP(ctx,p,data,color,label){
+    if(!data)return;var x=p.x,y=p.y,r=p.r;
+    ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(x,y+r*0.9,r*0.8,r*0.2,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(r*0.8)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(data.num||'?',x,y);
+    ctx.font=Math.floor(r*0.45)+'px sans-serif';ctx.fillText(data.name||'',x,y-r-this._s(8));
+    if(label){ctx.fillStyle=label==='攻'?'#ff0':label==='罚'?'#0f0':'#f88';ctx.font='bold '+Math.floor(r*0.45)+'px sans-serif';ctx.fillText(label,x,y+r+this._s(10))}
+  }
+  _drawBall(ctx){
+    if(!this.ball.has||this.ballInAir||this._shotPath){
+      var bx=this.ball.x,by=this.ball.y,br=this.ball.r;
+      ctx.fillStyle='#ff8c00';ctx.beginPath();ctx.arc(bx,by,br,0,Math.PI*2);ctx.fill();
+      ctx.strokeStyle='#cc6600';ctx.lineWidth=1.5;ctx.stroke();ctx.strokeStyle='#333';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(bx-br,by);ctx.lineTo(bx+br,by);ctx.stroke();ctx.beginPath();ctx.arc(bx,by,br*0.5,0,Math.PI*2);ctx.stroke();
+    }
+    if(this._shotPath){var sp2=this._shotPath;ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(sp2.sx,sp2.sy);
+      for(var i=1;i<=20;i++){var t=i/20;ctx.lineTo(sp2.sx+(sp2.ex-sp2.sx)*t,sp2.sy+(sp2.ey-sp2.sy)*t-sp2.peakH*Math.sin(Math.PI*t))}ctx.stroke();ctx.setLineDash([])}
+  }
+  _drawUI(ctx){
+    var w=this.w,h=this.h;
+    ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,w,this._s(44));
+    var p1=this.p1,p2=this.p2;
+    ctx.fillStyle='#1a6dd4';ctx.font='bold '+Math.floor(this._s(13))+'px sans-serif';ctx.textAlign='center';ctx.fillText(p1?p1.name:'P1',w*0.2,this._s(18));
+    ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(this._s(18))+'px sans-serif';ctx.fillText(this.score[0]+' - '+this.score[1],w/2,this._s(18));
+    ctx.fillStyle='#e03030';ctx.font='bold '+Math.floor(this._s(13))+'px sans-serif';ctx.fillText(p2?p2.name:'P2',w*0.8,this._s(18));
+    var sc=Math.max(0,Math.ceil(24-this.shotClockTimer/1000));ctx.fillStyle=sc<=5?'#ff4444':'#fff';ctx.font='bold '+Math.floor(this._s(11))+'px sans-serif';ctx.fillText(sc+'s',w-this._s(28),this._s(18));
+    var pt=this.phase==='freethrow'?'罚球: '+(this.ftShooter===0?(p1?p1.name:'P1'):(p2?p2.name:'P2'))+' ('+this.ftMade+'/2)':('球权: '+(this.poss===0?(p1?p1.name:'P1'):(p2?p2.name:'P2')));
+    ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font=Math.floor(this._s(10))+'px sans-serif';ctx.textAlign='center';ctx.fillText(pt,w/2,this._s(34));
+    // 计时器
+    if(!this.overtime||this.gameTimer>0||this.overtimeTimer>0){var remMs=this.overtime?this.overtimeTimer:this.gameTimer;var rs2=Math.ceil(remMs/1000),mn2=Math.floor(rs2/60),se2=rs2%60;var ts2=mn2+':'+(se2<10?'0':'')+se2;
+      ctx.fillStyle=remMs<=30000?'#ff4444':remMs<=60000?'#ff0':'#fff';ctx.font='bold '+Math.floor(this._s(12))+'px sans-serif';ctx.textAlign='center';
+      var tl2=(this.overtime?'⏱ OT ':'⏱ ')+ts2;if(this.gameType==='target'&&this.targetScore)tl2+=' | 🎯'+this.targetScore+'分';ctx.fillText(tl2,w/2,this._s(58))}
+    // 跳球
+    if(this.phase==='jumpball'&&this.jumpCountdown>0){ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,w,h);ctx.fillStyle='#ffd700';ctx.font='bold '+Math.floor(this._s(72))+'px sans-serif';ctx.textAlign='center';ctx.fillText(this.jumpCountdown,w/2,h/2+this._s(18));ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(this._s(16))+'px sans-serif';ctx.fillText('跳球！移动摇杆争夺球权',w/2,h/2+this._s(50))}
+    if(this.needClearThree&&!this.clearThreeDone&&this.phase==='playing'){ctx.fillStyle='#ff0';ctx.font='bold '+Math.floor(this._s(14))+'px sans-serif';ctx.textAlign='center';ctx.fillText('⚠ 需运球出三分线！',w/2,this._s(65))}
+    if(this.shooting){var bw=this._s(180),bh=this._s(10),bx2=w/2-bw/2,by2=h-this._s(90);ctx.fillStyle='#333';ctx.fillRect(bx2,by2,bw,bh);ctx.fillStyle='rgba(0,255,0,0.3)';ctx.fillRect(bx2+bw*0.45,by2,bw*0.1,bh);
+      var p=this.shotPower,mc=p>=.45&&p<=.55?'#00ff00':p>=.35&&p<=.65?'#ffff00':'#ff0000';ctx.fillStyle=mc;ctx.fillRect(bx2,by2,bw*p,bh);
+      ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.strokeRect(bx2,by2,bw,bh);ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(this._s(11))+'px sans-serif';ctx.textAlign='center';
+      ctx.fillText((this.phase==='freethrow'?'罚球':'投篮')+' 力度 '+Math.floor(p*100)+'%',w/2,by2-this._s(6))}
+    if(this.scoredAnim>0&&this.shotResult){var a2=Math.min(1,this.scoredAnim/800);var o2=(1500-this.scoredAnim)/1500*this._s(40);ctx.fillStyle='rgba(255,255,0,'+a2+')';ctx.font='bold '+Math.floor(this._s(22))+'px sans-serif';ctx.textAlign='center';ctx.fillText(this.shotResult.made?'+'+this.shotResult.pts:'打铁',w/2,this._s(180)-o2)}
+    if(this.msgTimer>0){var a3=Math.min(1,this.msgTimer/300);ctx.fillStyle='rgba(255,255,255,'+a3+')';ctx.font='bold '+Math.floor(this._s(16))+'px sans-serif';ctx.textAlign='center';ctx.fillText(this.msg,w/2,h-this._s(160))}
+    var ey=this._s(48),eh=this._s(5),ew=this._s(70),eg=this._s(10);ctx.fillStyle='#333';ctx.fillRect(eg,ey,ew,eh);ctx.fillStyle='#0cf';ctx.fillRect(eg,ey,ew*(this.offEnergy/100),eh);ctx.fillStyle='#333';ctx.fillRect(w-eg-ew,ey,ew,eh);ctx.fillStyle='#0cf';ctx.fillRect(w-eg-ew,ey,ew*(this.defEnergy/100),eh);
+    if(this.foulCooldown>0){ctx.fillStyle='rgba(255,68,0,0.4)';ctx.font=Math.floor(this._s(10))+'px sans-serif';ctx.textAlign='center';ctx.fillText('犯规冷却'+(this.foulCooldown/1000).toFixed(1)+'s',w-this._s(50),this._s(60))}
+    if(this.phase==='gameover'){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,h/2-this._s(40),w,this._s(80));ctx.fillStyle='#ffd700';ctx.font='bold '+Math.floor(this._s(24))+'px sans-serif';ctx.textAlign='center';
+      var wn=this.winner===0?(p1?p1.name:'P1'):(p2?p2.name:'P2');ctx.fillText(wn+' 获胜！',w/2,h/2+this._s(6))}
+  }
+
   getState(){
     var remMs=this.overtime?this.overtimeTimer:this.gameTimer;
     var sp=null;
@@ -683,8 +761,8 @@ function startSingleGame(){
   gameLoop=setInterval(function(){
     var now=performance.now(),dt=now-lastTime;lastTime=now;
     engine.update(dt);engine.offInput.mx=myInput.mx;engine.offInput.my=myInput.my;
-    var st=engine.getState();
-    renderSharedState(st,player1,player2,0);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    engine.render(ctx);
     if(engine.gameOver&&!gameEnded){gameEnded=true;clearInterval(gameLoop);showSingleGameOver()}
   },16);
 }
