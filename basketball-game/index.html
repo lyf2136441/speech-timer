@@ -2,21 +2,15 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>CBA篮球1v1</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 body{background:#0f0f1a;overflow:hidden;touch-action:manipulation;font-family:-apple-system,sans-serif;width:100vw;height:100vh;height:100dvh}
-/* 强制横屏提示 */
-#rotateHint{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:#0a0a15;flex-direction:column;align-items:center;justify-content:center;color:#fff;gap:20px}
-#rotateHint .icon{font-size:60px;animation:rotPulse 1.5s infinite}
-@keyframes rotPulse{0%,100%{transform:rotate(0deg)}50%{transform:rotate(90deg)}}
-@media screen and (orientation:portrait){#rotateHint{display:flex}}
-@media screen and (orientation:landscape){#rotateHint{display:none !important}}
 #app{width:100%;height:100%;position:relative}
 
-/* 模式选择 */
-#modePage{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;gap:24px}
+/* === 模式选择 === */
+#modePage{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;gap:24px;background:#0f0f1a}
 #modePage h1{font-size:32px;color:#ff8c00;letter-spacing:3px;font-weight:900;text-align:center}
 #modePage .sub{font-size:13px;color:#888;text-align:center;margin-top:-12px}
 .mode-btn{width:260px;height:80px;border-radius:20px;border:2px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:#fff;font-size:20px;font-weight:bold;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:all .2s}
@@ -25,118 +19,131 @@ body{background:#0f0f1a;overflow:hidden;touch-action:manipulation;font-family:-a
 .mode-btn.online{border-color:rgba(0,136,255,.4);background:rgba(0,136,255,.1)}
 .mode-btn .ico{font-size:32px}
 .mode-btn .desc{font-size:11px;opacity:.6}
-
-/* 选人页 */
-#selectPage{position:absolute;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;z-index:10;overflow-y:auto}
-.s-header{text-align:center;padding:12px 0 6px;flex-shrink:0}
-.s-header h2{font-size:20px;color:#ff8c00;letter-spacing:2px;font-weight:900}
-.s-header p{font-size:11px;color:#888;margin-top:2px}
-.mode-tag{display:inline-block;padding:2px 10px;border-radius:10px;font-size:10px;font-weight:bold;margin-left:4px}
-.mode-tag.single{background:rgba(255,140,0,.3);color:#ff8c00}
-.mode-tag.online{background:rgba(0,136,255,.3);color:#4af}
-.conn-row{display:flex;align-items:center;justify-content:center;gap:6px;padding:4px 16px;flex-shrink:0}
-.conn-row input{flex:1;max-width:180px;height:30px;background:#111;border:1px solid #333;border-radius:5px;color:#fff;padding:0 10px;font-size:12px}
-.conn-row button{height:30px;padding:0 12px;border-radius:5px;border:none;font-size:11px;font-weight:bold;background:#ff8c00;color:#000}
+/* 联机：连接栏 */
+.conn-inline{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.conn-inline input{width:160px;height:30px;background:#111;border:1px solid #333;border-radius:5px;color:#fff;padding:0 8px;font-size:11px}
+.conn-inline button{height:30px;padding:0 10px;border-radius:5px;border:none;font-size:11px;font-weight:bold;background:#ff8c00;color:#000}
 .stag{font-size:9px;padding:2px 8px;border-radius:8px;font-weight:bold}
 .stag.on{background:#0a3;color:#fff}.stag.off{background:#a30;color:#fff}
-.versus{display:flex;align-items:flex-start;padding:0 4px;flex-shrink:0}
-.pick{flex:1;background:#1a1a2e;border-radius:12px;overflow:hidden;min-height:130px}
-.pick-head{padding:10px;text-align:center;color:#fff}
-.pick-head .lbl{font-size:11px;opacity:.7}
-.pick-head .nm{font-size:16px;font-weight:bold;margin:2px 0}
-.pick-head .tm{font-size:10px;opacity:.6}
-.pick-head .ph{font-size:14px;opacity:.3;font-weight:normal}
-.attrs-box{padding:4px 8px}
-.attr-row{display:flex;align-items:center;margin-bottom:3px}
-.attr-row .an{width:26px;font-size:9px;color:#aaa;flex-shrink:0}
-.attr-row .ab{flex:1;height:4px;background:#333;border-radius:2px;margin:0 3px;overflow:hidden}
-.attr-row .ab div{height:100%;border-radius:2px}
-.attr-row .av{width:20px;font-size:9px;color:#fff;text-align:right}
-.vs-badge{display:flex;align-items:center;justify-content:center;width:36px;flex-shrink:0;padding-top:45px;font-size:20px;font-weight:bold;color:#ff4444}
-.s-hint{text-align:center;padding:4px;font-size:12px;color:#ff8c00;flex-shrink:0}
-.team-scroll{display:flex;overflow-x:auto;padding:4px 8px;gap:6px;flex-shrink:0;-webkit-overflow-scrolling:touch}
-.team-scroll::-webkit-scrollbar{display:none}
-.t-chip{border:2px solid #333;border-radius:14px;padding:5px 12px;font-size:11px;color:#aaa;white-space:nowrap;flex-shrink:0;cursor:pointer}
-.t-chip.active{color:#fff;background:#2a2a4e}
-#playerList{flex:1;overflow-y:auto;background:#1a1a2e;margin:0 4px;border-radius:10px;-webkit-overflow-scrolling:touch}
-.p-card{display:flex;justify-content:space-between;align-items:center;padding:10px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer}
-.p-card.sel{background:rgba(255,140,0,.12)}
-.p-card .cl{display:flex;align-items:center;gap:8px}
-.p-card .num{font-size:15px;font-weight:bold;color:#ff8c00;width:36px}
-.p-card .name{font-size:14px;color:#fff;width:80px}
-.p-card .pos{font-size:10px;color:#888;background:#2a2a4e;padding:2px 7px;border-radius:5px}
-.p-card .ms{display:flex;flex-wrap:wrap;gap:3px;font-size:8px;color:#999}
-.p-card .ms span{background:#222;padding:1px 4px;border-radius:3px}
-#startBtn{height:48px;background:#333;color:#888;border:none;border-radius:24px;font-size:17px;font-weight:bold;pointer-events:none;transition:all .3s;margin:8px 16px;flex-shrink:0;padding:0}
-#startBtn.ready{background:linear-gradient(135deg,#ff8c00,#ff4444);color:#fff;pointer-events:auto;box-shadow:0 4px 20px rgba(255,68,68,.4)}
-.back-row{text-align:center;padding:4px 16px 8px;flex-shrink:0}
-.back-row button{background:none;border:1px solid #444;color:#888;padding:6px 20px;border-radius:14px;font-size:12px}
-
 /* 排队 */
-.q-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.82);display:none;flex-direction:column;align-items:center;justify-content:center;z-index:50}
-.q-overlay.show{display:flex}
-.q-icon{font-size:56px;animation:pulse 1s infinite}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
-.q-text{font-size:18px;color:#ff8c00;margin-top:12px}
-.q-sub{font-size:12px;color:#888;margin-top:2px}
-.q-cancel{height:38px;padding:0 28px;border-radius:19px;border:none;background:#a30;color:#fff;font-size:13px;margin-top:16px}
-
-/* 倒计时 */
+.q-badge{display:inline-block;padding:4px 12px;border-radius:12px;background:rgba(255,140,0,.2);color:#ff8c00;font-size:12px;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+/* 倒计时覆盖 */
 #cdOverlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;z-index:100;flex-direction:column}
 #cdOverlay.show{display:flex}
 .cd-num{font-size:80px;font-weight:bold;color:#ffd700}
 .cd-opp{font-size:15px;color:#fff;margin-top:2px}
+/* 横屏提示 */
+#rotateHint{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:#0a0a15;flex-direction:column;align-items:center;justify-content:center;color:#fff;gap:20px}
+#rotateHint .icon{font-size:60px;animation:rotPulse 1.5s infinite}
+@keyframes rotPulse{0%,100%{transform:rotate(0deg)}50%{transform:rotate(90deg)}}
+@media screen and (orientation:portrait){#rotateHint{display:flex}}
+@media screen and (orientation:landscape){#rotateHint{display:none !important}}
+
+/* 选人页 */
+#selectPage{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;z-index:10}
+.s-header{text-align:center;padding:16px 0 8px;flex-shrink:0}
+.s-header h1{font-size:24px;color:#ff8c00;letter-spacing:2px;font-weight:900}
+.s-header p{font-size:12px;color:#888;margin-top:2px}
+.versus{display:flex;align-items:flex-start;padding:0 4px;flex-shrink:0}
+.pick{flex:1;background:#1a1a2e;border-radius:12px;overflow:hidden;min-height:140px}
+.pick-head{padding:10px;text-align:center;color:#fff}
+.pick-head .lbl{font-size:11px;opacity:.7}
+.pick-head .nm{font-size:18px;font-weight:bold;margin:2px 0}
+.pick-head .tm{font-size:11px;opacity:.6}
+.pick-head .ph{font-size:14px;opacity:.3;font-weight:normal}
+.attrs-box{padding:6px 10px}
+.attr-row{display:flex;align-items:center;margin-bottom:4px}
+.attr-row .an{width:30px;font-size:10px;color:#aaa;flex-shrink:0}
+.attr-row .ab{flex:1;height:5px;background:#333;border-radius:3px;margin:0 4px;overflow:hidden}
+.attr-row .ab div{height:100%;border-radius:3px}
+.attr-row .av{width:22px;font-size:10px;color:#fff;text-align:right}
+.vs-badge{display:flex;align-items:center;justify-content:center;width:40px;flex-shrink:0;padding-top:50px;font-size:22px;font-weight:bold;color:#ff4444}
+.s-hint{text-align:center;padding:6px;font-size:13px;color:#ff8c00;flex-shrink:0}
+.team-scroll{display:flex;overflow-x:auto;padding:6px 8px;gap:8px;flex-shrink:0;-webkit-overflow-scrolling:touch}
+.team-scroll::-webkit-scrollbar{display:none}
+.t-chip{border:2px solid #333;border-radius:16px;padding:6px 14px;font-size:12px;color:#aaa;white-space:nowrap;flex-shrink:0;cursor:pointer}
+.t-chip.active{color:#fff;background:#2a2a4e}
+#playerList{flex:1;overflow-y:auto;background:#1a1a2e;margin:0 4px;border-radius:10px;-webkit-overflow-scrolling:touch}
+.p-card{display:flex;justify-content:space-between;align-items:center;padding:12px;border-bottom:1px solid rgba(255,255,255,.04);cursor:pointer}
+.p-card.sel{background:rgba(255,140,0,.12)}
+.p-card .cl{display:flex;align-items:center;gap:10px}
+.p-card .num{font-size:16px;font-weight:bold;color:#ff8c00;width:40px}
+.p-card .name{font-size:15px;color:#fff;width:90px}
+.p-card .pos{font-size:11px;color:#888;background:#2a2a4e;padding:2px 8px;border-radius:6px}
+.p-card .ms{display:flex;flex-wrap:wrap;gap:4px;font-size:9px;color:#999}
+.p-card .ms span{background:#222;padding:1px 5px;border-radius:4px}
+#startBtn{position:absolute;bottom:30px;left:24px;right:24px;height:50px;background:#333;color:#888;border:none;border-radius:25px;font-size:18px;font-weight:bold;pointer-events:none;transition:all .3s;z-index:20;padding:0}
+#startBtn.ready{background:linear-gradient(135deg,#ff8c00,#ff4444);color:#fff;pointer-events:auto;box-shadow:0 4px 20px rgba(255,68,68,.4)}
 
 /* 游戏页 */
 #gamePage{position:absolute;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;z-index:20}
 #gameCanvas{flex:1;width:100%;display:block}
-.ctrls{display:flex;justify-content:space-between;align-items:flex-end;padding:6px 10px 20px}
+.ctrls{display:flex;justify-content:space-between;align-items:flex-end;padding:8px 12px 24px}
 .joy-wrap{display:flex;flex-direction:column;align-items:center}
-.joy-base{width:96px;height:96px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.2);border-radius:50%;position:relative}
-.joy-thumb{width:42px;height:42px;background:rgba(255,140,0,.5);border-radius:50%;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
-.joy-label{font-size:9px;color:rgba(255,255,255,.4);margin-top:3px}
-.btns{display:flex;flex-direction:column;gap:6px}
-.btns-row{display:flex;gap:6px;justify-content:flex-end}
-.btn{width:74px;height:64px;border-radius:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:11px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);transition:all .08s}
+.joy-base{width:100px;height:100px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.2);border-radius:50%;position:relative}
+.joy-thumb{width:44px;height:44px;background:rgba(255,140,0,.5);border-radius:50%;position:absolute;left:50%;top:50%;transform:translate(-50%,-50%)}
+.joy-label{font-size:10px;color:rgba(255,255,255,.4);margin-top:4px}
+.btns{display:flex;flex-direction:column;gap:8px}
+.btns-row{display:flex;gap:8px;justify-content:flex-end}
+.btn{width:80px;height:70px;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;border:2px solid rgba(255,255,255,.12);background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);transition:all .08s}
 .btn:active,.btn.active{background:rgba(255,140,0,.25);border-color:#ff8c00;transform:scale(.92)}
-.btn.shoot{width:96px;height:74px;background:rgba(255,68,68,.18);border-color:rgba(255,68,68,.25)}
+.btn.shoot{width:100px;height:80px;background:rgba(255,68,68,.18);border-color:rgba(255,68,68,.25)}
 .btn.drive{background:rgba(0,136,255,.15);border-color:rgba(0,136,255,.2)}
 .btn.steal{background:rgba(255,200,0,.12);border-color:rgba(255,200,0,.2)}
 .btn.block{background:rgba(255,0,0,.12);border-color:rgba(255,0,0,.2)}
 .btn.foul{background:rgba(255,68,0,.15);border-color:rgba(255,68,0,.3)}
-.btn .ico{font-size:22px}
-.btn .lbl{font-size:9px;margin-top:1px}
-
-/* 叠加 */
-.overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.75);display:none;align-items:center;justify-content:center;z-index:100}
+.btn .ico{font-size:24px}
+.btn .lbl{font-size:10px;margin-top:2px}
+.overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);display:none;align-items:center;justify-content:center;z-index:100}
 .overlay.show{display:flex}
-.ov-box{background:#1a1a2e;border-radius:20px;padding:32px 24px;text-align:center;width:300px;max-width:90vw}
-.ov-box h2{font-size:21px;color:#ffd700}
-.ov-box .ov-score{font-size:36px;font-weight:bold;color:#fff;margin:6px 0 12px}
-.ov-box .ov-stat{font-size:11px;color:#aaa;margin:2px 0}
-.ov-box button{width:100%;height:40px;border-radius:20px;border:none;font-size:14px;font-weight:bold;margin-top:7px;padding:0}
-.ov-box .ov-rematch{background:linear-gradient(135deg,#ff8c00,#ff4444);color:#fff}
-.ov-box .ov-home{background:rgba(255,255,255,.1);color:#ccc}
+.ov-box{background:#1a1a2e;border-radius:20px;padding:36px 32px;text-align:center;width:300px}
+.ov-box h2{font-size:24px;color:#ffd700}
+.ov-box .ov-score{font-size:42px;font-weight:bold;color:#fff;margin:8px 0 16px}
+.ov-box .ov-stat{font-size:13px;color:#aaa;margin:4px 0}
+.ov-box button{width:100%;height:44px;border-radius:22px;border:none;font-size:16px;font-weight:bold;margin-top:10px;padding:0}
 .ov-box .ov-detail{background:linear-gradient(135deg,#ff8c00,#ff4444);color:#fff}
+.ov-box .ov-again{background:rgba(255,255,255,.1);color:#ccc}
 
-/* 设置页 */
-#settingsPage{position:absolute;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:15;gap:14px;padding:24px;overflow-y:auto}
-#settingsPage h2{font-size:20px;color:#ff8c00}
-.set-card{background:#1a1a2e;border-radius:16px;padding:18px;width:310px;max-width:90vw}
-.set-card h3{font-size:13px;color:#888;margin-bottom:10px}
-.set-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
-.set-opt{padding:8px 14px;border-radius:10px;border:2px solid #333;background:#111;color:#aaa;font-size:13px;cursor:pointer;text-align:center;flex:1;min-width:55px;transition:all .15s}
-.set-opt.sel{border-color:#ff8c00;color:#ff8c00;background:#2a1a0e}
-.set-label{font-size:11px;color:#666;margin-bottom:6px}
-#settingsStart{width:310px;max-width:90vw;height:48px;border-radius:24px;border:none;font-size:17px;font-weight:bold;background:linear-gradient(135deg,#ff8c00,#ff4444);color:#fff;margin-top:4px;padding:0}
+/* 结果页 */
+#resultPage{position:absolute;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;overflow-y:auto;z-index:30;background:#0f0f1a;padding:24px 16px 120px;-webkit-overflow-scrolling:touch}
+#resultPage.show{display:flex}
+.r-head{text-align:center;margin-bottom:20px}
+.r-head .trophy{font-size:50px}
+.r-head h2{font-size:22px;color:#ffd700;margin:4px 0}
+.r-head .r-score{font-size:48px;font-weight:bold;color:#fff}
+.r-compare{display:flex;gap:10px}
+.r-player{flex:1;background:#1a1a2e;border-radius:14px;padding:16px;text-align:center;opacity:.7}
+.r-player.w{opacity:1}
+.r-player .rn{font-size:18px;font-weight:bold;color:#fff}
+.r-player .rt{font-size:12px;color:#888}
+.r-stats{display:flex;flex-wrap:wrap;margin-top:12px}
+.r-stats .rs{width:50%;padding:8px 0}
+.rs .rsv{font-size:24px;font-weight:bold;color:#ff8c00}
+.rs .rsl{font-size:10px;color:#888}
+.attr-section{background:#1a1a2e;border-radius:14px;padding:20px;margin-top:16px}
+.attr-section h3{font-size:14px;color:#fff;text-align:center;margin-bottom:12px}
+.ac-row{margin-bottom:10px}
+.ac-labels{display:flex;justify-content:space-between;font-size:10px;color:#888;margin-bottom:2px}
+.ac-bars{display:flex;align-items:center;gap:6px}
+.ac-bar{height:8px;flex:1}
+.ac-bar.l{border-radius:4px 0 0 4px}
+.ac-bar.r{border-radius:0 4px 4px 0}
+.ac-mid{font-size:10px;color:#666;white-space:nowrap;width:50px;text-align:center}
+.r-btns{position:fixed;bottom:24px;left:16px;right:16px;display:flex;gap:12px}
+.r-btns button{flex:1;height:48px;border-radius:24px;border:none;font-size:16px;font-weight:bold;padding:0}
+.r-btns .r-rematch{flex:2;background:linear-gradient(135deg,#ff8c00,#ff4444);color:#fff}
+.r-btns .r-home{background:rgba(255,255,255,.1);color:#ccc}
 </style>
 </head>
 <body>
 <div id="rotateHint"><div class="icon">📱</div><div style="font-size:20px;font-weight:bold">请旋转手机</div><div style="color:#888">横屏体验更佳</div></div>
 <div id="app">
   <div id="modePage"></div>
-  <div id="selectPage"></div>
-  <div id="settingsPage"></div>
   <div id="cdOverlay"><div class="cd-num" id="cdNum">3</div><div class="cd-opp" id="cdOpp"></div></div>
+  <!-- 选人页 -->
+  <div id="selectPage"></div>
+  <!-- 游戏页 -->
   <div id="gamePage">
     <canvas id="gameCanvas"></canvas>
     <div class="ctrls">
@@ -158,764 +165,1051 @@ body{background:#0f0f1a;overflow:hidden;touch-action:manipulation;font-family:-a
     </div>
     <div class="overlay" id="gameOverOverlay"></div>
   </div>
+  <!-- 结果页 -->
+  <div id="resultPage"></div>
 </div>
 
 <script>
-// ====== CBA数据 ======
-var CBA_TEAMS=[{id:'liaoning',name:'辽宁本钢',abbr:'辽宁',color:'#c8102e',players:[{id:'zhaojiwei',name:'赵继伟',num:3,pos:'PG',shooting:82,speed:85,strength:65,defense:78,dribbling:92,jumping:68},{id:'guoailun',name:'郭艾伦',num:13,pos:'SG',shooting:78,speed:92,strength:72,defense:75,dribbling:95,jumping:75},{id:'zhangzhenlin',name:'张镇麟',num:77,pos:'SF',shooting:80,speed:88,strength:80,defense:82,dribbling:78,jumping:90},{id:'fugao',name:'付豪',num:1,pos:'PF',shooting:76,speed:72,strength:85,defense:70,dribbling:68,jumping:72},{id:'hanjun',name:'韩德君',num:55,pos:'C',shooting:65,speed:50,strength:95,defense:78,dribbling:45,jumping:45},{id:'lixiaoxu',name:'李晓旭',num:22,pos:'PF',shooting:70,speed:65,strength:88,defense:82,dribbling:60,jumping:62},{id:'fogg',name:'弗格',num:4,pos:'SG',shooting:90,speed:86,strength:75,defense:82,dribbling:88,jumping:76},{id:'morland',name:'莫兰德',num:25,pos:'C',shooting:55,speed:65,strength:92,defense:90,dribbling:50,jumping:78},{id:'congmingchen',name:'丛明晨',num:10,pos:'SF',shooting:78,speed:76,strength:68,defense:70,dribbling:72,jumping:74},{id:'yanzhongqi',name:'鄢手骐',num:36,pos:'PG',shooting:68,speed:80,strength:62,defense:72,dribbling:78,jumping:70},{id:'liuhuyi',name:'刘雁宇',num:17,pos:'C',shooting:60,speed:62,strength:80,defense:68,dribbling:48,jumping:70},{id:'yushuchen',name:'俞泽辰',num:27,pos:'SF',shooting:72,speed:74,strength:70,defense:65,dribbling:68,jumping:76}]},{id:'guangdong',name:'广东东阳光',abbr:'广东',color:'#003399',players:[{id:'humingxuan',name:'胡明轩',num:3,pos:'SG',shooting:84,speed:86,strength:72,defense:80,dribbling:85,jumping:78},{id:'xujie',name:'徐杰',num:2,pos:'PG',shooting:82,speed:84,strength:58,defense:74,dribbling:90,jumping:66},{id:'zhourui',name:'周琦',num:26,pos:'C',shooting:72,speed:70,strength:88,defense:92,dribbling:55,jumping:85},{id:'renjunfei',name:'任骏飞',num:20,pos:'PF',shooting:74,speed:68,strength:82,defense:78,dribbling:65,jumping:68},{id:'duzhunwang',name:'杜润旺',num:18,pos:'PF',shooting:80,speed:66,strength:78,defense:65,dribbling:62,jumping:64},{id:'zhanghaoji',name:'张皓嘉',num:25,pos:'SF',shooting:72,speed:72,strength:74,defense:68,dribbling:70,jumping:72},{id:'waters',name:'沃特斯',num:1,pos:'PG',shooting:85,speed:94,strength:62,defense:72,dribbling:95,jumping:80},{id:'weems',name:'威姆斯',num:13,pos:'SF',shooting:78,speed:82,strength:80,defense:75,dribbling:82,jumping:82},{id:'zhangwenji',name:'张文逸',num:14,pos:'SG',shooting:74,speed:76,strength:65,defense:66,dribbling:74,jumping:72},{id:'huangmingyi',name:'黄明依',num:6,pos:'SF',shooting:66,speed:78,strength:70,defense:68,dribbling:66,jumping:78},{id:'zhangmingchi',name:'张明池',num:27,pos:'C',shooting:58,speed:58,strength:84,defense:70,dribbling:42,jumping:60},{id:'xuxin',name:'徐昕',num:19,pos:'C',shooting:56,speed:55,strength:82,defense:72,dribbling:40,jumping:65}]},{id:'xinjiang',name:'新疆伊力特',abbr:'新疆',color:'#0055a5',players:[{id:'abdusalam',name:'阿不都沙拉木',num:23,pos:'PF',shooting:82,speed:76,strength:84,defense:80,dribbling:72,jumping:76},{id:'qilin',name:'齐麟',num:11,pos:'SF',shooting:84,speed:82,strength:74,defense:72,dribbling:76,jumping:85},{id:'zhaorui',name:'赵睿',num:8,pos:'SG',shooting:78,speed:86,strength:80,defense:82,dribbling:86,jumping:78},{id:'yudchangdong',name:'于德豪',num:6,pos:'PG',shooting:65,speed:82,strength:68,defense:84,dribbling:78,jumping:68},{id:'luttbulah',name:'鲁吐布拉',num:14,pos:'C',shooting:58,speed:60,strength:88,defense:75,dribbling:42,jumping:72},{id:'zhuan',name:'朱旭航',num:22,pos:'PF',shooting:76,speed:70,strength:80,defense:74,dribbling:65,jumping:74},{id:'tangcaiyu',name:'唐才育',num:5,pos:'SF',shooting:74,speed:74,strength:68,defense:68,dribbling:70,jumping:72},{id:'huangrongqi',name:'黄荣奇',num:4,pos:'PG',shooting:68,speed:84,strength:66,defense:70,dribbling:80,jumping:76},{id:'jones',name:'多米尼克·琼斯',num:55,pos:'SG',shooting:80,speed:88,strength:85,defense:78,dribbling:90,jumping:82},{id:'wuguanxi',name:'吴冠希',num:9,pos:'C',shooting:62,speed:62,strength:86,defense:80,dribbling:48,jumping:70},{id:'xirreli',name:'西热力江',num:7,pos:'SG',shooting:76,speed:72,strength:74,defense:76,dribbling:74,jumping:66},{id:'liyiyang',name:'李炎哲',num:13,pos:'C',shooting:56,speed:52,strength:92,defense:78,dribbling:38,jumping:55}]},{id:'zhejiang_chouzhou',name:'浙江稠州金租',abbr:'浙江',color:'#b22222',players:[{id:'wuqiang',name:'吴前',num:33,pos:'SG',shooting:92,speed:84,strength:68,defense:72,dribbling:85,jumping:70},{id:'chengpeng',name:'程帅澎',num:6,pos:'SG',shooting:80,speed:82,strength:72,defense:78,dribbling:80,jumping:76},{id:'liuyize',name:'刘泽一',num:10,pos:'PF',shooting:72,speed:74,strength:82,defense:76,dribbling:66,jumping:74},{id:'wangyibo',name:'王奕博',num:15,pos:'PG',shooting:70,speed:86,strength:62,defense:74,dribbling:84,jumping:70},{id:'yujiahao',name:'余嘉豪',num:11,pos:'C',shooting:68,speed:55,strength:90,defense:82,dribbling:42,jumping:62},{id:'luzhouwenbo',name:'陆文博',num:8,pos:'SF',shooting:76,speed:78,strength:70,defense:76,dribbling:70,jumping:78},{id:'gaily',name:'盖利',num:3,pos:'SF',shooting:78,speed:86,strength:78,defense:82,dribbling:80,jumping:84},{id:'perry',name:'佩里',num:0,pos:'PF',shooting:74,speed:72,strength:86,defense:72,dribbling:65,jumping:76},{id:'linxiaotian',name:'林孝天',num:5,pos:'PG',shooting:66,speed:82,strength:60,defense:68,dribbling:78,jumping:72},{id:'wangzilu',name:'王子路',num:12,pos:'PF',shooting:68,speed:70,strength:78,defense:72,dribbling:62,jumping:70}]},{id:'guangsha',name:'浙江广厦雄狮',abbr:'广厦',color:'#f5a623',players:[{id:'sunminghui',name:'孙铭徽',num:17,pos:'PG',shooting:80,speed:90,strength:74,defense:82,dribbling:92,jumping:80},{id:'huzhinqiu',name:'胡金秋',num:21,pos:'PF',shooting:86,speed:74,strength:84,defense:80,dribbling:68,jumping:76},{id:'zhaoyanhao',name:'赵岩昊',num:25,pos:'SG',shooting:82,speed:84,strength:65,defense:72,dribbling:80,jumping:74},{id:'zhujunlong',name:'朱俊龙',num:10,pos:'SF',shooting:74,speed:78,strength:76,defense:82,dribbling:72,jumping:80},{id:'xuzhonghao',name:'许钟豪',num:24,pos:'C',shooting:60,speed:50,strength:90,defense:78,dribbling:40,jumping:52},{id:'okafo',name:'奥卡福',num:15,pos:'C',shooting:72,speed:65,strength:88,defense:82,dribbling:52,jumping:74},{id:'weizhe',name:'威哲',num:2,pos:'PG',shooting:74,speed:82,strength:66,defense:70,dribbling:86,jumping:72},{id:'lijinglong',name:'李金效',num:13,pos:'SF',shooting:70,speed:70,strength:72,defense:68,dribbling:66,jumping:68},{id:'wuxiao',name:'吴骁',num:5,pos:'PF',shooting:62,speed:68,strength:82,defense:72,dribbling:55,jumping:68},{id:'duanliqian',name:'段立谦',num:3,pos:'PG',shooting:64,speed:80,strength:58,defense:65,dribbling:76,jumping:68}]},{id:'shanghai',name:'上海久事',abbr:'上海',color:'#1e40af',players:[{id:'wangzhelin',name:'王哲林',num:94,pos:'C',shooting:76,speed:62,strength:88,defense:78,dribbling:52,jumping:65},{id:'liutricen',name:'刘铮',num:5,pos:'SG',shooting:78,speed:80,strength:68,defense:84,dribbling:78,jumping:72},{id:'luohandichen',name:'罗汉琛',num:33,pos:'PG',shooting:72,speed:84,strength:62,defense:70,dribbling:82,jumping:66},{id:'renjewei',name:'任骏威',num:9,pos:'PF',shooting:74,speed:68,strength:80,defense:74,dribbling:64,jumping:64},{id:'guohaowen',name:'郭昊文',num:7,pos:'SG',shooting:72,speed:88,strength:74,defense:66,dribbling:82,jumping:84},{id:'lihongquan',name:'李弘权',num:14,pos:'SF',shooting:74,speed:76,strength:78,defense:72,dribbling:70,jumping:78},{id:'bledsoe',name:'布莱德索',num:2,pos:'PG',shooting:78,speed:90,strength:82,defense:80,dribbling:92,jumping:82},{id:'franklin',name:'富兰克林',num:1,pos:'SG',shooting:82,speed:84,strength:78,defense:74,dribbling:86,jumping:78},{id:'lipeng',name:'李鹏',num:23,pos:'PF',shooting:66,speed:68,strength:78,defense:68,dribbling:60,jumping:66},{id:'yanpengfei',name:'闫鹏飞',num:10,pos:'C',shooting:64,speed:58,strength:84,defense:72,dribbling:45,jumping:58}]},{id:'beijing_shougang',name:'北京北汽',abbr:'北京',color:'#0066cc',players:[{id:'zengfanbo',name:'曾凡博',num:1,pos:'SF',shooting:82,speed:84,strength:72,defense:78,dribbling:74,jumping:90},{id:'fangshou',name:'方硕',num:8,pos:'SG',shooting:80,speed:78,strength:70,defense:72,dribbling:82,jumping:68},{id:'zhairan',name:'翟晓川',num:20,pos:'PF',shooting:76,speed:74,strength:82,defense:80,dribbling:68,jumping:76},{id:'fanzi',name:'范子铭',num:17,pos:'C',shooting:68,speed:62,strength:86,defense:76,dribbling:48,jumping:62},{id:'tianyouxiang',name:'田宇翔',num:25,pos:'PG',shooting:68,speed:82,strength:64,defense:74,dribbling:80,jumping:68},{id:'leaf',name:'利夫',num:2,pos:'PF',shooting:72,speed:74,strength:82,defense:78,dribbling:66,jumping:80},{id:'zhangcairren',name:'张才仁',num:16,pos:'SG',shooting:72,speed:74,strength:68,defense:68,dribbling:72,jumping:70},{id:'leimeng',name:'雷蒙',num:9,pos:'SF',shooting:74,speed:72,strength:76,defense:72,dribbling:68,jumping:68},{id:'qiulin',name:'邱天',num:19,pos:'C',shooting:56,speed:58,strength:90,defense:74,dribbling:40,jumping:62},{id:'johnson',name:'尼克·约翰逊',num:0,pos:'PG',shooting:76,speed:88,strength:74,defense:76,dribbling:88,jumping:80}]},{id:'beijing_ent',name:'北京控股',abbr:'北控',color:'#8b0000',players:[{id:'zhangfan',name:'张帆',num:6,pos:'SG',shooting:84,speed:80,strength:70,defense:72,dribbling:78,jumping:70},{id:'zozotonglin',name:'邹雨宸',num:10,pos:'C',shooting:68,speed:62,strength:88,defense:80,dribbling:48,jumping:72},{id:'liuleather',name:'廖三宁',num:2,pos:'PG',shooting:72,speed:86,strength:66,defense:70,dribbling:88,jumping:76},{id:'yuchangdong2',name:'俞长栋',num:7,pos:'PF',shooting:72,speed:68,strength:82,defense:76,dribbling:62,jumping:66},{id:'wangshaojie',name:'王少杰',num:14,pos:'PF',shooting:70,speed:74,strength:78,defense:74,dribbling:64,jumping:78},{id:'mengzokai',name:'孟子凯',num:1,pos:'SF',shooting:74,speed:74,strength:72,defense:68,dribbling:70,jumping:74},{id:'lining',name:'李宁',num:3,pos:'PG',shooting:66,speed:82,strength:60,defense:68,dribbling:80,jumping:68},{id:'shenjie',name:'沈梓捷',num:11,pos:'C',shooting:64,speed:68,strength:86,defense:82,dribbling:48,jumping:80},{id:'field',name:'费尔德',num:5,pos:'PG',shooting:80,speed:92,strength:72,defense:74,dribbling:92,jumping:82},{id:'jinxin',name:'金鑫',num:8,pos:'SF',shooting:70,speed:72,strength:70,defense:66,dribbling:68,jumping:70}]},{id:'shandong',name:'山东高速',abbr:'山东',color:'#e60012',players:[{id:'gaosyan',name:'高诗岩',num:0,pos:'PG',shooting:72,speed:84,strength:68,defense:84,dribbling:84,jumping:72},{id:'taohanlin',name:'陶汉林',num:20,pos:'C',shooting:65,speed:58,strength:94,defense:78,dribbling:42,jumping:60},{id:'chenpeidong',name:'陈培东',num:44,pos:'SG',shooting:76,speed:82,strength:68,defense:70,dribbling:78,jumping:74},{id:'jiachengyi',name:'贾诚',num:23,pos:'PF',shooting:72,speed:68,strength:84,defense:72,dribbling:60,jumping:68},{id:'jiaoclong',name:'焦海龙',num:4,pos:'PF',shooting:70,speed:70,strength:80,defense:74,dribbling:62,jumping:72},{id:'liuyi2',name:'刘毅',num:7,pos:'SF',shooting:74,speed:76,strength:72,defense:70,dribbling:72,jumping:74},{id:'gailiwo',name:'吉伦沃特',num:33,pos:'PF',shooting:78,speed:74,strength:86,defense:74,dribbling:68,jumping:76},{id:'hanslin',name:'哈德森',num:14,pos:'SG',shooting:88,speed:82,strength:76,defense:74,dribbling:84,jumping:74}]},{id:'guangzhou',name:'广州龙狮',abbr:'广州',color:'#e20613',players:[{id:'chenyingjun',name:'陈盈骏',num:9,pos:'PG',shooting:78,speed:84,strength:70,defense:76,dribbling:88,jumping:72},{id:'zhumingzhen',name:'祝铭震',num:7,pos:'SF',shooting:76,speed:78,strength:78,defense:78,dribbling:72,jumping:76},{id:'cuijinyi',name:'崔永熙',num:8,pos:'SG',shooting:78,speed:82,strength:74,defense:76,dribbling:78,jumping:84},{id:'jiabumingru',name:'贾明儒',num:3,pos:'PG',shooting:70,speed:80,strength:62,defense:66,dribbling:82,jumping:66},{id:'guoKaifa',name:'郭凯',num:14,pos:'PF',shooting:68,speed:68,strength:82,defense:74,dribbling:58,jumping:66},{id:'moore',name:'摩尔',num:4,pos:'SG',shooting:84,speed:86,strength:72,defense:72,dribbling:84,jumping:76},{id:'campbell',name:'坎普',num:22,pos:'PF',shooting:70,speed:72,strength:84,defense:74,dribbling:62,jumping:74}]},{id:'qingdao',name:'青岛国信海天',abbr:'青岛',color:'#004c97',players:[{id:'yanghanshen',name:'杨瀚森',num:15,pos:'C',shooting:68,speed:60,strength:84,defense:86,dribbling:58,jumping:66},{id:'wangrh',name:'王睿泽',num:2,pos:'SF',shooting:80,speed:78,strength:76,defense:74,dribbling:74,jumping:78},{id:'zhaojiayi2',name:'赵嘉义',num:33,pos:'PF',shooting:74,speed:72,strength:78,defense:72,dribbling:66,jumping:74},{id:'dangmuyi',name:'段昂君',num:3,pos:'PG',shooting:70,speed:84,strength:64,defense:68,dribbling:82,jumping:72},{id:'pomurray',name:'鲍威尔',num:13,pos:'SG',shooting:84,speed:86,strength:74,defense:74,dribbling:84,jumping:78},{id:'michl',name:'米切尔',num:1,pos:'PF',shooting:70,speed:74,strength:86,defense:78,dribbling:62,jumping:80},{id:'fanzhu',name:'范汇鎏',num:6,pos:'SG',shooting:72,speed:76,strength:68,defense:68,dribbling:72,jumping:70}]},{id:'tongxi',name:'南京头排苏酒',abbr:'南京',color:'#002b5c',players:[{id:'linwei',name:'林葳',num:23,pos:'SG',shooting:86,speed:84,strength:70,defense:68,dribbling:80,jumping:78},{id:'wanglanjin',name:'王岚嵚',num:8,pos:'PG',shooting:74,speed:86,strength:64,defense:72,dribbling:88,jumping:70},{id:'bryant',name:'布莱恩特',num:0,pos:'PF',shooting:72,speed:74,strength:84,defense:78,dribbling:64,jumping:80},{id:'zengfanri',name:'曾繁日',num:15,pos:'C',shooting:58,speed:60,strength:86,defense:74,dribbling:42,jumping:64},{id:'zhaobaozhen',name:'赵柏清',num:13,pos:'PF',shooting:74,speed:70,strength:80,defense:70,dribbling:62,jumping:72},{id:'wuTingjia',name:'邬挺嘉',num:4,pos:'SG',shooting:72,speed:74,strength:64,defense:66,dribbling:72,jumping:66},{id:'blakeney2',name:'布莱克尼',num:2,pos:'SG',shooting:88,speed:88,strength:76,defense:70,dribbling:86,jumping:82}]},{id:'jilin',name:'吉林九台农商',abbr:'吉林',color:'#c8102e',players:[{id:'jiangweize',name:'姜伟泽',num:13,pos:'SG',shooting:88,speed:84,strength:66,defense:68,dribbling:82,jumping:72},{id:'jiangyuxing',name:'姜宇星',num:5,pos:'SF',shooting:76,speed:82,strength:78,defense:76,dribbling:78,jumping:80},{id:'lidong',name:'李安',num:12,pos:'C',shooting:64,speed:58,strength:86,defense:76,dribbling:44,jumping:60},{id:'cuijinming',name:'崔晋铭',num:3,pos:'PG',shooting:72,speed:80,strength:66,defense:72,dribbling:82,jumping:68},{id:'zhongChen',name:'钟诚',num:21,pos:'PF',shooting:70,speed:64,strength:84,defense:78,dribbling:58,jumping:62},{id:'junior',name:'琼斯',num:55,pos:'SG',shooting:80,speed:88,strength:84,defense:78,dribbling:90,jumping:82}]}];
-var ATTR_NAMES=['投篮','速度','力量','防守','控球','弹跳'],ATTR_KEYS=['shooting','speed','strength','defense','dribbling','jumping'];
-function getPlayersByTeam(id){var t=CBA_TEAMS.find(function(x){return x.id===id});return t?t.players.map(function(p){return Object.assign({},p,{teamId:t.id,teamName:t.name,teamAbbr:t.abbr,teamColor:t.color})}):[]}
-
-// ====== DOM ======
-var $=function(id){return document.getElementById(id)}
-var modePage=$('modePage'),selectPage=$('selectPage'),gamePage=$('gamePage');
-var canvas=$('gameCanvas'),ctx=canvas.getContext('2d');
-var cdOverlay=$('cdOverlay'),cdNum=$('cdNum'),cdOpp=$('cdOpp');
-var goOverlay=$('gameOverOverlay');
-var btnShoot=$('btnShoot'),shootLabel=$('shootLabel');
-var joyBase=$('joyBase'),joyThumb=$('joyThumb');
-
-// ====== 全局状态 ======
-var gameMode=''; // 'single' | 'online'
-var player1=null,player2=null,selectingFor=1,currentTeamId='liaoning',selectedPid='';
-var engine=null,gameLoop=null,lastTime=0,gameEnded=false;
-var ws=null,wsConnected=false,myId='',mySide=-1,roomId='';
-var gameState=null,isQueuing=false,myInput={mx:0,my:0};
-var bgImage=null,joyActive=false,joyRect=null;
-var gameSettings={gameType:'endless',gameTime:3,targetScore:0}; // default
-
-// ====== 模式选择页 ======
+// ==================== 模式选择 + 联机 ====================
+var GAME_MODE=''; // 'single' | 'online'
+var ws=null,wsConnected=false,mySide=-1,roomId='',gameState=null,isQueuing=false,oppData=null,onlineStarted=false;
 function showModePage(){
-  modePage.style.display='flex';selectPage.style.display='none';gamePage.style.display='none';
-  cdOverlay.classList.remove('show');goOverlay.classList.remove('show');
-  modePage.innerHTML='<h1>🏀 CBA篮球1v1</h1><div class="sub">选择游戏模式</div>'+
+  var sp=$('selectPage'),gp=$('gamePage'),mp=$('modePage');
+  sp.style.display='none';gp.style.display='none';mp.style.display='flex';
+  $('gameOverOverlay').classList.remove('show');$('cdOverlay').classList.remove('show');
+  mp.innerHTML='<h1>🏀 CBA篮球1v1</h1><div class="sub">选择游戏模式</div>'+
     '<div class="mode-btn single" onclick="startMode(\'single\')"><span class="ico">🤖</span>单机模式<span class="desc">与AI对战</span></div>'+
     '<div class="mode-btn online" onclick="startMode(\'online\')"><span class="ico">🌐</span>联机模式<span class="desc">真人实时对战</span></div>';
 }
-
 function startMode(mode){
-  gameMode=mode;player1=null;player2=null;selectingFor=1;currentTeamId='liaoning';selectedPid='';
-  isQueuing=false;gameState=null;wsConnected=false;
-  modePage.style.display='none';selectPage.style.display='flex';gamePage.style.display='none';
+  GAME_MODE=mode;$('modePage').style.display='none';$('selectPage').style.display='flex';
+  player1=null;player2=null;selectingFor=1;currentTeamId='liaoning';selectedPid='';
+  isQueuing=false;gameState=null;onlineStarted=false;
   if(mode==='online'){setTimeout(function(){if(window.location.hostname!=='localhost'&&window.location.hostname!=='127.0.0.1')connectWS(getAutoUrl())},300)}
-  renderSelect();
+  renderSelectPage();
 }
-
-// ====== WebSocket ======
 function getAutoUrl(){var p=window.location.protocol==='https:'?'wss:':'ws:';return p+'//'+window.location.host}
 function connectWS(url){
   if(ws){try{ws.close()}catch(e){}}
-  var u=url||getAutoUrl();if(u.indexOf('://')===-1)u='ws://'+u;
-  ws=new WebSocket(u);
-  ws.onopen=function(){wsConnected=true;if(gameMode==='online')renderSelect();};
+  var u=url||getAutoUrl();if(u.indexOf('://')===-1)u='ws://'+u;ws=new WebSocket(u);
+  ws.onopen=function(){wsConnected=true;renderSelectPage();};
   ws.onmessage=function(e){handleMsg(JSON.parse(e.data))};
-  ws.onclose=function(){wsConnected=false;if(gameStarted)goHome();if(gameMode==='online')renderSelect();};
-  ws.onerror=function(){wsConnected=false;if(gameMode==='online')renderSelect();};
+  ws.onclose=function(){wsConnected=false;if(onlineStarted)goHome();renderSelectPage();};
+  ws.onerror=function(){wsConnected=false;renderSelectPage();};
 }
 function sendMsg(d){if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify(d))}
 function handleMsg(msg){
   switch(msg.type){
-    case 'connected':myId=msg.playerId;break;
-    case 'queued':isQueuing=true;renderSelect();break;
-    case 'matched':roomId=msg.roomId;mySide=msg.side;player2=msg.opponent.player||msg.opponent;cdOpp.textContent='VS '+player2.name;cdOverlay.classList.add('show');cdNum.textContent='3';break;
-    case 'jump_countdown':cdNum.textContent=msg.count>0?msg.count:'GO!';break;
-    case 'game_start':cdOverlay.classList.remove('show');startOnlineGame();break;
-    case 'state_sync':gameState=msg.state;break;
-    case 'score_update':if(gameState){gameState.sc=msg.score}break;
-    case 'possession_change':if(gameState){gameState.po=msg.poss}break;
-    case 'foul_called':if(gameState){gameState.ph='freethrow';gameState.fts=msg.shooter}break;
-    case 'game_over':showOnlineGameOver(msg);break;
-    case 'opponent_disconnected':alert('对手已断开！');goHome();break;
-    case 'rematch_start':gameState=null;goOverlay.classList.remove('show');cdOverlay.classList.add('show');cdNum.textContent='3';break;
+    case'connected':break;case'queued':isQueuing=true;renderSelectPage();break;
+    case'matched':roomId=msg.roomId;mySide=msg.side;oppData=msg.opponent.player||msg.opponent;
+      player2={name:oppData.name,teamColor:oppData.teamColor||'#e03030',num:oppData.num,teamAbbr:oppData.teamAbbr};$('cdOpp').textContent='VS '+player2.name;$('cdOverlay').classList.add('show');$('cdNum').textContent='3';break;
+    case'jump_countdown':$('cdNum').textContent=msg.count>0?msg.count:'GO!';break;
+    case'game_start':$('cdOverlay').classList.remove('show');startOnlineGame();break;
+    case'state_sync':gameState=msg.state;break;
+    case'score_update':if(gameState){gameState.sc=msg.score}break;
+    case'possession_change':if(gameState){gameState.po=msg.poss}break;
+    case'foul_called':if(gameState){gameState.ph='freethrow';gameState.fts=msg.shooter}break;
+    case'game_over':showOnlineGameOver(msg);break;
+    case'opponent_disconnected':alert('对手已断开！');goHome();break;
+    case'rematch_start':gameState=null;$('gameOverOverlay').classList.remove('show');$('cdOverlay').classList.add('show');$('cdNum').textContent='3';break;
   }
 }
-
-// ====== 选人页 ======
-function renderPlayerCard(p,label){
-  if(!p)return '<div class="pick"><div class="pick-head"><span class="lbl">'+label+'</span><span class="nm ph">选择球员</span></div></div>';
-  var h='<div class="pick"><div class="pick-head" style="background:'+p.teamColor+'"><span class="lbl">'+label+'</span><span class="nm">'+p.name+'</span><span class="tm">'+p.teamAbbr+' #'+p.num+'</span></div><div class="attrs-box">';
-  ATTR_KEYS.forEach(function(k,i){var v=p[k];
-    h+='<div class="attr-row"><span class="an">'+ATTR_NAMES[i]+'</span><div class="ab"><div style="width:'+v+'%;background:'+(v>70?'#0c6':v>40?'#fa0':'#f44')+'"></div></div><span class="av">'+v+'</span></div>';});
-  return h+'</div></div>';
+function doConn(){var addr=$('srvInp').value.trim();if(!addr)return;if(addr.indexOf('://')>0)addr=addr.split('://')[1];if(!addr.includes(':'))addr+=':3456';connectWS(addr)}
+// 在线游戏循环
+function startOnlineGame(){
+  onlineStarted=true;$('selectPage').style.display='none';$('gamePage').style.display='flex';
+  resizeCanvas();
+  if(gameLoop)clearInterval(gameLoop);
+  gameLoop=setInterval(function(){sendOnlineInput();renderOnlineGame();},33);
 }
-
-function renderSelect(){
-  var modeLabel=gameMode==='single'?'<span class="mode-tag single">单机模式</span>':'<span class="mode-tag online">联机模式</span>';
-  var h='<div class="s-header"><h2>选择球员 '+modeLabel+'</h2></div>';
-
-  if(gameMode==='online'){
-    var tag=wsConnected?'<span class="stag on">已连接</span>':'<span class="stag off">未连接</span>';
-    h+='<div class="conn-row"><input id="serverInp" placeholder="服务器地址" value="'+getAutoUrl().replace('ws','http')+'"><button onclick="doConn()">连接</button>'+tag+'</div>';
-  }
-
-  h+='<div class="versus">';
-  h+=renderPlayerCard(player1,'我方');
-  h+='<div class="vs-badge">VS</div>';
-  h+=renderPlayerCard(gameMode==='single'?player2:(isQueuing?player2:null),gameMode==='single'?'AI对手':'对手');
-  h+='</div>';
-
-  if(gameMode==='single'){
-    h+='<div class="s-hint">'+((player1&&player2)?'已选好双方球员':'为 '+(selectingFor===1?'我方':'AI对手')+' 选择球员')+'</div>';
-  }else{
-    h+='<div class="s-hint">'+(isQueuing?'🔍 匹配中...':(player1?(wsConnected?'点下方按钮开始匹配':'请先连接服务器'):'选择你的球员'))+'</div>';
-  }
-
-  h+='<div class="team-scroll">';
-  CBA_TEAMS.forEach(function(t){h+='<div class="t-chip'+(t.id===currentTeamId?' active':'')+'" onclick="pickTeam(\''+t.id+'\')" style="border-color:'+t.color+'">'+t.abbr+'</div>'});
-  h+='</div><div id="playerList">';
-  getPlayersByTeam(currentTeamId).forEach(function(p){
-    h+='<div class="p-card'+(p.id===selectedPid?' sel':'')+'" onclick="pickPlayer(\''+p.id+'\')" style="border-left:4px solid '+p.teamColor+'">';
-    h+='<div class="cl"><span class="num">#'+p.num+'</span><span class="name">'+p.name+'</span><span class="pos">'+p.pos+'</span></div>';
-    h+='<div class="ms">';ATTR_KEYS.forEach(function(k){h+='<span>'+k[0]+p[k]+'</span>'});h+='</div></div>';
+function sendOnlineInput(){if(!wsConnected||!gameState)return;sendMsg({type:'input',data:{action:'move',mx:engine?engine.offInput.mx:0,my:engine?engine.offInput.my:0}})}
+function renderOnlineGame(){
+  if(!ctx||!canvas||!gameState)return;
+  var w=canvas.width,h=canvas.height;
+  ctx.clearRect(0,0,w,h);
+  var s=gameState;
+  // 用临时engine渲染: 把server state注入engine
+  if(!engine)engine=new GameEngine(w,h);
+  engine.w=w;engine.h=h;engine.scale=Math.min(w/750,h/500);
+  engine.score=s.sc||[0,0];engine.poss=s.po!==undefined?s.po:0;
+  engine.phase=s.ph||'playing';engine.shotClockTimer=(24-(s.cl||24))*1000;
+  engine.p1=player1;engine.p2=player2||oppData||{name:'对手',teamColor:'#e03030',num:0};
+  engine.offEnergy=s.p1?+s.p1.e||100:100;engine.defEnergy=s.p2?+s.p2.e||100:100;
+  engine.shooting=s.sh||false;engine.shotPower=s.sp||0;
+  engine.shotReleased=false;engine.ballInAir=s.ba?+s.ba.ia||false:false;
+  engine.ball={x:engine._s(s.ba?+s.ba.x||375:375),y:engine._s(s.ba?+s.ba.y||340:340),r:engine._s(10),has:s.ba?+s.ba.ps!==false:true};
+  engine.off={x:engine._s(s.p1?+s.p1.x||375:375),y:engine._s(s.p1?+s.p1.y||380:380),r:engine._s(25)};
+  engine.def={x:engine._s(s.p2?+s.p2.x||375:375),y:engine._s(s.p2?+s.p2.y||120:120),r:engine._s(25)};
+  engine.needClearThree=s.nct||false;engine.clearThreeDone=s.ctd||false;
+  engine.blockAnim=0;engine.stealAnim=0;engine.driveAnim=0;engine.scoredAnim=s.san||0;
+  engine.foulCooldown=s.fcd?+s.fcd[mySide]||0:0;
+  engine.foulCooldown=s.fcd?(s.fcd[mySide]||0):0;
+  engine.msgTimer=s.ev&&s.ev.length>0?1500:0;engine.msg=s.ev&&s.ev.length>0?s.ev[s.ev.length-1]:'';
+  engine.shotResult=s.spt>0?{made:true,pts:s.spt}:null;
+  engine.ftShooter=s.fts!==undefined?s.fts:0;engine.ftMade=s.ftm||0;engine.ftCount=s.ftc||0;
+  engine.winner=s.winner!==undefined?s.winner:-1;engine.gameOver=s.ph==='gameover';
+  engine.phase=s.ph||'playing';
+  engine._drawCourt(ctx);engine._drawPlayers(ctx);engine._drawBall(ctx);engine._drawUI(ctx);
+}
+function showOnlineGameOver(msg){
+  if(gameLoop){clearInterval(gameLoop);gameLoop=null}onlineStarted=false;
+  var ov=$('gameOverOverlay');
+  var p1n=player1?player1.name:'我方',p2n=player2?(player2.name||'对手'):'对手';
+  ov.innerHTML='<div class="ov-box"><h2>'+msg.winner.name+' 获胜！</h2><div class="ov-score">'+msg.score[0]+' - '+msg.score[1]+'</div>'+
+    '<div class="ov-stat">'+p1n+': '+(msg.stats.p1?msg.stats.p1.pts:0)+'分 '+(msg.stats.p1?msg.stats.p1.reb||0:0)+'板</div>'+
+    '<div class="ov-stat">'+p2n+': '+(msg.stats.p2?msg.stats.p2.pts:0)+'分 '+(msg.stats.p2?msg.stats.p2.reb||0:0)+'板</div>'+
+    '<button class="ov-detail" onclick="rematchOnline()">再来一局</button><button class="ov-again" onclick="goHome()">返回首页</button></div>';
+  ov.classList.add('show');
+}
+function rematchOnline(){sendMsg({type:'rematch_request'});$('gameOverOverlay').classList.remove('show');gameState=null}
+// 重写goHome
+var _origGoHome=goHome;
+goHome=function(){
+  if(gameLoop){clearInterval(gameLoop);gameLoop=null}onlineStarted=false;gameState=null;engine=null;
+  isQueuing=false;if(wsConnected)sendMsg({type:'leave_queue'});
+  player1=null;player2=null;selectingFor=1;currentTeamId='liaoning';selectedPid='';
+  $('gamePage').style.display='none';$('gameOverOverlay').classList.remove('show');
+  $('cdOverlay').classList.remove('show');$('resultPage').style.display='none';
+  showModePage();
+};
+// 重写restartGame
+restartGame=function(){
+  if(GAME_MODE==='online'){$('gameOverOverlay').classList.remove('show');startOnlineGame();return;}
+  $('gameOverOverlay').classList.remove('show');
+  if(gameLoop)clearInterval(gameLoop);
+  engine=new GameEngine(canvas.width,canvas.height);engine.bgImage=bgImage;
+  engine.setPlayers(player1,player2);gameEnded=false;lastTime=performance.now();
+  gameLoop=setInterval(function(){var now=performance.now(),dt=now-lastTime;lastTime=now;engine.update(dt);ctx.clearRect(0,0,canvas.width,canvas.height);engine.render(ctx);if(engine.gameOver&&!gameEnded){gameEnded=true;clearInterval(gameLoop);var wn=engine.winner===0?player1.name:player2.name;var ov2=$('gameOverOverlay');ov2.innerHTML='<div class="ov-box"><h2>'+wn+' 获胜！</h2><div class="ov-score">'+engine.score[0]+' - '+engine.score[1]+'</div><div class="ov-stat">'+player1.name+': '+engine.stats.p1.pts+'分 '+engine.stats.p1.blk+'帽 '+engine.stats.p1.stl+'断</div><div class="ov-stat">'+player2.name+': '+engine.stats.p2.pts+'分 '+engine.stats.p2.blk+'帽 '+engine.stats.p2.stl+'断</div><button class="ov-detail" onclick="showResult()">查看详情</button><button class="ov-again" onclick="restartGame()">再来一局</button></div>';ov2.classList.add('show')}},16);
+};
+// 重写btnSteal/btnBlock/btnFoul以支持联机
+var _origBtnsInit=false;
+function initOnlineBtns(){
+  if(_origBtnsInit)return;_origBtnsInit=true;
+  var btns={btnDrive:'drive',btnSteal:'steal',btnBlock:'block'};
+  Object.keys(btns).forEach(function(id){var b=$(id);var act=btns[id];
+    b.addEventListener('touchstart',function(e){e.preventDefault();b.classList.add('active');if(GAME_MODE==='online'){sendMsg({type:'input',data:{action:act}})};if(GAME_MODE==='single'&&engine){if(act==='drive')engine.drive();else if(act==='steal')engine.steal();else if(act==='block')engine.block()};setTimeout(function(){b.classList.remove('active')},400)});
+    b.addEventListener('mousedown',function(){b.classList.add('active');if(GAME_MODE==='online'){sendMsg({type:'input',data:{action:act}})};if(GAME_MODE==='single'&&engine){if(act==='drive')engine.drive();else if(act==='steal')engine.steal();else if(act==='block')engine.block()};setTimeout(function(){b.classList.remove('active')},400)});
   });
-  h+='</div>';
+  // Foul button (new)
+  var fb=$('btnFoul');
+  if(fb){fb.addEventListener('touchstart',function(e){e.preventDefault();fb.classList.add('active');if(GAME_MODE==='online')sendMsg({type:'input',data:{action:'foul'}});if(GAME_MODE==='single'&&engine)engine.foul();setTimeout(function(){fb.classList.remove('active')},400)});
+  fb.addEventListener('mousedown',function(){fb.classList.add('active');if(GAME_MODE==='online')sendMsg({type:'input',data:{action:'foul'}});if(GAME_MODE==='single'&&engine)engine.foul();setTimeout(function(){fb.classList.remove('active')},400)})}
+  // Shoot button -支持联机
+  var sb=$('btnShoot'),sl=$('shootLabel');
+  sb.addEventListener('touchstart',function(e){e.preventDefault();sb.classList.add('active');sl.textContent='松手!';if(GAME_MODE==='online')sendMsg({type:'input',data:{action:'shoot_start'}});if(GAME_MODE==='single'&&engine)engine.startShoot()});
+  sb.addEventListener('touchend',function(e){e.preventDefault();sb.classList.remove('active');sl.textContent='投篮';if(GAME_MODE==='online')sendMsg({type:'input',data:{action:'shoot_release'}});if(GAME_MODE==='single'&&engine)engine.releaseShoot()});
+  sb.addEventListener('mousedown',function(){sb.classList.add('active');sl.textContent='松手!';if(GAME_MODE==='online')sendMsg({type:'input',data:{action:'shoot_start'}});if(GAME_MODE==='single'&&engine)engine.startShoot()});
+  sb.addEventListener('mouseup',function(){sb.classList.remove('active');sl.textContent='投篮';if(GAME_MODE==='online')sendMsg({type:'input',data:{action:'shoot_release'}});if(GAME_MODE==='single'&&engine)engine.releaseShoot()});
+}
+// 启动
+showModePage();
 
-  if(gameMode==='single'){
-    h+='<button id="startBtn" class="'+(player1&&player2?'ready':'')+'" onclick="showSettings()">'+(player1&&player2?'选择比赛规则':'请选择双方球员')+'</button>';
-  }else{
-    if(isQueuing){h+='<button id="startBtn" class="ready" onclick="cancelQ()">取消排队</button>'}
-    else{h+='<button id="startBtn" class="'+(player1&&wsConnected?'ready':'')+'" onclick="joinQ()">开始匹配</button>'}
-  }
-  h+='<div class="back-row"><button onclick="showModePage()">← 返回模式选择</button></div>';
-  selectPage.innerHTML=h;
+// ==================== CBA数据 ====================
+const CBA_TEAMS=[{id:'liaoning',name:'辽宁本钢',abbr:'辽宁',color:'#c8102e',players:[{id:'zhaojiwei',name:'赵继伟',num:3,pos:'PG',shooting:82,speed:85,strength:65,defense:78,dribbling:92,jumping:68},{id:'guoailun',name:'郭艾伦',num:13,pos:'SG',shooting:78,speed:92,strength:72,defense:75,dribbling:95,jumping:75},{id:'zhangzhenlin',name:'张镇麟',num:77,pos:'SF',shooting:80,speed:88,strength:80,defense:82,dribbling:78,jumping:90},{id:'fugao',name:'付豪',num:1,pos:'PF',shooting:76,speed:72,strength:85,defense:70,dribbling:68,jumping:72},{id:'hanjun',name:'韩德君',num:55,pos:'C',shooting:65,speed:50,strength:95,defense:78,dribbling:45,jumping:45},{id:'lixiaoxu',name:'李晓旭',num:22,pos:'PF',shooting:70,speed:65,strength:88,defense:82,dribbling:60,jumping:62},{id:'congmingchen',name:'丛明晨',num:10,pos:'SF',shooting:78,speed:76,strength:68,defense:70,dribbling:72,jumping:74},{id:'yanzhongqi',name:'鄢手骐',num:36,pos:'PG',shooting:68,speed:80,strength:62,defense:72,dribbling:78,jumping:70},{id:'morland',name:'莫兰德',num:25,pos:'C',shooting:55,speed:65,strength:92,defense:90,dribbling:50,jumping:78},{id:'fogg',name:'弗格',num:4,pos:'SG',shooting:90,speed:86,strength:75,defense:82,dribbling:88,jumping:76},{id:'liuhuyi',name:'刘雁宇',num:17,pos:'C',shooting:60,speed:62,strength:80,defense:68,dribbling:48,jumping:70},{id:'yushuchen',name:'俞泽辰',num:27,pos:'SF',shooting:72,speed:74,strength:70,defense:65,dribbling:68,jumping:76}]},{id:'guangdong',name:'广东东阳光',abbr:'广东',color:'#003399',players:[{id:'humingxuan',name:'胡明轩',num:3,pos:'SG',shooting:84,speed:86,strength:72,defense:80,dribbling:85,jumping:78},{id:'xujie',name:'徐杰',num:2,pos:'PG',shooting:82,speed:84,strength:58,defense:74,dribbling:90,jumping:66},{id:'zhourui',name:'周琦',num:26,pos:'C',shooting:72,speed:70,strength:88,defense:92,dribbling:55,jumping:85},{id:'renjunfei',name:'任骏飞',num:20,pos:'PF',shooting:74,speed:68,strength:82,defense:78,dribbling:65,jumping:68},{id:'duzhunwang',name:'杜润旺',num:18,pos:'PF',shooting:80,speed:66,strength:78,defense:65,dribbling:62,jumping:64},{id:'zhanghaoji',name:'张皓嘉',num:25,pos:'SF',shooting:72,speed:72,strength:74,defense:68,dribbling:70,jumping:72},{id:'waters',name:'沃特斯',num:1,pos:'PG',shooting:85,speed:94,strength:62,defense:72,dribbling:95,jumping:80},{id:'weems',name:'威姆斯',num:13,pos:'SF',shooting:78,speed:82,strength:80,defense:75,dribbling:82,jumping:82},{id:'zhangwenji',name:'张文逸',num:14,pos:'SG',shooting:74,speed:76,strength:65,defense:66,dribbling:74,jumping:72},{id:'huangmingyi',name:'黄明依',num:6,pos:'SF',shooting:66,speed:78,strength:70,defense:68,dribbling:66,jumping:78},{id:'zhangmingchi',name:'张明池',num:27,pos:'C',shooting:58,speed:58,strength:84,defense:70,dribbling:42,jumping:60},{id:'xuxin',name:'徐昕',num:19,pos:'C',shooting:56,speed:55,strength:82,defense:72,dribbling:40,jumping:65}]},{id:'xinjiang',name:'新疆伊力特',abbr:'新疆',color:'#0055a5',players:[{id:'abdusalam',name:'阿不都沙拉木',num:23,pos:'PF',shooting:82,speed:76,strength:84,defense:80,dribbling:72,jumping:76},{id:'qilin',name:'齐麟',num:11,pos:'SF',shooting:84,speed:82,strength:74,defense:72,dribbling:76,jumping:85},{id:'zhaorui',name:'赵睿',num:8,pos:'SG',shooting:78,speed:86,strength:80,defense:82,dribbling:86,jumping:78},{id:'yudchangdong',name:'于德豪',num:6,pos:'PG',shooting:65,speed:82,strength:68,defense:84,dribbling:78,jumping:68},{id:'luttbulah',name:'鲁吐布拉',num:14,pos:'C',shooting:58,speed:60,strength:88,defense:75,dribbling:42,jumping:72},{id:'zhuan',name:'朱旭航',num:22,pos:'PF',shooting:76,speed:70,strength:80,defense:74,dribbling:65,jumping:74},{id:'tangcaiyu',name:'唐才育',num:5,pos:'SF',shooting:74,speed:74,strength:68,defense:68,dribbling:70,jumping:72},{id:'huangrongqi',name:'黄荣奇',num:4,pos:'PG',shooting:68,speed:84,strength:66,defense:70,dribbling:80,jumping:76},{id:'jones',name:'多米尼克·琼斯',num:55,pos:'SG',shooting:80,speed:88,strength:85,defense:78,dribbling:90,jumping:82},{id:'wuguanxi',name:'吴冠希',num:9,pos:'C',shooting:62,speed:62,strength:86,defense:80,dribbling:48,jumping:70},{id:'xirreli',name:'西热力江',num:7,pos:'SG',shooting:76,speed:72,strength:74,defense:76,dribbling:74,jumping:66},{id:'liyiyang',name:'李炎哲',num:13,pos:'C',shooting:56,speed:52,strength:92,defense:78,dribbling:38,jumping:55}]},{id:'zhejiang_chouzhou',name:'浙江稠州金租',abbr:'浙江',color:'#b22222',players:[{id:'wuqiang',name:'吴前',num:33,pos:'SG',shooting:92,speed:84,strength:68,defense:72,dribbling:85,jumping:70},{id:'chengpeng',name:'程帅澎',num:6,pos:'SG',shooting:80,speed:82,strength:72,defense:78,dribbling:80,jumping:76},{id:'liuyize',name:'刘泽一',num:10,pos:'PF',shooting:72,speed:74,strength:82,defense:76,dribbling:66,jumping:74},{id:'wangyibo',name:'王奕博',num:15,pos:'PG',shooting:70,speed:86,strength:62,defense:74,dribbling:84,jumping:70},{id:'yujiahao',name:'余嘉豪',num:11,pos:'C',shooting:68,speed:55,strength:90,defense:82,dribbling:42,jumping:62},{id:'luzhouwenbo',name:'陆文博',num:8,pos:'SF',shooting:76,speed:78,strength:70,defense:76,dribbling:70,jumping:78},{id:'gaily',name:'盖利',num:3,pos:'SF',shooting:78,speed:86,strength:78,defense:82,dribbling:80,jumping:84},{id:'perry',name:'佩里',num:0,pos:'PF',shooting:74,speed:72,strength:86,defense:72,dribbling:65,jumping:76},{id:'linxiaotian',name:'林孝天',num:5,pos:'PG',shooting:66,speed:82,strength:60,defense:68,dribbling:78,jumping:72},{id:'wangzilu',name:'王子路',num:12,pos:'PF',shooting:68,speed:70,strength:78,defense:72,dribbling:62,jumping:70}]},{id:'guangsha',name:'浙江广厦雄狮',abbr:'广厦',color:'#f5a623',players:[{id:'sunminghui',name:'孙铭徽',num:17,pos:'PG',shooting:80,speed:90,strength:74,defense:82,dribbling:92,jumping:80},{id:'huzhinqiu',name:'胡金秋',num:21,pos:'PF',shooting:86,speed:74,strength:84,defense:80,dribbling:68,jumping:76},{id:'zhaoyanhao',name:'赵岩昊',num:25,pos:'SG',shooting:82,speed:84,strength:65,defense:72,dribbling:80,jumping:74},{id:'zhujunlong',name:'朱俊龙',num:10,pos:'SF',shooting:74,speed:78,strength:76,defense:82,dribbling:72,jumping:80},{id:'xuzhonghao',name:'许钟豪',num:24,pos:'C',shooting:60,speed:50,strength:90,defense:78,dribbling:40,jumping:52},{id:'okafo',name:'奥卡福',num:15,pos:'C',shooting:72,speed:65,strength:88,defense:82,dribbling:52,jumping:74},{id:'weizhe',name:'威哲',num:2,pos:'PG',shooting:74,speed:82,strength:66,defense:70,dribbling:86,jumping:72},{id:'lijinglong',name:'李金效',num:13,pos:'SF',shooting:70,speed:70,strength:72,defense:68,dribbling:66,jumping:68},{id:'wuxiao',name:'吴骁',num:5,pos:'PF',shooting:62,speed:68,strength:82,defense:72,dribbling:55,jumping:68},{id:'duanliqian',name:'段立谦',num:3,pos:'PG',shooting:64,speed:80,strength:58,defense:65,dribbling:76,jumping:68}]},{id:'shanghai',name:'上海久事',abbr:'上海',color:'#1e40af',players:[{id:'wangzhelin',name:'王哲林',num:94,pos:'C',shooting:76,speed:62,strength:88,defense:78,dribbling:52,jumping:65},{id:'liutricen',name:'刘铮',num:5,pos:'SG',shooting:78,speed:80,strength:68,defense:84,dribbling:78,jumping:72},{id:'luohandichen',name:'罗汉琛',num:33,pos:'PG',shooting:72,speed:84,strength:62,defense:70,dribbling:82,jumping:66},{id:'renjewei',name:'任骏威',num:9,pos:'PF',shooting:74,speed:68,strength:80,defense:74,dribbling:64,jumping:64},{id:'guohaowen',name:'郭昊文',num:7,pos:'SG',shooting:72,speed:88,strength:74,defense:66,dribbling:82,jumping:84},{id:'lihongquan',name:'李弘权',num:14,pos:'SF',shooting:74,speed:76,strength:78,defense:72,dribbling:70,jumping:78},{id:'bledsoe',name:'布莱德索',num:2,pos:'PG',shooting:78,speed:90,strength:82,defense:80,dribbling:92,jumping:82},{id:'franklin',name:'富兰克林',num:1,pos:'SG',shooting:82,speed:84,strength:78,defense:74,dribbling:86,jumping:78},{id:'lipeng',name:'李鹏',num:23,pos:'PF',shooting:66,speed:68,strength:78,defense:68,dribbling:60,jumping:66},{id:'yanpengfei',name:'闫鹏飞',num:10,pos:'C',shooting:64,speed:58,strength:84,defense:72,dribbling:45,jumping:58}]},{id:'beijing_shougang',name:'北京北汽',abbr:'北京',color:'#0066cc',players:[{id:'zengfanbo',name:'曾凡博',num:1,pos:'SF',shooting:82,speed:84,strength:72,defense:78,dribbling:74,jumping:90},{id:'fangshou',name:'方硕',num:8,pos:'SG',shooting:80,speed:78,strength:70,defense:72,dribbling:82,jumping:68},{id:'zhairan',name:'翟晓川',num:20,pos:'PF',shooting:76,speed:74,strength:82,defense:80,dribbling:68,jumping:76},{id:'fanzi',name:'范子铭',num:17,pos:'C',shooting:68,speed:62,strength:86,defense:76,dribbling:48,jumping:62},{id:'tianyouxiang',name:'田宇翔',num:25,pos:'PG',shooting:68,speed:82,strength:64,defense:74,dribbling:80,jumping:68},{id:'leaf',name:'利夫',num:2,pos:'PF',shooting:72,speed:74,strength:82,defense:78,dribbling:66,jumping:80},{id:'zhangcairren',name:'张才仁',num:16,pos:'SG',shooting:72,speed:74,strength:68,defense:68,dribbling:72,jumping:70},{id:'leimeng',name:'雷蒙',num:9,pos:'SF',shooting:74,speed:72,strength:76,defense:72,dribbling:68,jumping:68},{id:'qiulin',name:'邱天',num:19,pos:'C',shooting:56,speed:58,strength:90,defense:74,dribbling:40,jumping:62},{id:'johnson',name:'尼克·约翰逊',num:0,pos:'PG',shooting:76,speed:88,strength:74,defense:76,dribbling:88,jumping:80}]},{id:'beijing_ent',name:'北京控股',abbr:'北控',color:'#8b0000',players:[{id:'zhangfan',name:'张帆',num:6,pos:'SG',shooting:84,speed:80,strength:70,defense:72,dribbling:78,jumping:70},{id:'zozotonglin',name:'邹雨宸',num:10,pos:'C',shooting:68,speed:62,strength:88,defense:80,dribbling:48,jumping:72},{id:'liuleather',name:'廖三宁',num:2,pos:'PG',shooting:72,speed:86,strength:66,defense:70,dribbling:88,jumping:76},{id:'yuchangdong2',name:'俞长栋',num:7,pos:'PF',shooting:72,speed:68,strength:82,defense:76,dribbling:62,jumping:66},{id:'wangshaojie',name:'王少杰',num:14,pos:'PF',shooting:70,speed:74,strength:78,defense:74,dribbling:64,jumping:78},{id:'mengzokai',name:'孟子凯',num:1,pos:'SF',shooting:74,speed:74,strength:72,defense:68,dribbling:70,jumping:74},{id:'lining',name:'李宁',num:3,pos:'PG',shooting:66,speed:82,strength:60,defense:68,dribbling:80,jumping:68},{id:'shenjie',name:'沈梓捷',num:11,pos:'C',shooting:64,speed:68,strength:86,defense:82,dribbling:48,jumping:80},{id:'field',name:'费尔德',num:5,pos:'PG',shooting:80,speed:92,strength:72,defense:74,dribbling:92,jumping:82},{id:'jinxin',name:'金鑫',num:8,pos:'SF',shooting:70,speed:72,strength:70,defense:66,dribbling:68,jumping:70}]},{id:'shandong',name:'山东高速',abbr:'山东',color:'#e60012',players:[{id:'gaosyan',name:'高诗岩',num:0,pos:'PG',shooting:72,speed:84,strength:68,defense:84,dribbling:84,jumping:72},{id:'taohanlin',name:'陶汉林',num:20,pos:'C',shooting:65,speed:58,strength:94,defense:78,dribbling:42,jumping:60},{id:'chenpeidong',name:'陈培东',num:44,pos:'SG',shooting:76,speed:82,strength:68,defense:70,dribbling:78,jumping:74},{id:'jiachengyi',name:'贾诚',num:23,pos:'PF',shooting:72,speed:68,strength:84,defense:72,dribbling:60,jumping:68},{id:'jiaoclong',name:'焦海龙',num:4,pos:'PF',shooting:70,speed:70,strength:80,defense:74,dribbling:62,jumping:72},{id:'liuyi2',name:'刘毅',num:7,pos:'SF',shooting:74,speed:76,strength:72,defense:70,dribbling:72,jumping:74},{id:'gailiwo',name:'吉伦沃特',num:33,pos:'PF',shooting:78,speed:74,strength:86,defense:74,dribbling:68,jumping:76},{id:'hanslin',name:'哈德森',num:14,pos:'SG',shooting:88,speed:82,strength:76,defense:74,dribbling:84,jumping:74},{id:'qiaoWenjian',name:'乔文瀚',num:10,pos:'SG',shooting:70,speed:72,strength:66,defense:66,dribbling:72,jumping:68},{id:'zhanghiyu',name:'张辉',num:5,pos:'PG',shooting:66,speed:80,strength:64,defense:72,dribbling:78,jumping:68}]},{id:'guangzhou',name:'广州龙狮',abbr:'广州',color:'#e20613',players:[{id:'chenyingjun',name:'陈盈骏',num:9,pos:'PG',shooting:78,speed:84,strength:70,defense:76,dribbling:88,jumping:72},{id:'zhumingzhen',name:'祝铭震',num:7,pos:'SF',shooting:76,speed:78,strength:78,defense:78,dribbling:72,jumping:76},{id:'cuijinyi',name:'崔永熙',num:8,pos:'SG',shooting:78,speed:82,strength:74,defense:76,dribbling:78,jumping:84},{id:'jiabumingru',name:'贾明儒',num:3,pos:'PG',shooting:70,speed:80,strength:62,defense:66,dribbling:82,jumping:66},{id:'guoKaifa',name:'郭凯',num:14,pos:'PF',shooting:68,speed:68,strength:82,defense:74,dribbling:58,jumping:66},{id:'moore',name:'摩尔',num:4,pos:'SG',shooting:84,speed:86,strength:72,defense:72,dribbling:84,jumping:76},{id:'campbell',name:'坎普',num:22,pos:'PF',shooting:70,speed:72,strength:84,defense:74,dribbling:62,jumping:74},{id:'liujiangcheng',name:'刘金成',num:11,pos:'SF',shooting:66,speed:74,strength:68,defense:68,dribbling:66,jumping:72},{id:'wangjunbo',name:'王泉博',num:5,pos:'PF',shooting:64,speed:66,strength:76,defense:70,dribbling:56,jumping:68}]},{id:'shenzhen',name:'深圳马可波罗',abbr:'深圳',color:'#c41230',players:[{id:'hexi',name:'贺希宁',num:3,pos:'SG',shooting:80,speed:82,strength:76,defense:80,dribbling:80,jumping:78},{id:'gumingyang',name:'顾全',num:12,pos:'SF',shooting:82,speed:70,strength:78,defense:70,dribbling:68,jumping:66},{id:'baijintian',name:'白昊天',num:2,pos:'PG',shooting:70,speed:82,strength:66,defense:72,dribbling:82,jumping:70},{id:'zhoupeng',name:'周鹏',num:9,pos:'PF',shooting:76,speed:68,strength:80,defense:85,dribbling:66,jumping:68},{id:'sunhuoqin',name:'孙浩钦',num:5,pos:'SG',shooting:72,speed:80,strength:66,defense:68,dribbling:76,jumping:74},{id:'salinger',name:'萨林杰',num:0,pos:'PF',shooting:78,speed:72,strength:90,defense:82,dribbling:68,jumping:74},{id:'wuzhihan',name:'武子涵',num:6,pos:'SF',shooting:68,speed:74,strength:70,defense:66,dribbling:66,jumping:72},{id:'lihongyu',name:'李宏宇',num:1,pos:'PG',shooting:64,speed:80,strength:58,defense:64,dribbling:78,jumping:68},{id:'luzhouwen',name:'卢鹏羽',num:8,pos:'SF',shooting:70,speed:72,strength:68,defense:68,dribbling:68,jumping:70}]},{id:'qingdao',name:'青岛国信海天',abbr:'青岛',color:'#004c97',players:[{id:'yanghanshen',name:'杨瀚森',num:15,pos:'C',shooting:68,speed:60,strength:84,defense:86,dribbling:58,jumping:66},{id:'wangrh',name:'王睿泽',num:2,pos:'SF',shooting:80,speed:78,strength:76,defense:74,dribbling:74,jumping:78},{id:'zhaojiayi2',name:'赵嘉义',num:33,pos:'PF',shooting:74,speed:72,strength:78,defense:72,dribbling:66,jumping:74},{id:'dangmuyi',name:'段昂君',num:3,pos:'PG',shooting:70,speed:84,strength:64,defense:68,dribbling:82,jumping:72},{id:'pomurray',name:'鲍威尔',num:13,pos:'SG',shooting:84,speed:86,strength:74,defense:74,dribbling:84,jumping:78},{id:'michl',name:'米切尔',num:1,pos:'PF',shooting:70,speed:74,strength:86,defense:78,dribbling:62,jumping:80},{id:'fanzhu',name:'范汇鎏',num:6,pos:'SG',shooting:72,speed:76,strength:68,defense:68,dribbling:72,jumping:70},{id:'lijiah',name:'纪卓',num:5,pos:'PF',shooting:68,speed:68,strength:80,defense:72,dribbling:58,jumping:66},{id:'yangjinmeng',name:'杨金蒙',num:7,pos:'PG',shooting:66,speed:78,strength:62,defense:70,dribbling:76,jumping:66},{id:'ouyanghang',name:'欧俊炫',num:9,pos:'C',shooting:60,speed:62,strength:82,defense:70,dribbling:44,jumping:68}]},{id:'fujian',name:'福建浔兴',abbr:'福建',color:'#005eb8',players:[{id:'chenlinjian',name:'陈林坚',num:15,pos:'SF',shooting:88,speed:76,strength:72,defense:66,dribbling:72,jumping:72},{id:'liyiyang2',name:'黎伊扬',num:3,pos:'PG',shooting:68,speed:86,strength:60,defense:72,dribbling:88,jumping:68},{id:'zhuangzhan',name:'黄毅超',num:6,pos:'SG',shooting:74,speed:80,strength:68,defense:68,dribbling:74,jumping:74},{id:'wanghuayi',name:'王化一',num:9,pos:'PF',shooting:66,speed:66,strength:80,defense:68,dribbling:56,jumping:64},{id:'suimran',name:'孙岩松',num:11,pos:'C',shooting:60,speed:58,strength:84,defense:72,dribbling:42,jumping:60},{id:'young',name:'约瑟夫·杨',num:1,pos:'SG',shooting:86,speed:90,strength:72,defense:66,dribbling:90,jumping:82},{id:'makar',name:'梅克',num:5,pos:'C',shooting:66,speed:68,strength:84,defense:82,dribbling:50,jumping:78},{id:'zenglingxuan',name:'曾令煊',num:7,pos:'SG',shooting:70,speed:74,strength:66,defense:64,dribbling:70,jumping:68},{id:'zhangxun',name:'张旭',num:10,pos:'SF',shooting:68,speed:72,strength:70,defense:66,dribbling:66,jumping:70},{id:'lifuzheng',name:'李富政',num:2,pos:'PG',shooting:62,speed:78,strength:58,defense:64,dribbling:76,jumping:66}]},{id:'jiangsu',name:'江苏肯帝亚',abbr:'江苏',color:'#003d7c',players:[{id:'liutao',name:'刘志轩',num:7,pos:'SG',shooting:78,speed:72,strength:72,defense:74,dribbling:76,jumping:64},{id:'cuixialong',name:'崔晓龙',num:5,pos:'PG',shooting:70,speed:84,strength:68,defense:70,dribbling:82,jumping:72},{id:'majianhao',name:'马建豪',num:1,pos:'SF',shooting:72,speed:76,strength:68,defense:66,dribbling:70,jumping:74},{id:'blakeney',name:'布莱克尼',num:2,pos:'SG',shooting:88,speed:88,strength:76,defense:70,dribbling:86,jumping:82},{id:'wulong',name:'吴龙',num:4,pos:'PG',shooting:64,speed:80,strength:58,defense:64,dribbling:78,jumping:66},{id:'xumengxun',name:'许梦君',num:3,pos:'SF',shooting:68,speed:72,strength:68,defense:66,dribbling:66,jumping:68},{id:'zhaoxuzhou',name:'赵旭洲',num:10,pos:'C',shooting:56,speed:55,strength:84,defense:72,dribbling:38,jumping:58},{id:'zhangxiwei',name:'张稀伟',num:6,pos:'PF',shooting:62,speed:64,strength:78,defense:68,dribbling:54,jumping:62}]},{id:'tongxi',name:'南京头排苏酒',abbr:'南京',color:'#002b5c',players:[{id:'linwei',name:'林葳',num:23,pos:'SG',shooting:86,speed:84,strength:70,defense:68,dribbling:80,jumping:78},{id:'wanglanjin',name:'王岚嵚',num:8,pos:'PG',shooting:74,speed:86,strength:64,defense:72,dribbling:88,jumping:70},{id:'bryant',name:'布莱恩特',num:0,pos:'PF',shooting:72,speed:74,strength:84,defense:78,dribbling:64,jumping:80},{id:'zengfanri',name:'曾繁日',num:15,pos:'C',shooting:58,speed:60,strength:86,defense:74,dribbling:42,jumping:64},{id:'zhaobaozhen',name:'赵柏清',num:13,pos:'PF',shooting:74,speed:70,strength:80,defense:70,dribbling:62,jumping:72},{id:'wuTingjia',name:'邬挺嘉',num:4,pos:'SG',shooting:72,speed:74,strength:64,defense:66,dribbling:72,jumping:66},{id:'liuhang',name:'刘航',num:7,pos:'SF',shooting:66,speed:74,strength:70,defense:66,dribbling:66,jumping:70},{id:'blakeney2',name:'布莱克尼',num:2,pos:'SG',shooting:88,speed:88,strength:76,defense:70,dribbling:86,jumping:82},{id:'wangrui',name:'王睿',num:10,pos:'PF',shooting:64,speed:66,strength:76,defense:68,dribbling:56,jumping:66},{id:'yanghaoyu',name:'杨皓宇',num:5,pos:'PG',shooting:62,speed:80,strength:58,defense:64,dribbling:76,jumping:68}]},{id:'jilin',name:'吉林九台农商',abbr:'吉林',color:'#c8102e',players:[{id:'jiangweize',name:'姜伟泽',num:13,pos:'SG',shooting:88,speed:84,strength:66,defense:68,dribbling:82,jumping:72},{id:'jiangyuxing',name:'姜宇星',num:5,pos:'SF',shooting:76,speed:82,strength:78,defense:76,dribbling:78,jumping:80},{id:'lidong',name:'李安',num:12,pos:'C',shooting:64,speed:58,strength:86,defense:76,dribbling:44,jumping:60},{id:'cuijinming',name:'崔晋铭',num:3,pos:'PG',shooting:72,speed:80,strength:66,defense:72,dribbling:82,jumping:68},{id:'zhongChen',name:'钟诚',num:21,pos:'PF',shooting:70,speed:64,strength:84,defense:78,dribbling:58,jumping:62},{id:'daixuanbo',name:'代怀博',num:6,pos:'PF',shooting:74,speed:68,strength:78,defense:68,dribbling:60,jumping:68},{id:'junior',name:'琼斯',num:55,pos:'SG',shooting:80,speed:88,strength:84,defense:78,dribbling:90,jumping:82},{id:'liujiantao',name:'刘天意',num:1,pos:'SF',shooting:68,speed:74,strength:68,defense:66,dribbling:68,jumping:70},{id:'wangzixu',name:'王梓旭',num:8,pos:'PG',shooting:64,speed:78,strength:60,defense:66,dribbling:76,jumping:66},{id:'dinghaoran',name:'丁浩然',num:9,pos:'PF',shooting:62,speed:66,strength:76,defense:66,dribbling:54,jumping:64}]},{id:'tianjin',name:'天津先行者',abbr:'天津',color:'#003893',players:[{id:'linqian',name:'林庭谦',num:0,pos:'PG',shooting:78,speed:86,strength:66,defense:74,dribbling:88,jumping:74},{id:'shideshuai',name:'时德帅',num:10,pos:'PF',shooting:74,speed:72,strength:80,defense:74,dribbling:64,jumping:72},{id:'terry',name:'田雨',num:7,pos:'SF',shooting:76,speed:74,strength:72,defense:68,dribbling:70,jumping:72},{id:'desau',name:'孟子凯',num:1,pos:'PF',shooting:72,speed:72,strength:76,defense:68,dribbling:62,jumping:72},{id:'dushao',name:'杜思远',num:2,pos:'C',shooting:60,speed:58,strength:84,defense:72,dribbling:42,jumping:60},{id:'james',name:'大卫·詹姆斯',num:31,pos:'PF',shooting:76,speed:78,strength:86,defense:80,dribbling:68,jumping:82},{id:'liyizhen',name:'李荣培',num:5,pos:'SG',shooting:72,speed:76,strength:68,defense:68,dribbling:74,jumping:70},{id:'guanderen',name:'谷泽浴',num:3,pos:'PG',shooting:66,speed:82,strength:60,defense:66,dribbling:80,jumping:68},{id:'zhangyunmeng',name:'张云梦',num:6,pos:'SF',shooting:68,speed:74,strength:68,defense:66,dribbling:68,jumping:70},{id:'lairongpei',name:'赖俊豪',num:9,pos:'C',shooting:58,speed:60,strength:82,defense:70,dribbling:40,jumping:64}]},{id:'sichuan',name:'四川锦城',abbr:'四川',color:'#003d7c',players:[{id:'zuolian',name:'左朕年',num:13,pos:'SF',shooting:74,speed:74,strength:76,defense:68,dribbling:68,jumping:74},{id:'hanyu',name:'韩硕',num:33,pos:'PG',shooting:72,speed:72,strength:66,defense:74,dribbling:80,jumping:62},{id:'jinganyi',name:'景菡一',num:1,pos:'SG',shooting:72,speed:78,strength:70,defense:68,dribbling:74,jumping:74},{id:'zhangdayu',name:'张大宇',num:15,pos:'C',shooting:62,speed:58,strength:84,defense:74,dribbling:44,jumping:60},{id:'suduo',name:'苏若禹',num:7,pos:'PF',shooting:64,speed:64,strength:82,defense:70,dribbling:52,jumping:62},{id:'gordon',name:'高登',num:2,pos:'SG',shooting:84,speed:88,strength:74,defense:68,dribbling:86,jumping:78},{id:'xufeng',name:'卢艺文',num:11,pos:'SF',shooting:68,speed:72,strength:68,defense:64,dribbling:66,jumping:68},{id:'mengtianyi',name:'孟天艺',num:5,pos:'PF',shooting:66,speed:68,strength:76,defense:66,dribbling:56,jumping:66},{id:'yuxiaoyong',name:'于枭永',num:8,pos:'PG',shooting:64,speed:80,strength:58,defense:66,dribbling:78,jumping:68},{id:'wangxinkai',name:'王薪凯',num:6,pos:'SG',shooting:70,speed:72,strength:64,defense:62,dribbling:68,jumping:68}]},{id:'ningbo',name:'宁波町渥',abbr:'宁波',color:'#0066cc',players:[{id:'wangzhigang',name:'王治郅之子',num:3,pos:'PG',shooting:66,speed:80,strength:60,defense:66,dribbling:78,jumping:68},{id:'liyu',name:'李原宇',num:1,pos:'PF',shooting:68,speed:64,strength:82,defense:70,dribbling:54,jumping:62},{id:'wangchen',name:'王成',num:5,pos:'SF',shooting:68,speed:72,strength:70,defense:66,dribbling:66,jumping:70},{id:'zhangbiaa',name:'张彪',num:7,pos:'PF',shooting:66,speed:66,strength:78,defense:68,dribbling:56,jumping:64},{id:'ninghongyu',name:'宁鸿宇',num:9,pos:'C',shooting:58,speed:56,strength:84,defense:72,dribbling:40,jumping:58},{id:'mitch',name:'米切尔',num:2,pos:'SG',shooting:76,speed:82,strength:74,defense:72,dribbling:80,jumping:76},{id:'jiangshuai',name:'姜帅',num:4,pos:'PG',shooting:62,speed:78,strength:58,defense:64,dribbling:76,jumping:66},{id:'wangxiang',name:'王向彬',num:6,pos:'SG',shooting:64,speed:72,strength:64,defense:64,dribbling:68,jumping:68},{id:'wangkun',name:'王坤',num:8,pos:'SF',shooting:66,speed:70,strength:68,defense:64,dribbling:64,jumping:68},{id:'maxiaolong',name:'马晓龙',num:10,pos:'C',shooting:54,speed:54,strength:82,defense:68,dribbling:38,jumping:56}]}];
+
+const ATTR_NAMES = ['投篮','速度','力量','防守','控球','弹跳'];
+const ATTR_KEYS = ['shooting','speed','strength','defense','dribbling','jumping'];
+
+// ==================== 工具函数 ====================
+function getAllPlayers(){
+  const a=[];
+  CBA_TEAMS.forEach(t=>t.players.forEach(p=>a.push({...p,teamId:t.id,teamName:t.name,teamAbbr:t.abbr,teamColor:t.color})));
+  return a;
+}
+function getPlayersByTeam(id){
+  const t=CBA_TEAMS.find(t=>t.id===id);
+  return t?t.players.map(p=>({...p,teamId:t.id,teamName:t.name,teamAbbr:t.abbr,teamColor:t.color})):[];
 }
 
-function pickTeam(id){currentTeamId=id;selectedPid='';renderSelect()}
-function pickPlayer(pid){
-  var pl=getPlayersByTeam(currentTeamId);var p=pl.find(function(x){return x.id===pid});if(!p)return;
-  selectedPid=pid;
-  if(gameMode==='single'){
-    if(selectingFor===1){player1=p;selectingFor=2;var nt=CBA_TEAMS.find(function(t){return t.id!==p.teamId})||CBA_TEAMS[0];currentTeamId=nt.id;selectedPid='';renderSelect()}
-    else{player2=p;selectingFor=1;renderSelect()}
-  }else{player1=p;renderSelect()}
-}
-function doConn(){var addr=$('serverInp').value.trim();if(!addr)return;if(addr.indexOf('://')>0)addr=addr.split('://')[1];if(!addr.includes(':'))addr+=':3456';connectWS(addr)}
-function joinQ(){if(!player1||!wsConnected)return;sendMsg({type:'join_queue',name:player1.name,player:{id:player1.id,name:player1.name,num:player1.num,pos:player1.pos,shooting:player1.shooting,speed:player1.speed,strength:player1.strength,defense:player1.defense,dribbling:player1.dribbling,jumping:player1.jumping,teamColor:player1.teamColor,teamAbbr:player1.teamAbbr}});isQueuing=true;renderSelect()}
-function cancelQ(){sendMsg({type:'leave_queue'});isQueuing=false;renderSelect()}
-
-// ====== 比赛设置页 ======
-function showSettings(){
-  selectPage.style.display='none';
-  var sp=$('settingsPage');sp.style.display='flex';
-  var gt=gameSettings.gameType, gtime=gameSettings.gameTime, tgt=gameSettings.targetScore;
-  var times=[1,2,3,5,10], targets=[7,11,15,21];
-  var h='<h2>⚙ 比赛规则</h2>';
-  h+='<div class="set-card"><h3>比赛模式</h3><div class="set-row">';
-  h+='<div class="set-opt'+(gt==='endless'?' sel':'')+'" onclick="setGT(\'endless\')">⏱ 无尽模式<div style="font-size:10px;opacity:.6">时间耗完分高者胜</div></div>';
-  h+='<div class="set-opt'+(gt==='target'?' sel':'')+'" onclick="setGT(\'target\')">🎯 目标分数<div style="font-size:10px;opacity:.6">先达标或时间到</div></div>';
-  h+='</div></div>';
-  h+='<div class="set-card"><h3>比赛时间</h3><div class="set-label">'+gtime+' 分钟</div><div class="set-row">';
-  times.forEach(function(t){h+='<div class="set-opt'+(gtime===t?' sel':'')+'" onclick="setTime('+t+')">'+t+'分钟</div>'});h+='</div></div>';
-  if(gt==='target'){
-    h+='<div class="set-card"><h3>目标分数</h3><div class="set-label">'+tgt+' 分(需赢2分)</div><div class="set-row">';
-    targets.forEach(function(t){h+='<div class="set-opt'+(tgt===t?' sel':'')+'" onclick="setTgt('+t+')">'+t+'分</div>'});h+='</div></div>';
-  }
-  h+='<button id="settingsStart" onclick="startSingleGame()">开始比赛</button>';
-  h+='<button style="background:none;border:1px solid #444;color:#888;padding:8px 24px;border-radius:14px;font-size:12px;margin-top:4px" onclick="backToSelect()">← 返回选人</button>';
-  sp.innerHTML=h;
-}
-function backToSelect(){document.getElementById('settingsPage').style.display='none';selectPage.style.display='flex'}
-function setGT(t){gameSettings.gameType=t;if(t==='endless')gameSettings.targetScore=0;else if(gameSettings.targetScore===0)gameSettings.targetScore=11;showSettings()}
-function setTime(t){gameSettings.gameTime=t;showSettings()}
-function setTgt(t){gameSettings.targetScore=t;showSettings()}
-
-// ====== 单机模式：GameEngine ======
-// (完整引擎代码，与cba-game.html一致，省略大量注释)
-function _clamp(v,a,b){return Math.max(a,Math.min(b,v))}
-
-class GameEngine{
-  constructor(w,h,p1,p2,settings){
-    settings=settings||{};
-    this.w=w;this.h=h;this.scale=Math.min(w/750,h/500);this.bgImage=null;
+// ==================== 游戏引擎 ====================
+class GameEngine {
+  constructor(w,h){
+    this.w=w;this.h=h;
+    this.scale=Math.min(w/750,h/500);
+    this.bgImage=null;
     this.poss=0;this.score=[0,0];this.gameOver=false;this.winner=-1;
     this.stats={p1:{pts:0,blk:0,stl:0,reb:0},p2:{pts:0,blk:0,stl:0,reb:0}};
     this.shooting=false;this.shotPower=0;this.shotReleased=false;
-    this.ballInAir=false;this.offInput={mx:0,my:0};this.blockAnim=0;this.stealAnim=0;this.driveAnim=0;this.scoredAnim=0;
-    this.msg='';this.msgTimer=0;this.shotResult=null;this.offEnergy=100;this.defEnergy=100;this.shotClockTimer=0;this._powAnim=0;
-    this.phase='jumpball';this.jumpCountdown=3;this.jumpCDTimer=0;this.jumpBallTossed=false;
+    this.ballInAir=false;this.offInput={mx:0,my:0};this.defInput={mx:0,my:0};
+    this.blockAnim=0;this.stealAnim=0;this.driveAnim=0;this.scoredAnim=0;
+    this.msg='';this.msgTimer=0;this.shotResult=null;
+    this.offEnergy=100;this.defEnergy=100;
+    this.shotClockTimer=0;this._powAnim=0;
+    // 新状态
+    this.phase='jumpball'; // jumpball | playing | freethrow | gameover
+    this.jumpCountdown=3;this.jumpCDTimer=0;this.jumpBallTossed=false;
+    this.jumpBallVx=0;this.jumpBallVy=0;
     this.needClearThree=false;this.clearThreeDone=false;
-    this.ftCount=0;this.ftMade=0;this.ftShooter=0;this.foulCooldown=0;
+    this.ftCount=0;this.ftMade=0;this.ftShooter=0;
     this._shotPath=null;this._shotProgress=0;this._shotSpeed=0;
-    this.p1=p1;this.p2=p2;
-    this.gameType=settings.gameType||'endless'; // 'endless' | 'target'
-    this.gameTimer=settings.gameTime*1000||180000; // default 3min
-    this.gameTimeTotal=this.gameTimer;
-    this.targetScore=settings.targetScore||0; // 0=endless
-    this.overtime=false;this.overtimeTimer=0;
-    this._init();this._apply();
+    this.foulCooldown=0;
+    this._init();
   }
   _s(v){return v*this.scale}
   _init(){
-    var cx=this._s(375),cy=this._s(250);
+    const cx=this._s(375),cy=this._s(250);
     this.ball={x:cx,y:cy,vx:0,vy:0,r:this._s(10),has:false};
     this._resetJumpBall();
   }
   _resetJumpBall(){
-    var cx=this._s(375),cy=this._s(250);
-    this.off={x:cx-this._s(40),y:cy,r:this._s(25)};this.def={x:cx+this._s(40),y:cy,r:this._s(25)};
+    const cx=this._s(375),cy=this._s(250);
+    this.off={x:cx-this._s(40),y:cy,r:this._s(25),mx:0,my:0};
+    this.def={x:cx+this._s(40),y:cy,r:this._s(25),mx:0,my:0};
     this.ball.x=cx;this.ball.y=cy;this.ball.vx=0;this.ball.vy=0;this.ball.has=false;
     this.ballInAir=false;this.jumpCountdown=3;this.jumpCDTimer=0;this.jumpBallTossed=false;
     this.shooting=false;this.shotPower=0;this.shotReleased=false;this.shotResult=null;
-    this.needClearThree=false;this.clearThreeDone=false;this.phase='jumpball';
+    this.needClearThree=false;this.clearThreeDone=false;
+    this.phase='jumpball';
   }
   _resetAfterScore(){
-    var cx=this._s(375),r=this._s(25),outY=this._s(380);
-    this.off.x=cx;this.off.y=outY;this.def.x=cx;this.def.y=this._s(120);
-    this.ball.x=cx;this.ball.y=outY-r-this._s(5);this.ball.vx=0;this.ball.vy=0;this.ball.has=true;this.ballInAir=false;
+    // 进球后：新进攻方从三分线外开始
+    const cx=this._s(375),r=this._s(25);
+    const outY=this._s(370);
+    this.off.x=cx;this.off.y=outY;
+    this.def.x=cx;this.def.y=this._s(120);
+    this.ball.x=cx;this.ball.y=outY-r-this._s(5);
+    this.ball.vx=0;this.ball.vy=0;this.ball.has=true;this.ballInAir=false;
     this.shooting=false;this.shotPower=0;this.shotReleased=false;this.shotResult=null;
-    this._shotPath=null;this._shotProgress=0;this.needClearThree=false;this.clearThreeDone=false;this.shotClockTimer=0;
+    this._shotPath=null;this._shotProgress=0;
+    this.needClearThree=false;this.clearThreeDone=false;
+    this.shotClockTimer=0;
     this.stealAnim=0;this.blockAnim=0;this.driveAnim=0;
-    this.offEnergy=Math.min(100,this.offEnergy+30);this.defEnergy=Math.min(100,this.defEnergy+30);
+    this.offEnergy=Math.min(100,this.offEnergy+30);
+    this.defEnergy=Math.min(100,this.defEnergy+30);
   }
   _resetFreeThrow(){
-    var cx=this._s(375),ftY=this._s(250),r=this._s(25);
-    if(this.ftShooter===0){this.off.x=cx;this.off.y=ftY;this.def.x=cx;this.def.y=this._s(100)}
-    else{this.def.x=cx;this.def.y=ftY;this.off.x=cx;this.off.y=this._s(100)}
-    this.ball.x=cx;this.ball.y=ftY-r-this._s(5);this.ball.vx=0;this.ball.vy=0;this.ball.has=true;this.ballInAir=false;
-    this.shooting=false;this.shotPower=0;this.shotReleased=false;this.shotResult=null;this._shotPath=null;this._shotProgress=0;
+    const cx=this._s(375),ftY=this._s(250),r=this._s(25);
+    const shooterIdx=this.ftShooter;
+    if(shooterIdx===0){
+      this.off.x=cx;this.off.y=ftY;
+      this.def.x=cx;this.def.y=this._s(100);
+    } else {
+      this.def.x=cx;this.def.y=ftY;
+      this.off.x=cx;this.off.y=this._s(100);
+    }
+    this.ball.x=cx;this.ball.y=ftY-r-this._s(5);
+    this.ball.vx=0;this.ball.vy=0;this.ball.has=true;this.ballInAir=false;
+    this.shooting=false;this.shotPower=0;this.shotReleased=false;this.shotResult=null;
+    this._shotPath=null;this._shotProgress=0;
   }
   _reset(){
-    var cx=this._s(375),r=this._s(25);
-    this.off.x=cx;this.off.y=this._s(380);this.def.x=cx;this.def.y=this._s(120);
-    this.ball.x=cx;this.ball.y=this._s(380)-r-this._s(5);this.ball.vx=0;this.ball.vy=0;this.ball.has=true;this.ballInAir=false;
+    const cx=this._s(375),r=this._s(25);
+    this.off.x=cx;this.off.y=this._s(370);
+    this.def.x=cx;this.def.y=this._s(120);
+    this.ball.x=cx;this.ball.y=this._s(370)-r-this._s(5);
+    this.ball.vx=0;this.ball.vy=0;this.ball.has=true;this.ballInAir=false;
     this.shooting=false;this.shotPower=0;this.shotReleased=false;this.shotResult=null;
-    this._shotPath=null;this._shotProgress=0;this.needClearThree=false;this.clearThreeDone=false;this.shotClockTimer=0;
+    this._shotPath=null;this._shotProgress=0;
+    this.needClearThree=false;this.clearThreeDone=false;
+    this.shotClockTimer=0;
+  }
+  setPlayers(p1,p2){
+    this.p1=p1;this.p2=p2;this._apply();
   }
   _apply(){
     if(!this.p1||!this.p2)return;
-    var o=this.poss===0?this.p1:this.p2;var d=this.poss===0?this.p2:this.p1;
-    this._oSpeed=2.5*(0.6+o.speed/99*0.8);this._dSpeed=2.5*(0.6+d.speed/99*0.7);
-    this._oDrib=o.dribbling;this._oShoot=o.shooting;this._dDef=d.defense;this._dJump=d.jumping;
+    const o=this.poss===0?this.p1:this.p2;
+    const d=this.poss===0?this.p2:this.p1;
+    this._oSpeed=2.5*(0.6+o.speed/99*0.8);
+    this._dSpeed=2.5*(0.6+d.speed/99*0.7);
+    this._oDrib=o.dribbling;this._oShoot=o.shooting;
+    this._dDef=d.defense;this._dJump=d.jumping;
   }
   getOffPlayer(){return this.poss===0?this.p1:this.p2}
   getDefPlayer(){return this.poss===0?this.p2:this.p1}
 
   update(dt){
-    if(this.phase==='gameover')return;dt=Math.min(dt,33);
-    if(this.msgTimer>0)this.msgTimer-=dt;if(this.blockAnim>0)this.blockAnim-=dt;
-    if(this.stealAnim>0)this.stealAnim-=dt;if(this.driveAnim>0)this.driveAnim-=dt;
-    if(this.scoredAnim>0)this.scoredAnim-=dt;if(this.foulCooldown>0)this.foulCooldown-=dt;
-    if(this.phase==='jumpball'){this._updateJump(dt);return;}
-    if(this.phase==='freethrow'){this._updateFT(dt);return;}
-    this.offEnergy=Math.min(100,this.offEnergy+dt*0.008);this.defEnergy=Math.min(100,this.defEnergy+dt*0.008);
-    this.shotClockTimer+=dt;if(this.shotClockTimer>=24000)this._changePoss('进攻超时！');
-    // Game timer
-    if(!this.overtime){this.gameTimer-=dt;if(this.gameTimer<=0)this.gameTimer=0;}
-    else{this.overtimeTimer-=dt;if(this.overtimeTimer<=0)this.overtimeTimer=0;}
+    if(this.phase==='gameover')return;
+    dt=Math.min(dt,33);
+    if(this.msgTimer>0)this.msgTimer-=dt;
+    if(this.blockAnim>0)this.blockAnim-=dt;
+    if(this.stealAnim>0)this.stealAnim-=dt;
+    if(this.driveAnim>0)this.driveAnim-=dt;
+    if(this.scoredAnim>0)this.scoredAnim-=dt;
+    if(this.foulCooldown>0)this.foulCooldown-=dt;
+    if(this.phase==='jumpball'){this._updateJumpBall(dt);return;}
+    if(this.phase==='freethrow'){this._updateFreeThrow(dt);return;}
+    this.offEnergy=Math.min(100,this.offEnergy+dt*0.008);
+    this.defEnergy=Math.min(100,this.defEnergy+dt*0.008);
+    this.shotClockTimer+=dt;
+    if(this.shotClockTimer>=24000)this._changePoss('进攻超时！');
     if(this._shotPath){this._updateShotPath(dt);return;}
-    this._physics(dt);this._move(dt);this._shootUpdate();this._collide();this._checkThreeClear();this._checkWin();
+    this._physics(dt);
+    this._move(dt);
+    this._shootUpdate();
+    this._collide();
+    this._checkThreeClear();
+    this._checkWin();
   }
 
-  _updateJump(dt){
-    if(this.jumpCountdown>0){this.jumpCDTimer+=dt;if(this.jumpCDTimer>=700){this.jumpCountdown--;this.jumpCDTimer=0;
-      if(this.jumpCountdown===0){this.jumpBallTossed=true;this.ballInAir=true;this.ball.vx=(Math.random()-.5)*1.5;this.ball.vy=-6;this._msg('跳球！');}}return;}
-    this._moveJump(dt);this._physJumpBall(dt);this._shootUpdate();
+  // === 跳球阶段 ===
+  _updateJumpBall(dt){
+    if(this.jumpCountdown>0){
+      this.jumpCDTimer+=dt;
+      if(this.jumpCDTimer>=700){this.jumpCountdown--;this.jumpCDTimer=0;
+        if(this.jumpCountdown===0){this.jumpBallTossed=true;this.ballInAir=true;
+          this.ball.vx=(Math.random()-0.5)*1.5;this.ball.vy=-6-this.shotPower;
+          this._msg('跳球！');}}
+      return;
+    }
+    this._moveJumpBall(dt);
+    this._physicsJumpBall(dt);
+    this._shootUpdate();
+    // 检测谁碰到球
     if(this.ballInAir){
-      var odx=this.off.x-this.ball.x,ody=this.off.y-this.ball.y,ddx=this.def.x-this.ball.x,ddy=this.def.y-this.ball.y;
-      var od=Math.sqrt(odx*odx+ody*ody),dd=Math.sqrt(ddx*ddx+ddy*ddy),cr=this._s(35);
-      if(od<cr){this.ballInAir=false;this.ball.has=true;this.poss=0;this._apply();this.phase='playing';this.shotClockTimer=0;this.needClearThree=false;this._msg('跳球成功！')}
-      else if(dd<cr){this.ballInAir=false;this.ball.has=true;this.poss=1;this._apply();this.phase='playing';this.shotClockTimer=0;this.needClearThree=false;this._msg('AI抢到跳球！')}
+      const odx=this.off.x-this.ball.x,ody=this.off.y-this.ball.y;
+      const ddx=this.def.x-this.ball.x,ddy=this.def.y-this.ball.y;
+      const od=Math.sqrt(odx*odx+ody*ody),dd=Math.sqrt(ddx*ddx+ddy*ddy);
+      const catchR=this._s(35);
+      if(od<catchR){this.ballInAir=false;this.ball.has=true;this.poss=0;this._apply();this.phase='playing';this.shotClockTimer=0;this.needClearThree=false;this._msg('跳球成功！球权P1');}
+      else if(dd<catchR){this.ballInAir=false;this.ball.has=true;this.poss=1;this._apply();this.phase='playing';this.shotClockTimer=0;this.needClearThree=false;this._msg('跳球成功！球权P2');}
     }
   }
-  _moveJump(dt){
-    var mxW=this.w-this.off.r,mnX=this.off.r,mxH=this.h-this.off.r,mnY=this._s(40)+this.off.r;
-    var os=this._oSpeed||3;var omx=this.offInput.mx,omy=this.offInput.my;
-    if(omx!==0||omy!==0){var m=Math.sqrt(omx*omx+omy*omy);this.off.x+=omx/m*os*(dt/16);this.off.y+=omy/m*os*(dt/16)}
-    var tox=this.ball.x-this.def.x,toy=this.ball.y-this.def.y,tod=Math.sqrt(tox*tox+toy*toy);
+  _moveJumpBall(dt){
+    const mxW=this.w-this.off.r,mnX=this.off.r,mxH=this.h-this.off.r,mnY=this._s(40)+this.off.r;
+    let os=this._oSpeed||3;
+    let omx=this.offInput.mx,omy=this.offInput.my;
+    if(omx!==0||omy!==0){const m=Math.sqrt(omx*omx+omy*omy);this.off.x+=omx/m*os*(dt/16);this.off.y+=omy/m*os*(dt/16)}
+    // 防守方AI也移动去抢球
+    const tox=this.ball.x-this.def.x,toy=this.ball.y-this.def.y,tod=Math.sqrt(tox*tox+toy*toy);
     if(tod>0){this.def.x+=tox/tod*this._dSpeed*(dt/16);this.def.y+=toy/tod*this._dSpeed*(dt/16)}
-    this.off.x=_clamp(this.off.x,mnX,mxW);this.off.y=_clamp(this.off.y,mnY,mxH);
-    this.def.x=_clamp(this.def.x,mnX,mxW);this.def.y=_clamp(this.def.y,mnY,mxH);
+    this.off.x=Math.max(mnX,Math.min(mxW,this.off.x));
+    this.off.y=Math.max(mnY,Math.min(mxH,this.off.y));
+    this.def.x=Math.max(mnX,Math.min(mxW,this.def.x));
+    this.def.y=Math.max(mnY,Math.min(mxH,this.def.y));
   }
-  _physJumpBall(dt){
-    if(!this.ballInAir)return;this.ball.vy+=0.3*(dt/16);this.ball.x+=this.ball.vx*(dt/16);this.ball.y+=this.ball.vy*(dt/16);
+  _physicsJumpBall(dt){
+    if(!this.ballInAir)return;
+    this.ball.vy+=0.3*(dt/16);
+    this.ball.x+=this.ball.vx*(dt/16);
+    this.ball.y+=this.ball.vy*(dt/16);
     if(this.ball.y>this.h-this._s(10)){this.ball.y=this.h-this._s(10)-this.ball.r;this.ball.vy=-Math.abs(this.ball.vy)*0.5;this.ball.vx*=0.7;
       if(Math.abs(this.ball.vy)<1){this.ballInAir=false;this.ball.has=true;
-        var dO=Math.abs(this.off.x-this.ball.x),dD=Math.abs(this.def.x-this.ball.x);
-        this.poss=dO<dD?0:1;this._apply();this.phase='playing';this.shotClockTimer=0;this.needClearThree=false;this._msg(dO<dD?'跳球成功！':'AI抢到跳球！')}
+        const dtoO=Math.abs(this.off.x-this.ball.x),dtoD=Math.abs(this.def.x-this.ball.x);
+        this.poss=dtoO<dtoD?0:1;this._apply();this.phase='playing';this.shotClockTimer=0;this.needClearThree=false;}
     }
   }
-  _updateFT(dt){}
-  _doFT(){
-    var t=this._timing();var mp=t.basePct+10+this._oShoot/99*15;mp=_clamp(mp,10,98);var made=Math.random()*100<mp;
-    this.ball.has=false;var rx=this._s(375),ry=this._s(60),sx=this.ball.x,sy=this.ball.y,dx=rx-sx,dy=ry-sy,dist=Math.sqrt(dx*dx+dy*dy);
-    this._shotPath={sx:sx,sy:sy,ex:rx,ey:ry,peakH:dist*(made?0.5:0.35),made:made};
-    this._shotProgress=0;this._shotSpeed=1/(dist/(7+this.shotPower*12));this.shotResult={made:made,pts:1,timing:t.label};
+
+  // === 罚球阶段 ===
+  _updateFreeThrow(dt){}
+  _doFreeThrow(){
+    const t=this._timing();
+    let mp=t.basePct+10;
+    mp+=this._oShoot/99*15;
+    mp=Math.max(10,Math.min(98,mp));
+    const made=Math.random()*100<mp;
+    this.ball.has=false;
+    const rx=this._s(375),ry=this._s(60);
+    const sx=this.ball.x,sy=this.ball.y;
+    const dx=rx-sx,dy=ry-sy,dist=Math.sqrt(dx*dx+dy*dy);
+    if(made){
+      const peakH=dist*0.5;
+      this._shotPath={sx,sy,ex:rx,ey:ry,peakH,made:true};
+    } else {
+      const mx=(Math.random()-0.5)*this._s(35),my=(Math.random()-0.5)*this._s(20);
+      this._shotPath={sx,sy,ex:rx+mx,ey:ry+my,peakH:dist*0.4,made:false};
+    }
+    this._shotProgress=0;this._shotSpeed=1/(dist/(7+this.shotPower*12));
+    this.shotResult={made,pts:1,timing:t.label};
   }
 
-  _physics(dt){
-    if(!this.ballInAir){if(this.ball.has){this.ball.x=this.off.x;this.ball.y=this.off.y-this.off.r-this.ball.r}return;}
-    this.ball.vy+=0.4*(dt/16);this.ball.x+=this.ball.vx*(dt/16);this.ball.y+=this.ball.vy*(dt/16);
-    var rx=this._s(375),ry=this._s(60),rr=this._s(12),dx=this.ball.x-rx,dy=this.ball.y-ry,dist=Math.sqrt(dx*dx+dy*dy);
-    if(dist<rr+this.ball.r&&this.ballInAir){var nx=dx/dist,ny=dy/dist,dot=this.ball.vx*nx+this.ball.vy*ny;
-      this.ball.vx-=1.6*dot*nx;this.ball.vy-=1.6*dot*ny;this.ball.vx*=0.5;this.ball.vy*=0.5;
-      this.ball.x+=nx*(rr+this.ball.r-dist+1);this.ball.y+=ny*(rr+this.ball.r-dist+1);}
-    if(this.ball.y<this._s(48)&&this.ball.vy<0&&Math.abs(this.ball.x-rx)<this._s(80)){this.ball.y=this._s(48)+this.ball.r;this.ball.vy=Math.abs(this.ball.vy)*0.6;this.ball.vx*=0.7;}
-    if(this.ball.y>this.h+50||Math.abs(this.ball.x)>this.w+50||this.ball.y<-200){this._changePoss('球出界！');}
-    if(this.ball.y>this.h-this._s(10)&&this.ball.vy>0){this.ball.y=this.h-this._s(10)-this.ball.r;this.ball.vy=-Math.abs(this.ball.vy)*0.55;this.ball.vx*=0.7;
-      if(Math.abs(this.ball.vy)<1){this.ballInAir=false;this.ball.has=true;this.shotResult=null;
-        var dO=Math.abs(this.off.x-this.ball.x)+(this.off.y-this.ball.y),dD=Math.abs(this.def.x-this.ball.x)+(this.def.y-this.ball.y),reb=dO<dD?this.poss:(1-this.poss);
-        if(reb!==this.poss){this.poss=reb;this._apply();this.needClearThree=true;this.clearThreeDone=false;this.shotClockTimer=0;this.stats[this.poss===0?'p1':'p2'].reb++;this._msg('篮板球！需出三分线');}
-        else{this.stats[this.poss===0?'p1':'p2'].reb++;this.shotClockTimer=Math.max(0,this.shotClockTimer-7000);this._msg('进攻篮板！');}
+  // === 抛物线投篮路径 ===
+  _updateShotPath(dt){
+    this._shotProgress+=this._shotSpeed*(dt/16);
+    const t=Math.min(1,this._shotProgress);
+    const {sx,sy,ex,ey,peakH}=this._shotPath;
+    const x=sx+(ex-sx)*t;
+    const y=sy+(ey-sy)*t-peakH*Math.sin(Math.PI*t);
+    this.ball.x=x;this.ball.y=y;
+    if(t>=1){
+      this._shotPath=null;this._shotProgress=0;
+      if(this.shotResult&&this.shotResult.made){
+        this._onScore();
+      } else {
+        this._onMiss();
       }
     }
   }
 
-  _updateShotPath(dt){this._shotProgress+=this._shotSpeed*(dt/16);var t=Math.min(1,this._shotProgress);
-    var p=this._shotPath;var x=p.sx+(p.ex-p.sx)*t,y=p.sy+(p.ey-p.sy)*t-p.peakH*Math.sin(Math.PI*t);this.ball.x=x;this.ball.y=y;
-    if(t>=1){this._shotPath=null;this._shotProgress=0;if(this.shotResult&&this.shotResult.made){this._onScore()}else{this._onMiss()}}}
+  _physics(dt){
+    if(!this.ballInAir){
+      if(this.ball.has){this.ball.x=this.off.x;this.ball.y=this.off.y-this.off.r-this.ball.r}
+      return;
+    }
+    this.ball.vy+=0.4*(dt/16);
+    this.ball.x+=this.ball.vx*(dt/16);
+    this.ball.y+=this.ball.vy*(dt/16);
+    const rx=this._s(375),ry=this._s(60),rr=this._s(12);
+    const dx=this.ball.x-rx,dy=this.ball.y-ry,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<rr+this.ball.r&&this.ballInAir){
+      const nx=dx/dist,ny=dy/dist,dot=this.ball.vx*nx+this.ball.vy*ny;
+      this.ball.vx-=1.6*dot*nx;this.ball.vy-=1.6*dot*ny;
+      this.ball.vx*=0.5;this.ball.vy*=0.5;
+      this.ball.x+=nx*(rr+this.ball.r-dist+1);
+      this.ball.y+=ny*(rr+this.ball.r-dist+1);
+    }
+    if(this.ball.y<this._s(48)&&this.ball.vy<0&&Math.abs(this.ball.x-rx)<this._s(80)){
+      this.ball.y=this._s(48)+this.ball.r;this.ball.vy=Math.abs(this.ball.vy)*0.6;this.ball.vx*=0.7;
+    }
+    if(this.ball.y>this.h+50||Math.abs(this.ball.x)>this.w+50||this.ball.y<-200){
+      this._changePoss('球出界！');
+    }
+    if(this.ball.y>this.h-this._s(10)&&this.ball.vy>0){
+      this.ball.y=this.h-this._s(10)-this.ball.r;
+      this.ball.vy=-Math.abs(this.ball.vy)*0.55;this.ball.vx*=0.7;
+      if(Math.abs(this.ball.vy)<1){
+        this.ballInAir=false;this.ball.has=true;
+        this.shotResult=null;
+        // 篮板球——检查球权是否转换
+        const dtoO=Math.abs(this.off.x-this.ball.x)+(this.off.y-this.ball.y);
+        const dtoD=Math.abs(this.def.x-this.ball.x)+(this.def.y-this.ball.y);
+        const rebounder=dtoO<dtoD?this.poss:(this.poss===0?1:0);
+        if(rebounder!==this.poss){
+          this.poss=rebounder;this._apply();
+          this.needClearThree=true;this.clearThreeDone=false;
+          this.shotClockTimer=0;
+          this.stats[this.poss===0?'p1':'p2'].reb++;
+          this._msg('篮板球！球权转换！需出三分线');
+        } else {
+          this.stats[this.poss===0?'p1':'p2'].reb++;
+          this.shotClockTimer=Math.max(0,this.shotClockTimer-7000);
+          this._msg('进攻篮板！');
+        }
+      }
+    }
+  }
 
   _move(dt){
-    var mxW=this.w-this.off.r,mnX=this.off.r,mxH=this.h-this.off.r,mnY=this._s(40)+this.off.r;
-    var os=this._oSpeed;if(this.driveAnim>0)os=5;var omx=this.offInput.mx,omy=this.offInput.my;if(this.driveAnim>0)omy=-1;
-    if(omx!==0||omy!==0){var m=Math.sqrt(omx*omx+omy*omy);this.off.x+=omx/m*os*(dt/16);this.off.y+=omy/m*os*(dt/16)}
-    var tox=this.off.x-this.def.x,toy=this.off.y-this.def.y,tod=Math.sqrt(tox*tox+toy*toy),id=this._s(40);
-    var dmx=0,dmy=0;if(tod>0&&tod>id+5){dmx+=(tox/tod)*0.8;dmy+=(toy/tod)*0.8}else if(tod<id-5&&tod>0){dmx-=(tox/tod)*0.3;dmy-=(toy/tod)*0.3}
-    var dm=Math.sqrt(dmx*dmx+dmy*dmy);if(dm>1){dmx/=dm;dmy/=dm}
+    const mxW=this.w-this.off.r,mnX=this.off.r,mxH=this.h-this.off.r,mnY=this._s(40)+this.off.r;
+    let os=this._oSpeed;if(this.driveAnim>0)os=5;
+    let omx=this.offInput.mx,omy=this.offInput.my;
+    if(this.driveAnim>0)omy=-1;
+    if(omx!==0||omy!==0){const m=Math.sqrt(omx*omx+omy*omy);this.off.x+=omx/m*os*(dt/16);this.off.y+=omy/m*os*(dt/16)}
+    let dmx=this.defInput.mx,dmy=this.defInput.my;
+    const tox=this.off.x-this.def.x,toy=this.off.y-this.def.y,tod=Math.sqrt(tox*tox+toy*toy);
+    const id=this._s(40);
+    if(tod>0&&tod>id+5){dmx+=(tox/tod)*0.8;dmy+=(toy/tod)*0.8}
+    else if(tod<id-5&&tod>0){dmx-=(tox/tod)*0.3;dmy-=(toy/tod)*0.3}
+    const dm=Math.sqrt(dmx*dmx+dmy*dmy);
+    if(dm>1){dmx/=dm;dmy/=dm}
     if(dm>0.1){this.def.x+=dmx*this._dSpeed*(dt/16);this.def.y+=dmy*this._dSpeed*(dt/16)}
-    this.off.x=_clamp(this.off.x,mnX,mxW);this.off.y=_clamp(this.off.y,mnY,mxH);
-    this.def.x=_clamp(this.def.x,mnX,mxW);this.def.y=_clamp(this.def.y,mnY,mxH);
+    this.off.x=Math.max(mnX,Math.min(mxW,this.off.x));
+    this.off.y=Math.max(mnY,Math.min(mxH,this.off.y));
+    this.def.x=Math.max(mnX,Math.min(mxW,this.def.x));
+    this.def.y=Math.max(mnY,Math.min(mxH,this.def.y));
   }
-  _shootUpdate(){if(!this.shooting||this.shotReleased)return;this._powAnim+=0.025;this.shotPower=Math.abs(Math.sin(this._powAnim))}
-  _checkThreeClear(){if(!this.needClearThree||this.clearThreeDone)return;var rx=this._s(375),ry=this._s(60),tr=this._s(280),dx=this.off.x-rx,dy=this.off.y-ry;
-    if(Math.sqrt(dx*dx+dy*dy)>tr){this.clearThreeDone=true;this.needClearThree=false;this._msg('已出三分线！')}}
-  _collide(){if(this.stealAnim>0&&this.ball.has&&!this.shooting){var dx=this.def.x-this.off.x,dy=this.def.y-this.off.y;
-    if(Math.sqrt(dx*dx+dy*dy)<this._s(35)){var c=0.25+this._dDef/99*0.35-this._oDrib/99*0.25;
-    if(Math.random()<c){this._changePoss('抢断成功！');this.stats[this.poss===0?'p2':'p1'].stl++;this._msg('抢断！')}else this._msg('抢断失败');this.stealAnim=0;}}}
+
+  _shootUpdate(){
+    if(!this.shooting||this.shotReleased)return;
+    this._powAnim+=0.025;
+    this.shotPower=Math.abs(Math.sin(this._powAnim));
+  }
+
+  _checkThreeClear(){
+    if(!this.needClearThree||this.clearThreeDone)return;
+    const rx=this._s(375),ry=this._s(60),tr=this._s(280);
+    const dx=this.off.x-rx,dy=this.off.y-ry;
+    if(Math.sqrt(dx*dx+dy*dy)>tr){
+      this.clearThreeDone=true;this.needClearThree=false;
+      this._msg('已出三分线！可以进攻');
+    }
+  }
+
+  _collide(){
+    if(this.stealAnim>0&&this.ball.has&&!this.shooting){
+      const dx=this.def.x-this.off.x,dy=this.def.y-this.off.y;
+      if(Math.sqrt(dx*dx+dy*dy)<this._s(35)){
+        const c=0.25+this._dDef/99*0.35-this._oDrib/99*0.25;
+        if(Math.random()<c){this._changePoss('抢断成功！');this.stats[this.poss===0?'p2':'p1'].stl++;this._msg('抢断！')}
+        else this._msg('抢断失败');
+        this.stealAnim=0;
+      }
+    }
+  }
+
   _checkWin(){
     if(this.phase==='gameover')return;
-    var s0=this.score[0],s1=this.score[1],d=Math.abs(s0-s1);
-    // Target score mode
-    if(this.gameType==='target'&&this.targetScore>0){
-      if(s0>=this.targetScore&&d>=2){this.phase='gameover';this.gameOver=true;this.winner=0;return;}
-      if(s1>=this.targetScore&&d>=2){this.phase='gameover';this.gameOver=true;this.winner=1;return;}
-    }
-    // Timer check
-    if(!this.overtime&&this.gameTimer<=0){
-      if(s0>s1){this.phase='gameover';this.gameOver=true;this.winner=0;return;}
-      if(s1>s0){this.phase='gameover';this.gameOver=true;this.winner=1;return;}
-      // Tie → overtime
-      if(s0===s1){this.overtime=true;this.overtimeTimer=120000;this._msg('平局！加时2分钟！');return;}
-    }
-    // Overtime check
-    if(this.overtime&&this.overtimeTimer<=0){
-      if(s0>s1){this.phase='gameover';this.gameOver=true;this.winner=0;}
-      else if(s1>s0){this.phase='gameover';this.gameOver=true;this.winner=1;}
-      else{this.overtimeTimer=120000;this._msg('继续加时！')}
-    }
+    const d=Math.abs(this.score[0]-this.score[1]);
+    if(this.score[0]>=11&&d>=2){this.phase='gameover';this.gameOver=true;this.winner=0}
+    else if(this.score[1]>=11&&d>=2){this.phase='gameover';this.gameOver=true;this.winner=1}
   }
 
-  startShoot(){if(this.phase==='freethrow'){if(this.shooting||this.shotReleased)return;this.shooting=true;this.shotPower=0;this.shotReleased=false;this._powAnim=0;return;}
-    if(!this.ball.has||this.shooting||this.ballInAir||this.driveAnim>0)return;if(this.needClearThree){this._msg('需先出三分线！');return;}
-    if(this.phase!=='playing'&&this.phase!=='jumpball')return;this.shooting=true;this.shotPower=0;this.shotReleased=false;this._powAnim=0;}
-  releaseShoot(){if(!this.shooting||this.shotReleased)return;this.shotReleased=true;this.shooting=false;
-    if(this.phase==='freethrow'){this._doFT();return;}this._doShot();}
-  _doShot(){
-    var t=this._timing();var dd=this._defDist();var ce=this._contest(dd);var mp=t.basePct+this._oShoot/99*20-ce;mp=_clamp(mp,5,98);
-    var is3=this.off.y>this._s(350),pts=is3?3:2;var made=Math.random()*100<mp;this.ball.has=false;
-    var rx=this._s(375),ry=this._s(60),sx=this.ball.x,sy=this.ball.y,dx=rx-sx,dy=ry-sy,dist=Math.sqrt(dx*dx+dy*dy);
-    if(made){this._shotPath={sx:sx,sy:sy,ex:rx,ey:ry,peakH:dist*0.48,made:true}}
-    else{var mx=(Math.random()-.5)*this._s(50),my=(Math.random()-.5)*this._s(35);this._shotPath={sx:sx,sy:sy,ex:rx+mx,ey:ry+my,peakH:dist*(0.3+Math.random()*0.25),made:false}}
-    this._shotProgress=0;this._shotSpeed=1/(dist/(7+this.shotPower*12));this.shotResult={made:made,pts:pts,timing:t.label};this.ballInAir=true;
+  startShoot(){
+    if(this.phase==='freethrow'){
+      if(this.shooting||this.shotReleased)return;
+      this.shooting=true;this.shotPower=0;this.shotReleased=false;this._powAnim=0;return;
+    }
+    if(!this.ball.has||this.shooting||this.ballInAir||this.driveAnim>0)return;
+    if(this.needClearThree){this._msg('需先出三分线！');return;}
+    if(this.phase!=='playing')return;
+    this.shooting=true;this.shotPower=0;this.shotReleased=false;this._powAnim=0;
   }
-  _timing(){var p=this.shotPower;if(p>=.45&&p<=.55)return{label:'完美',basePct:95};if(p>=.35&&p<=.65)return{label:'不错',basePct:70};if(p>=.2&&p<=.8)return{label:'一般',basePct:40};return{label:'太差',basePct:15}}
-  _defDist(){var dx=this.def.x-this.off.x,dy=this.def.y-this.off.y;return Math.sqrt(dx*dx+dy*dy)}
-  _contest(d){if(d>this._s(50))return 0;var f=1-d/this._s(50);return f*30+this._dDef/99*10}
+  releaseShoot(){
+    if(!this.shooting||this.shotReleased)return;
+    this.shotReleased=true;this.shooting=false;
+    if(this.phase==='freethrow'){this._doFreeThrow();return;}
+    this._doShot();
+  }
+  _doShot(){
+    const t=this._timing();const dd=this._defDist();const ce=this._contest(dd);
+    let mp=t.basePct;mp+=this._oShoot/99*20;mp-=ce;mp=Math.max(5,Math.min(98,mp));
+    const is3=this.off.y>this._s(350);const pts=is3?3:2;
+    const made=Math.random()*100<mp;
+    this.ball.has=false;
+    const rx=this._s(375),ry=this._s(60);
+    const sx=this.ball.x,sy=this.ball.y;
+    const dx=rx-sx,dy=ry-sy,dist=Math.sqrt(dx*dx+dy*dy);
+    if(made){
+      const peakH=dist*0.48;
+      this._shotPath={sx,sy,ex:rx,ey:ry,peakH,made:true};
+    } else {
+      const mx=(Math.random()-0.5)*this._s(50),my=(Math.random()-0.5)*this._s(35);
+      this._shotPath={sx,sy,ex:rx+mx,ey:ry+my,peakH:dist*(0.3+Math.random()*0.25),made:false};
+    }
+    this._shotProgress=0;this._shotSpeed=1/(dist/(7+this.shotPower*12));
+    this.shotResult={made,pts,timing:t.label};
+    this.ballInAir=true;
+  }
+  _timing(){
+    const p=this.shotPower;
+    if(p>=.45&&p<=.55)return{label:'完美',basePct:95};
+    if(p>=.35&&p<=.65)return{label:'不错',basePct:70};
+    if(p>=.2&&p<=.8)return{label:'一般',basePct:40};
+    return{label:'太差',basePct:15};
+  }
+  _defDist(){const dx=this.def.x-this.off.x,dy=this.def.y-this.off.y;return Math.sqrt(dx*dx+dy*dy)}
+  _contest(d){if(d>this._s(50))return 0;const f=1-d/this._s(50);return f*30+this._dDef/99*10}
 
   _onScore(){
-    this.ballInAir=false;this.ball.has=false;this.ball.x=this._s(375);this.ball.y=this._s(100);this.ball.vx=0;this.ball.vy=0;this._shotPath=null;this._shotProgress=0;
+    this.ballInAir=false;this.ball.has=false;
+    this.ball.x=this._s(375);this.ball.y=this._s(100);
+    this.ball.vx=0;this.ball.vy=0;this._shotPath=null;this._shotProgress=0;
     if(this.shotResult&&this.shotResult.made){
-      if(this.phase==='freethrow'){this.score[this.poss]+=1;this.stats[this.poss===0?'p1':'p2'].pts+=1;this.ftMade++;this.scoredAnim=1200;this._msg(this.shotResult.timing+'！罚球+1 ('+this.ftMade+'/2)');
-        var that=this;setTimeout(function(){if(that.ftMade>=2){that.phase='playing';that._changePoss('罚球结束')}else{that._resetFreeThrow()}},1200)}
-      else{this.score[this.poss]+=this.shotResult.pts;this.stats[this.poss===0?'p1':'p2'].pts+=this.shotResult.pts;this.scoredAnim=1500;this._msg(this.shotResult.timing+'！+'+this.shotResult.pts+'分');
-        var t2=this;setTimeout(function(){t2.poss=1-t2.poss;t2._apply();t2._resetAfterScore();t2.phase='playing'},1500)}
-    }this.shotResult=null;
+      if(this.phase==='freethrow'){
+        this.score[this.poss]+=1;
+        this.stats[this.poss===0?'p1':'p2'].pts+=1;
+        this.ftMade++;this.scoredAnim=1200;
+        this._msg(`${this.shotResult.timing}！罚球+1 (${this.ftMade}/2)`);
+        setTimeout(()=>{
+          if(this.ftMade>=2||this.ftCount<=1){
+            this.phase='playing';this._changePoss('罚球结束');
+          } else {
+            this.ftCount--;this._resetFreeThrow();
+          }
+        },1200);
+      } else {
+        this.score[this.poss]+=this.shotResult.pts;
+        this.stats[this.poss===0?'p1':'p2'].pts+=this.shotResult.pts;
+        this.scoredAnim=1500;this._msg(`${this.shotResult.timing}！+${this.shotResult.pts}分`);
+        setTimeout(()=>{
+          this.poss=this.poss===0?1:0;this._apply();
+          this._resetAfterScore();
+          this.phase='playing';
+        },1500);
+      }
+    }
+    this.shotResult=null;
   }
-  _onMiss(){this.ballInAir=true;this.ball.vx=(Math.random()-.5)*3;this.ball.vy=2+Math.random()*2;this.shotResult=null;
-    if(this.phase==='freethrow'){var that=this;setTimeout(function(){that.phase='playing';that._changePoss('罚球结束')},1000)}}
-  _changePoss(reason){if(this.scoredAnim>0)return;if(reason)this._msg(reason);
-    var that=this;setTimeout(function(){that.poss=1-that.poss;that._apply();that._reset();that.shotClockTimer=0;that.shotResult=null;that.ballInAir=false;
-    that._shotPath=null;that._shotProgress=0;that.stealAnim=0;that.blockAnim=0;that.driveAnim=0;that.needClearThree=false;that.clearThreeDone=false;
-    that.offEnergy=Math.min(100,that.offEnergy+30);that.defEnergy=Math.min(100,that.defEnergy+30);that.phase='playing'},1200)}
+  _onMiss(){
+    this.ballInAir=true;
+    this.ball.vx=(Math.random()-0.5)*3;
+    this.ball.vy=2+Math.random()*2;
+    this.shotResult=null;
+    if(this.phase==='freethrow'){
+      this.ftCount--;
+      if(this.ftCount<=0){
+        setTimeout(()=>{this.phase='playing';this._changePoss('罚球结束');},1000);
+      } else {
+        setTimeout(()=>this._resetFreeThrow(),800);
+      }
+    }
+  }
+  _changePoss(reason){
+    if(this.scoredAnim>0)return;if(reason)this._msg(reason);
+    setTimeout(()=>{
+      this.poss=this.poss===0?1:0;this._apply();this._reset();
+      this.shotClockTimer=0;this.shotResult=null;this.ballInAir=false;
+      this._shotPath=null;this._shotProgress=0;
+      this.stealAnim=0;this.blockAnim=0;this.driveAnim=0;
+      this.needClearThree=false;this.clearThreeDone=false;
+      this.offEnergy=Math.min(100,this.offEnergy+30);
+      this.defEnergy=Math.min(100,this.defEnergy+30);
+      this.phase='playing';
+    },1200);
+  }
   _msg(t){this.msg=t;this.msgTimer=1500}
 
-  steal(){if(this.phase!=='playing'||!this.ball.has||this.shooting||this.stealAnim>0||this.defEnergy<20){if(this.defEnergy<20)this._msg('体力不足');return}
-    this.stealAnim=400;this.defEnergy-=20;var dx=this.def.x-this.off.x,dy=this.def.y-this.off.y,dist=Math.sqrt(dx*dx+dy*dy);
-    if(dist<this._s(52)){var c=(dist<this._s(35)?0.3:0.12)+this._dDef/99*0.35-this._oDrib/99*0.3;
-      if(Math.random()<c){this._changePoss('抢断成功！');this.stats[this.poss===0?'p2':'p1'].stl++;this._msg('抢断成功！');return}}this._msg('抢断失败')}
-  block(){if(this.phase!=='playing')return;if(!this._shotPath||this.blockAnim>0||this.defEnergy<25){if(this.defEnergy<25)this._msg('体力不足');else if(!this._shotPath)this._msg('等待投篮');return}
-    this.blockAnim=500;this.defEnergy-=25;var bx=this.ball.x,by=this.ball.y,dx=this.def.x-bx,dy=this.def.y-by,dist=Math.sqrt(dx*dx+dy*dy);
-    if(dist<this._s(60)){var c=0.15+this._dDef/99*0.25+this._dJump/99*0.2;if(Math.random()<c){this._shotPath=null;this._shotProgress=0;this.shotResult=null;
-    this.ballInAir=true;this.ball.has=false;this.ball.vy=Math.abs(this.ball.vy||3)*1.5;this.ball.vx=(Math.random()-.5)*8;this._msg('盖帽！');
-    this.stats[this.poss===0?'p2':'p1'].blk++;var t=this;setTimeout(function(){if(t.ballInAir)t._changePoss('盖帽！')},2000);return}}this._msg('盖帽失败')}
-  drive(){if(this.phase!=='playing'||!this.ball.has||this.shooting||this.driveAnim>0||this.offEnergy<30){if(this.offEnergy<30)this._msg('体力不足');return}
-    if(this.needClearThree){this._msg('需先出三分线！');return}this.driveAnim=600;this.offEnergy-=30;this._msg('突破！');
-    var d=this._defDist();if(d<this._s(25)){var c=0.35+this.p1.speed/99*0.35-this._dDef/99*0.25;if(Math.random()>c){this._msg('突破被阻！');this.driveAnim=200;var t=this;setTimeout(function(){t._changePoss('进攻犯规！')},300)}}}
-  foul(){if(this.phase!=='playing'||this.foulCooldown>0||!this.ball.has||this.defEnergy<15){if(this.defEnergy<15)this._msg('体力不足');else if(this.foulCooldown>0)this._msg('冷却中');return}
-    this.foulCooldown=5000;this.defEnergy-=15;this.ftShooter=this.poss;this.ftCount=2;this.ftMade=0;this.phase='freethrow';this._msg('犯规！对方罚球2次');this._resetFreeThrow();}
+  steal(){
+    if(this.phase!=='playing'||!this.ball.has||this.shooting||this.stealAnim>0||this.defEnergy<20){if(this.defEnergy<20)this._msg('体力不足');return}
+    this.stealAnim=400;this.defEnergy-=20;
+    const dx=this.def.x-this.off.x,dy=this.def.y-this.off.y,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<this._s(52)){
+      const c=(dist<this._s(35)?0.3:0.12)+this._dDef/99*0.35-this._oDrib/99*0.3;
+      if(Math.random()<c){this._changePoss('抢断成功！');this.stats[this.poss===0?'p2':'p1'].stl++;this._msg('抢断成功！');return}
+    }
+    this._msg('抢断失败');
+  }
+  block(){
+    if(this.phase!=='playing')return;
+    if(!this._shotPath||this.blockAnim>0||this.defEnergy<25){if(this.defEnergy<25)this._msg('体力不足');else if(!this._shotPath)this._msg('等待投篮');return}
+    this.blockAnim=500;this.defEnergy-=25;
+    const bx=this.ball.x,by=this.ball.y;
+    const dx=this.def.x-bx,dy=this.def.y-by,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<this._s(60)){
+      const c=0.15+this._dDef/99*0.25+this._dJump/99*0.2;
+      if(Math.random()<c){
+        this._shotPath=null;this._shotProgress=0;this.shotResult=null;
+        this.ballInAir=true;this.ball.has=false;
+        this.ball.vy=Math.abs(this.ball.vy||3)*1.5;this.ball.vx=(Math.random()-.5)*8;
+        this._msg('盖帽！');
+        this.stats[this.poss===0?'p2':'p1'].blk++;
+        setTimeout(()=>{if(this.ballInAir)this._changePoss('盖帽！')},2000);return;
+      }
+    }
+    this._msg('盖帽失败');
+  }
+  drive(){
+    if(this.phase!=='playing'||!this.ball.has||this.shooting||this.driveAnim>0||this.offEnergy<30){if(this.offEnergy<30)this._msg('体力不足');return}
+    if(this.needClearThree){this._msg('需先出三分线！');return;}
+    this.driveAnim=600;this.offEnergy-=30;this._msg('突破！');
+    const d=this._defDist();
+    if(d<this._s(25)){
+      const c=0.35+this.p1.speed/99*0.35-this._dDef/99*0.25;
+      if(Math.random()>c){this._msg('突破被阻！');this.driveAnim=200;setTimeout(()=>this._changePoss('进攻犯规！'),300)}
+    }
+  }
+  foul(){
+    if(this.phase!=='playing'||this.foulCooldown>0||!this.ball.has||this.defEnergy<15){if(this.defEnergy<15)this._msg('体力不足');else if(this.foulCooldown>0)this._msg('冷却中');return}
+    this.foulCooldown=5000;this.defEnergy-=15;
+    this.ftShooter=this.poss;this.ftCount=2;this.ftMade=0;
+    this.phase='freethrow';
+    this._msg('犯规！对方罚球2次');
+    this._resetFreeThrow();
+  }
 
-  // 渲染（供单机模式用）
-  // === 渲染(与cba-game.html完全一致) ===
+  // === 渲染 ===
   render(ctx){
-    this._drawCourt(ctx);this._drawPlayers(ctx);this._drawBall(ctx);this._drawUI(ctx);
+    const w=this.w,h=this.h;
+    if(this.bgImage){
+      ctx.drawImage(this.bgImage,0,0,w,h);
+      ctx.fillStyle='rgba(0,0,0,0.30)';ctx.fillRect(0,0,w,h);
+    }
+    this._drawCourt(ctx);
+    this._drawPlayers(ctx);
+    this._drawBall(ctx);
+    this._drawUI(ctx);
   }
   _drawCourt(ctx){
-    var cx=this._s(375);
-    ctx.fillStyle='#c68642';ctx.fillRect(0,0,this.w,this.h);
+    const s=this.scale,cx=this._s(375);
+    if(this.bgImage){
+      ctx.fillStyle='rgba(198,134,66,0.35)';ctx.fillRect(0,0,this.w,this.h);
+    } else {
+      ctx.fillStyle='#c68642';ctx.fillRect(0,0,this.w,this.h);
+    }
     ctx.strokeStyle='rgba(180,130,80,0.2)';ctx.lineWidth=1;
-    for(var y=0;y<this.h;y+=this._s(25)){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(this.w,y);ctx.stroke()}
-    var rx=cx,ry=this._s(60);
+    for(let y=0;y<this.h;y+=this._s(25)){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(this.w,y);ctx.stroke()}
+    // 篮板
+    const rx=cx,ry=this._s(60);
     ctx.fillStyle='#ddd';ctx.fillRect(rx-this._s(50),ry-this._s(20),this._s(100),this._s(8));
-    ctx.strokeStyle='#ff4444';ctx.lineWidth=3;ctx.beginPath();ctx.arc(rx,ry,this._s(12),0,Math.PI*2);ctx.stroke();
+    // 篮筐
+    ctx.strokeStyle='#ff4444';ctx.lineWidth=3;
+    ctx.beginPath();ctx.arc(rx,ry,this._s(12),0,Math.PI*2);ctx.stroke();
+    // 网
     ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=0.5;
-    for(var i=0;i<4;i++){ctx.beginPath();ctx.moveTo(rx+Math.cos(-1.9+i*0.25)*this._s(10),ry+Math.sin(-1.9+i*0.25)*this._s(10));ctx.lineTo(rx,ry+this._s(30));ctx.stroke()}
-    var tr=this._s(280);ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(rx,ry,tr,Math.PI*0.5,Math.PI*1.5);ctx.stroke();
-    var pw=this._s(160),ph=this._s(200);ctx.fillStyle='#b87a3a';ctx.fillRect(rx-pw/2,ry,pw,ph);
-    ctx.strokeStyle='#fff';ctx.strokeRect(rx-pw/2,ry,pw,ph);ctx.beginPath();ctx.moveTo(rx-pw/2,ry+ph);ctx.lineTo(rx+pw/2,ry+ph);ctx.stroke();
+    for(let i=0;i<4;i++){ctx.beginPath();ctx.moveTo(rx+Math.cos(-1.9+i*0.25)*this._s(10),ry+Math.sin(-1.9+i*0.25)*this._s(10));ctx.lineTo(rx,ry+this._s(30));ctx.stroke()}
+    // 三分线
+    const tr=this._s(280);
+    ctx.strokeStyle='#fff';ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(rx,ry,tr,Math.PI*0.5,Math.PI*1.5);ctx.stroke();
+    // 禁区
+    const pw=this._s(160),ph=this._s(200);
+    if(this.bgImage){
+      ctx.fillStyle='rgba(184,122,58,0.5)';ctx.fillRect(rx-pw/2,ry,pw,ph);
+    } else {
+      ctx.fillStyle='#b87a3a';ctx.fillRect(rx-pw/2,ry,pw,ph);
+    }
+    ctx.strokeStyle='#fff';ctx.strokeRect(rx-pw/2,ry,pw,ph);
+    // 罚球线
+    ctx.strokeStyle='#fff';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(rx-pw/2,ry+ph);ctx.lineTo(rx+pw/2,ry+ph);ctx.stroke();
+    // 中圈
     ctx.beginPath();ctx.arc(cx,this.h-this._s(30),this._s(60),0,Math.PI);ctx.stroke();
   }
   _drawPlayers(ctx){
-    var o=this.getOffPlayer(),d=this.getDefPlayer();
-    if(this.phase==='freethrow'){var sd=this.ftShooter===0?o:d;
-      if(this.ftShooter===0){this._drawP(ctx,this.off,o,'#1a6dd4','罚');this._drawP(ctx,this.def,d,'#e03030','')}
-      else{this._drawP(ctx,this.def,d,'#e03030','罚');this._drawP(ctx,this.off,o,'#1a6dd4','')}
-    }else{this._drawP(ctx,this.def,d,'#e03030','守');this._drawP(ctx,this.off,o,'#1a6dd4','攻')}
-    if(this.blockAnim>0){var bp=this.blockAnim/500;ctx.fillStyle='rgba(255,200,0,0.5)';ctx.beginPath();ctx.arc(this.def.x,this.def.y-this.def.r-bp*this._s(60),this._s(15)*(1-bp),0,Math.PI*2);ctx.fill()}
-    if(this.stealAnim>0){var sp=this.stealAnim/400;ctx.strokeStyle='rgba(255,255,0,0.6)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(this.def.x,this.def.y,this._s(35)*(1+sp),0,Math.PI*2);ctx.stroke()}
-    if(this.driveAnim>0){ctx.strokeStyle='rgba(0,136,255,0.5)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(this.off.x,this.off.y);ctx.lineTo(this.off.x,this.off.y-this._s(50));ctx.stroke()}
+    const o=this.getOffPlayer(),d=this.getDefPlayer();
+    if(this.phase==='freethrow'){
+      const shooter=this.ftShooter===0?o:d;
+      if(this.ftShooter===0){
+        this._drawP(ctx,this.off,o,'#1a6dd4','罚');
+        this._drawP(ctx,this.def,d,'#e03030','');
+      } else {
+        this._drawP(ctx,this.def,d,'#e03030','罚');
+        this._drawP(ctx,this.off,o,'#1a6dd4','');
+      }
+    } else {
+      this._drawP(ctx,this.def,d,'#e03030','守');
+      this._drawP(ctx,this.off,o,'#1a6dd4','攻');
+    }
+    if(this.blockAnim>0){
+      const p=this.blockAnim/500;
+      ctx.fillStyle='rgba(255,200,0,0.5)';ctx.beginPath();
+      ctx.arc(this.def.x,this.def.y-this.def.r-p*this._s(60),this._s(15)*(1-p),0,Math.PI*2);ctx.fill();
+    }
+    if(this.stealAnim>0){
+      const p=this.stealAnim/400;
+      ctx.strokeStyle='rgba(255,255,0,0.6)';ctx.lineWidth=2;ctx.beginPath();
+      ctx.arc(this.def.x,this.def.y,this._s(35)*(1+p),0,Math.PI*2);ctx.stroke();
+    }
+    if(this.driveAnim>0){
+      ctx.strokeStyle='rgba(0,136,255,0.5)';ctx.lineWidth=3;
+      ctx.beginPath();ctx.moveTo(this.off.x,this.off.y);ctx.lineTo(this.off.x,this.off.y-this._s(50));ctx.stroke();
+    }
   }
   _drawP(ctx,p,data,color,label){
-    if(!data)return;var x=p.x,y=p.y,r=p.r;
-    var bh=r*2.6,hdR=r*0.32,bw=r*0.45,skin='#e8b88a';
-    // Shadow
-    ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();ctx.ellipse(x,y+bh/2+r*0.25,bw*0.6,r*0.12,0,0,Math.PI*2);ctx.fill();
-    // Legs
-    var legTop=y+bh*0.1,legLen=bh*0.5;
-    ctx.strokeStyle=skin;ctx.lineWidth=r*0.2;ctx.lineCap='round';
-    ctx.beginPath();ctx.moveTo(x-bw*0.2,legTop);ctx.lineTo(x-bw*0.35,legTop+legLen);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(x+bw*0.2,legTop);ctx.lineTo(x+bw*0.2,legTop+legLen);ctx.stroke();
-    // Shorts
-    ctx.fillStyle='#1a1a2e';ctx.fillRect(x-bw*0.85,legTop-r*0.1,bw*1.7,r*0.4);
-    // Shoes
-    ctx.fillStyle='#222';ctx.beginPath();ctx.ellipse(x-bw*0.35,legTop+legLen+r*0.08,r*0.22,r*0.1,0,0,Math.PI*2);ctx.fill();
-    ctx.beginPath();ctx.ellipse(x+bw*0.2,legTop+legLen+r*0.08,r*0.22,r*0.1,0,0,Math.PI*2);ctx.fill();
-    // Jersey
-    var bodyTop=y-bh*0.42;
-    ctx.fillStyle=color;
-    var jrx=x-bw,jry=bodyTop,jrw=bw*2,jrh=bh*0.48,jrad=r*0.08;
-    ctx.beginPath();ctx.moveTo(jrx+jrad,jry);ctx.lineTo(jrx+jrw-jrad,jry);ctx.quadraticCurveTo(jrx+jrw,jry,jrx+jrw,jry+jrad);ctx.lineTo(jrx+jrw,jry+jrh-jrad);ctx.quadraticCurveTo(jrx+jrw,jry+jrh,jrx+jrw-jrad,jry+jrh);ctx.lineTo(jrx+jrad,jry+jrh);ctx.quadraticCurveTo(jrx,jry+jrh,jrx,jry+jrh-jrad);ctx.lineTo(jrx,jry+jrad);ctx.quadraticCurveTo(jrx,jry,jrx+jrad,jry);ctx.closePath();ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=0.8;ctx.stroke();
-    // Jersey number
-    ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(r*0.52)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(data.num||'?',x,bodyTop+bh*0.24);
-    // Name
-    ctx.fillStyle='#fff';ctx.font=Math.floor(r*0.38)+'px sans-serif';ctx.textAlign='center';
-    ctx.fillText(data.name||'',x,y-bh/2-hdR-this._s(6));
-    // Arms
-    var sy=bodyTop+r*0.12;
-    ctx.strokeStyle=skin;ctx.lineWidth=r*0.15;ctx.lineCap='round';
-    ctx.beginPath();ctx.moveTo(x+bw*0.3,sy);ctx.lineTo(x+bw*0.5,sy-bh*0.3);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(x-bw*0.3,sy);ctx.lineTo(x-bw*0.55,sy+bh*0.12);ctx.stroke();
-    // Head
-    ctx.fillStyle=skin;ctx.beginPath();ctx.arc(x,bodyTop-hdR*0.4,hdR,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle='#d4a574';ctx.lineWidth=0.6;ctx.stroke();
-    // Hair
-    ctx.fillStyle='#111';ctx.beginPath();ctx.arc(x,bodyTop-hdR*0.4-hdR*0.25,hdR*1.05,Math.PI,2*Math.PI);ctx.fill();
-    // Label
-    if(label){ctx.fillStyle=label==='攻'?'#ff0':label==='罚'?'#0f0':'#f88';ctx.font='bold '+Math.floor(r*0.38)+'px sans-serif';ctx.textAlign='center';ctx.fillText(label,x,y+bh/2+this._s(10))}
+    if(!data)return;
+    const x=p.x,y=p.y,r=p.r;
+    ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(x,y+r*0.9,r*0.8,r*0.2,0,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;ctx.stroke();
+    ctx.fillStyle='#fff';ctx.font=`bold ${Math.floor(r*0.8)}px sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(data.num||'?',x,y);
+    ctx.font=`${Math.floor(r*0.45)}px sans-serif`;ctx.fillText(data.name,x,y-r-this._s(8));
+    if(label){
+      ctx.fillStyle=label==='攻'?'#ff0':label==='罚'?'#0f0':'#f88';
+      ctx.font=`bold ${Math.floor(r*0.45)}px sans-serif`;
+      ctx.fillText(label,x,y+r+this._s(10));
+    }
   }
   _drawBall(ctx){
     if(!this.ball.has||this.ballInAir||this._shotPath){
-      var bx=this.ball.x,by=this.ball.y,br=this.ball.r;
+      const bx=this.ball.x,by=this.ball.y,br=this.ball.r;
       ctx.fillStyle='#ff8c00';ctx.beginPath();ctx.arc(bx,by,br,0,Math.PI*2);ctx.fill();
-      ctx.strokeStyle='#cc6600';ctx.lineWidth=1.5;ctx.stroke();ctx.strokeStyle='#333';ctx.lineWidth=1;
-      ctx.beginPath();ctx.moveTo(bx-br,by);ctx.lineTo(bx+br,by);ctx.stroke();ctx.beginPath();ctx.arc(bx,by,br*0.5,0,Math.PI*2);ctx.stroke();
+      ctx.strokeStyle='#cc6600';ctx.lineWidth=1.5;ctx.stroke();
+      ctx.strokeStyle='#333';ctx.lineWidth=1;
+      ctx.beginPath();ctx.moveTo(bx-br,by);ctx.lineTo(bx+br,by);ctx.stroke();
+      ctx.beginPath();ctx.arc(bx,by,br*0.5,0,Math.PI*2);ctx.stroke();
     }
-    if(this._shotPath){var sp2=this._shotPath;ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(sp2.sx,sp2.sy);
-      for(var i=1;i<=20;i++){var t=i/20;ctx.lineTo(sp2.sx+(sp2.ex-sp2.sx)*t,sp2.sy+(sp2.ey-sp2.sy)*t-sp2.peakH*Math.sin(Math.PI*t))}ctx.stroke();ctx.setLineDash([])}
+    // 投篮轨迹线
+    if(this._shotPath){
+      const {sx,sy,ex,ey,peakH}=this._shotPath;
+      ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+      ctx.beginPath();ctx.moveTo(sx,sy);
+      for(let i=1;i<=20;i++){const t=i/20;ctx.lineTo(sx+(ex-sx)*t,sy+(ey-sy)*t-peakH*Math.sin(Math.PI*t))}
+      ctx.stroke();ctx.setLineDash([]);
+    }
   }
   _drawUI(ctx){
-    var w=this.w,h=this.h;
+    const w=this.w,h=this.h;
+    // 顶栏
     ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,w,this._s(44));
-    var p1=this.p1,p2=this.p2;
-    ctx.fillStyle='#1a6dd4';ctx.font='bold '+Math.floor(this._s(13))+'px sans-serif';ctx.textAlign='center';ctx.fillText(p1?p1.name:'P1',w*0.2,this._s(18));
-    ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(this._s(18))+'px sans-serif';ctx.fillText(this.score[0]+' - '+this.score[1],w/2,this._s(18));
-    ctx.fillStyle='#e03030';ctx.font='bold '+Math.floor(this._s(13))+'px sans-serif';ctx.fillText(p2?p2.name:'P2',w*0.8,this._s(18));
-    var sc=Math.max(0,Math.ceil(24-this.shotClockTimer/1000));ctx.fillStyle=sc<=5?'#ff4444':'#fff';ctx.font='bold '+Math.floor(this._s(11))+'px sans-serif';ctx.fillText(sc+'s',w-this._s(28),this._s(18));
-    var pt=this.phase==='freethrow'?'罚球: '+(this.ftShooter===0?(p1?p1.name:'P1'):(p2?p2.name:'P2'))+' ('+this.ftMade+'/2)':('球权: '+(this.poss===0?(p1?p1.name:'P1'):(p2?p2.name:'P2')));
-    ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font=Math.floor(this._s(10))+'px sans-serif';ctx.textAlign='center';ctx.fillText(pt,w/2,this._s(34));
-    // 计时器
-    if(!this.overtime||this.gameTimer>0||this.overtimeTimer>0){var remMs=this.overtime?this.overtimeTimer:this.gameTimer;var rs2=Math.ceil(remMs/1000),mn2=Math.floor(rs2/60),se2=rs2%60;var ts2=mn2+':'+(se2<10?'0':'')+se2;
-      ctx.fillStyle=remMs<=30000?'#ff4444':remMs<=60000?'#ff0':'#fff';ctx.font='bold '+Math.floor(this._s(12))+'px sans-serif';ctx.textAlign='center';
-      var tl2=(this.overtime?'⏱ OT ':'⏱ ')+ts2;if(this.gameType==='target'&&this.targetScore)tl2+=' | 🎯'+this.targetScore+'分';ctx.fillText(tl2,w/2,this._s(58))}
-    // 跳球
-    if(this.phase==='jumpball'&&this.jumpCountdown>0){ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,w,h);ctx.fillStyle='#ffd700';ctx.font='bold '+Math.floor(this._s(72))+'px sans-serif';ctx.textAlign='center';ctx.fillText(this.jumpCountdown,w/2,h/2+this._s(18));ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(this._s(16))+'px sans-serif';ctx.fillText('跳球！移动摇杆争夺球权',w/2,h/2+this._s(50))}
-    if(this.needClearThree&&!this.clearThreeDone&&this.phase==='playing'){ctx.fillStyle='#ff0';ctx.font='bold '+Math.floor(this._s(14))+'px sans-serif';ctx.textAlign='center';ctx.fillText('⚠ 需运球出三分线！',w/2,this._s(65))}
-    if(this.shooting){var bw=this._s(180),bh=this._s(10),bx2=w/2-bw/2,by2=h-this._s(90);ctx.fillStyle='#333';ctx.fillRect(bx2,by2,bw,bh);ctx.fillStyle='rgba(0,255,0,0.3)';ctx.fillRect(bx2+bw*0.45,by2,bw*0.1,bh);
-      var p=this.shotPower,mc=p>=.45&&p<=.55?'#00ff00':p>=.35&&p<=.65?'#ffff00':'#ff0000';ctx.fillStyle=mc;ctx.fillRect(bx2,by2,bw*p,bh);
-      ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.strokeRect(bx2,by2,bw,bh);ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(this._s(11))+'px sans-serif';ctx.textAlign='center';
-      ctx.fillText((this.phase==='freethrow'?'罚球':'投篮')+' 力度 '+Math.floor(p*100)+'%',w/2,by2-this._s(6))}
-    if(this.scoredAnim>0&&this.shotResult){var a2=Math.min(1,this.scoredAnim/800);var o2=(1500-this.scoredAnim)/1500*this._s(40);ctx.fillStyle='rgba(255,255,0,'+a2+')';ctx.font='bold '+Math.floor(this._s(22))+'px sans-serif';ctx.textAlign='center';ctx.fillText(this.shotResult.made?'+'+this.shotResult.pts:'打铁',w/2,this._s(180)-o2)}
-    if(this.msgTimer>0){var a3=Math.min(1,this.msgTimer/300);ctx.fillStyle='rgba(255,255,255,'+a3+')';ctx.font='bold '+Math.floor(this._s(16))+'px sans-serif';ctx.textAlign='center';ctx.fillText(this.msg,w/2,h-this._s(160))}
-    var ey=this._s(48),eh=this._s(5),ew=this._s(70),eg=this._s(10);ctx.fillStyle='#333';ctx.fillRect(eg,ey,ew,eh);ctx.fillStyle='#0cf';ctx.fillRect(eg,ey,ew*(this.offEnergy/100),eh);ctx.fillStyle='#333';ctx.fillRect(w-eg-ew,ey,ew,eh);ctx.fillStyle='#0cf';ctx.fillRect(w-eg-ew,ey,ew*(this.defEnergy/100),eh);
-    if(this.foulCooldown>0){ctx.fillStyle='rgba(255,68,0,0.4)';ctx.font=Math.floor(this._s(10))+'px sans-serif';ctx.textAlign='center';ctx.fillText('犯规冷却'+(this.foulCooldown/1000).toFixed(1)+'s',w-this._s(50),this._s(60))}
-    if(this.phase==='gameover'){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,h/2-this._s(40),w,this._s(80));ctx.fillStyle='#ffd700';ctx.font='bold '+Math.floor(this._s(24))+'px sans-serif';ctx.textAlign='center';
-      var wn=this.winner===0?(p1?p1.name:'P1'):(p2?p2.name:'P2');ctx.fillText(wn+' 获胜！',w/2,h/2+this._s(6))}
-  }
-
-  getState(){
-    var remMs=this.overtime?this.overtimeTimer:this.gameTimer;
-    var sp=null;
-    if(this._shotPath){sp={sx:this._shotPath.sx/this.scale,sy:this._shotPath.sy/this.scale,ex:this._shotPath.ex/this.scale,ey:this._shotPath.ey/this.scale,peakH:this._shotPath.peakH/this.scale}}
-    return{
-      ph:this.phase,sc:this.score,po:this.poss,cl:Math.max(0,Math.ceil(24-this.shotClockTimer/1000)),
-      winner:this.winner,
-      p1:{x:this.off.x/this.scale,y:this.off.y/this.scale,e:this.offEnergy},
-      p2:{x:this.def.x/this.scale,y:this.def.y/this.scale,e:this.defEnergy},
-      ba:{x:this.ball.x/this.scale,y:this.ball.y/this.scale,ia:this.ballInAir,ps:this.ball.has,pr:this.poss},
-      nct:this.needClearThree,ctd:this.clearThreeDone,sh:this.shooting,sp:this.shotPower,
-      san:this.scoredAnim,spt:this.shotResult?this.shotResult.pts:0,
-      fts:this.ftShooter,ftm:this.ftMade,ftc:this.ftCount,fcd:[this.foulCooldown,0],
-      ev:this.msgTimer>0?[this.msg]:[],msgT:this.msgTimer,
-      blkA:this.blockAnim,stlA:this.stealAnim,drvA:this.driveAnim,
-      shotPath:sp,
-      gt:this.gameTimer,gtt:this.gameTimeTotal,ot:this.overtime,ott:this.overtimeTimer,tgt:this.targetScore,gtype:this.gameType
+    const p1=this.p1,p2=this.p2;
+    ctx.fillStyle='#1a6dd4';ctx.font=`bold ${Math.floor(this._s(13))}px sans-serif`;ctx.textAlign='center';
+    ctx.fillText(p1?p1.name:'P1',w*0.2,this._s(18));
+    ctx.fillStyle='#fff';ctx.font=`bold ${Math.floor(this._s(18))}px sans-serif`;
+    ctx.fillText(`${this.score[0]} - ${this.score[1]}`,w/2,this._s(18));
+    ctx.fillStyle='#e03030';ctx.font=`bold ${Math.floor(this._s(13))}px sans-serif`;
+    ctx.fillText(p2?p2.name:'P2',w*0.8,this._s(18));
+    const sc=Math.max(0,Math.ceil(24-this.shotClockTimer/1000));
+    ctx.fillStyle=sc<=5?'#ff4444':'#fff';ctx.font=`bold ${Math.floor(this._s(11))}px sans-serif`;
+    ctx.fillText(`${sc}s`,w-this._s(28),this._s(18));
+    ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font=`${Math.floor(this._s(10))}px sans-serif`;
+    const possText=this.phase==='freethrow'?`罚球: ${this.ftShooter===0?(p1?p1.name:'P1'):(p2?p2.name:'P2')} (${this.ftMade}/2)`:(`球权: ${this.poss===0?(p1?p1.name:'P1'):(p2?p2.name:'P2')}`);
+    ctx.fillText(possText,w/2,this._s(34));
+    // 跳球倒计时
+    if(this.phase==='jumpball'&&this.jumpCountdown>0){
+      ctx.fillStyle='rgba(0,0,0,0.5)';ctx.fillRect(0,0,w,h);
+      ctx.fillStyle='#ffd700';ctx.font=`bold ${Math.floor(this._s(72))}px sans-serif`;ctx.textAlign='center';
+      ctx.fillText(this.jumpCountdown,w/2,h/2+this._s(18));
+      ctx.fillStyle='#fff';ctx.font=`bold ${Math.floor(this._s(16))}px sans-serif`;
+      ctx.fillText('跳球！移动摇杆争夺球权',w/2,h/2+this._s(50));
+    }
+    // 三分线提示
+    if(this.needClearThree&&!this.clearThreeDone&&this.phase==='playing'){
+      ctx.fillStyle='#ff0';ctx.font=`bold ${Math.floor(this._s(14))}px sans-serif`;ctx.textAlign='center';
+      ctx.fillText('⚠ 需运球出三分线！',w/2,this._s(65));
+    }
+    // 投篮条
+    if(this.shooting){
+      const bw=this._s(180),bh=this._s(10),bx=w/2-bw/2,by=h-this._s(90);
+      ctx.fillStyle='#333';ctx.fillRect(bx,by,bw,bh);
+      ctx.fillStyle='rgba(0,255,0,0.3)';ctx.fillRect(bx+bw*0.45,by,bw*0.1,bh);
+      let mc='#ff0000';const p=this.shotPower;
+      if(p>=.45&&p<=.55)mc='#00ff00';else if(p>=.35&&p<=.65)mc='#ffff00';
+      ctx.fillStyle=mc;ctx.fillRect(bx,by,bw*p,bh);
+      ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.strokeRect(bx,by,bw,bh);
+      ctx.fillStyle='#fff';ctx.font=`bold ${Math.floor(this._s(11))}px sans-serif`;ctx.textAlign='center';
+      ctx.fillText((this.phase==='freethrow'?'罚球':'投篮')+` 力度 ${Math.floor(p*100)}%`,w/2,by-this._s(6));
+    }
+    // 得分
+    if(this.scoredAnim>0&&this.shotResult){
+      const a=Math.min(1,this.scoredAnim/800);const o=(1500-this.scoredAnim)/1500*this._s(40);
+      ctx.fillStyle=`rgba(255,255,0,${a})`;ctx.font=`bold ${Math.floor(this._s(22))}px sans-serif`;ctx.textAlign='center';
+      ctx.fillText(this.shotResult.made?`+${this.shotResult.pts}`:'打铁',w/2,this._s(180)-o);
+    }
+    // 消息
+    if(this.msgTimer>0){
+      const a=Math.min(1,this.msgTimer/300);
+      ctx.fillStyle=`rgba(255,255,255,${a})`;ctx.font=`bold ${Math.floor(this._s(16))}px sans-serif`;ctx.textAlign='center';
+      ctx.fillText(this.msg,w/2,h-this._s(160));
+    }
+    // 体力
+    const ey=this._s(48),eh=this._s(5),ew=this._s(70),eg=this._s(10);
+    ctx.fillStyle='#333';ctx.fillRect(eg,ey,ew,eh);
+    ctx.fillStyle='#0cf';ctx.fillRect(eg,ey,ew*(this.offEnergy/100),eh);
+    ctx.fillStyle='#333';ctx.fillRect(w-eg-ew,ey,ew,eh);
+    ctx.fillStyle='#0cf';ctx.fillRect(w-eg-ew,ey,ew*(this.defEnergy/100),eh);
+    // 犯规冷却指示
+    if(this.foulCooldown>0){
+      ctx.fillStyle='rgba(255,68,0,0.4)';ctx.font=`${Math.floor(this._s(10))}px sans-serif`;ctx.textAlign='center';
+      ctx.fillText(`犯规冷却${(this.foulCooldown/1000).toFixed(1)}s`,w-this._s(50),this._s(60));
+    }
+    // 游戏结束
+    if(this.phase==='gameover'){
+      ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,h/2-this._s(40),w,this._s(80));
+      ctx.fillStyle='#ffd700';ctx.font=`bold ${Math.floor(this._s(24))}px sans-serif`;ctx.textAlign='center';
+      const wn=this.winner===0?(p1?p1.name:'P1'):(p2?p2.name:'P2');
+      ctx.fillText(`${wn} 获胜！`,w/2,h/2+this._s(6));
     }
   }
 }
 
-// ====== 共享渲染(与cba-game.html完全一致) ======
-function renderSharedState(state, p1data, p2data, mySideIdx){
-  var w=canvas.width,h=canvas.height;ctx.clearRect(0,0,w,h);
-  var sc=Math.min(w/750,h/500);function _(v){return v*sc}
-  if(!state)return;
-  var s=state;
+// ==================== 应用控制 ====================
+const $=id=>document.getElementById(id);
+const selectPage=$('selectPage'),gamePage=$('gamePage'),resultPage=$('resultPage');
+const canvas=$('gameCanvas'),ctx=canvas.getContext('2d');
 
-  // 球场——与原始_drawCourt完全一致
-  ctx.fillStyle='#c68642';ctx.fillRect(0,0,w,h);
-  ctx.strokeStyle='rgba(180,130,80,0.2)';ctx.lineWidth=1;
-  for(var y=0;y<h;y+=_(25)){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
-  var rx=_(375),ry=_(60);
-  ctx.fillStyle='#ddd';ctx.fillRect(rx-_(50),ry-_(20),_(100),_(8));
-  ctx.strokeStyle='#ff4444';ctx.lineWidth=3;ctx.beginPath();ctx.arc(rx,ry,_(12),0,Math.PI*2);ctx.stroke();
-  ctx.strokeStyle='rgba(255,255,255,0.2)';ctx.lineWidth=0.5;
-  for(var i=0;i<4;i++){ctx.beginPath();ctx.moveTo(rx+Math.cos(-1.9+i*0.25)*_(10),ry+Math.sin(-1.9+i*0.25)*_(10));ctx.lineTo(rx,ry+_(30));ctx.stroke()}
-  var tr=_(280);ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(rx,ry,tr,Math.PI*0.5,Math.PI*1.5);ctx.stroke();
-  var pw=_(160),ph=_(200);ctx.fillStyle='#b87a3a';ctx.fillRect(rx-pw/2,ry,pw,ph);
-  ctx.strokeStyle='#fff';ctx.strokeRect(rx-pw/2,ry,pw,ph);
-  ctx.beginPath();ctx.moveTo(rx-pw/2,ry+ph);ctx.lineTo(rx+pw/2,ry+ph);ctx.stroke();
-  ctx.beginPath();ctx.arc(rx,h-_(30),_(60),0,Math.PI);ctx.stroke();
+let player1=null,player2=null,selectingFor=1,currentTeamId='liaoning',selectedPid='';
+let engine=null,gameLoop=null,lastTime=0,gameEnded=false,bgImage=null;
 
-  // Players — 与原始_drawPlayers/_drawP一致
-  function drawPx(px,py,data,color,label){
-    if(!data)return;var x=_(px),y=_(py),r=_(25);
-    var bh=r*2.6,hdR=r*0.32,bw=r*0.45,skin='#e8b88a';
-    // Shadow
-    ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();ctx.ellipse(x,y+bh/2+r*0.25,bw*0.6,r*0.12,0,0,Math.PI*2);ctx.fill();
-    // Legs
-    var legTop=y+bh*0.1,legLen=bh*0.5;
-    ctx.strokeStyle=skin;ctx.lineWidth=r*0.2;ctx.lineCap='round';
-    ctx.beginPath();ctx.moveTo(x-bw*0.2,legTop);ctx.lineTo(x-bw*0.35,legTop+legLen);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(x+bw*0.2,legTop);ctx.lineTo(x+bw*0.2,legTop+legLen);ctx.stroke();
-    // Shorts
-    ctx.fillStyle='#1a1a2e';ctx.fillRect(x-bw*0.85,legTop-r*0.1,bw*1.7,r*0.4);
-    // Shoes
-    ctx.fillStyle='#222';ctx.beginPath();ctx.ellipse(x-bw*0.35,legTop+legLen+r*0.08,r*0.22,r*0.1,0,0,Math.PI*2);ctx.fill();
-    ctx.beginPath();ctx.ellipse(x+bw*0.2,legTop+legLen+r*0.08,r*0.22,r*0.1,0,0,Math.PI*2);ctx.fill();
-    // Jersey
-    var bodyTop=y-bh*0.42;
-    ctx.fillStyle=color;
-    var jrx=x-bw,jry=bodyTop,jrw=bw*2,jrh=bh*0.48,jrad=r*0.08;
-    ctx.beginPath();ctx.moveTo(jrx+jrad,jry);ctx.lineTo(jrx+jrw-jrad,jry);ctx.quadraticCurveTo(jrx+jrw,jry,jrx+jrw,jry+jrad);ctx.lineTo(jrx+jrw,jry+jrh-jrad);ctx.quadraticCurveTo(jrx+jrw,jry+jrh,jrx+jrw-jrad,jry+jrh);ctx.lineTo(jrx+jrad,jry+jrh);ctx.quadraticCurveTo(jrx,jry+jrh,jrx,jry+jrh-jrad);ctx.lineTo(jrx,jry+jrad);ctx.quadraticCurveTo(jrx,jry,jrx+jrad,jry);ctx.closePath();ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=0.8;ctx.stroke();
-    // Jersey number
-    ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(r*0.52)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(data.num||'?',x,bodyTop+bh*0.24);
-    // Name
-    ctx.fillStyle='#fff';ctx.font=Math.floor(r*0.38)+'px sans-serif';ctx.textAlign='center';
-    ctx.fillText(data.name||'',x,y-bh/2-hdR-_(6));
-    // Arms
-    var sy=bodyTop+r*0.12;
-    ctx.strokeStyle=skin;ctx.lineWidth=r*0.15;ctx.lineCap='round';
-    ctx.beginPath();ctx.moveTo(x+bw*0.3,sy);ctx.lineTo(x+bw*0.5,sy-bh*0.3);ctx.stroke();
-    ctx.beginPath();ctx.moveTo(x-bw*0.3,sy);ctx.lineTo(x-bw*0.55,sy+bh*0.12);ctx.stroke();
-    // Head
-    ctx.fillStyle=skin;ctx.beginPath();ctx.arc(x,bodyTop-hdR*0.4,hdR,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle='#d4a574';ctx.lineWidth=0.6;ctx.stroke();
-    // Hair
-    ctx.fillStyle='#111';ctx.beginPath();ctx.arc(x,bodyTop-hdR*0.4-hdR*0.25,hdR*1.05,Math.PI,2*Math.PI);ctx.fill();
-    // Label
-    if(label){ctx.fillStyle=label==='攻'?'#ff0':label==='罚'?'#0f0':'#f88';ctx.font='bold '+Math.floor(r*0.38)+'px sans-serif';ctx.textAlign='center';ctx.fillText(label,x,y+bh/2+_(10))}
-  }
+// 加载背景图片
+(function(){
+  var img=new Image();
+  img.onload=function(){bgImage=img;};
+  img.src='images/guoailun.jpg';
+})();
 
-  var p1=s.p1||{x:375,y:380,e:100},p2=s.p2||{x:375,y:120,e:100};
-  if(s.ph==='freethrow'){
-    var sIdx=s.fts!==undefined?s.fts:0;
-    drawPx(p1.x,p1.y,p1data,'#1a6dd4',sIdx===0?'罚':'');
-    drawPx(p2.x,p2.y,p2data,'#e03030',sIdx===1?'罚':'');
-  }else{
-    drawPx(p1.x,p1.y,p1data,'#1a6dd4',s.po===0?'攻':'守');
-    drawPx(p2.x,p2.y,p2data,'#e03030',s.po===1?'攻':'守');
-  }
-
-  // 动画效果 — 与原始一致
-  if(s.blkA&&s.blkA>0){var bp=s.blkA/500;ctx.fillStyle='rgba(255,200,0,0.5)';ctx.beginPath();ctx.arc(_(p2.x),_(p2.y)-_(25)-bp*_(60),_(15)*(1-bp),0,Math.PI*2);ctx.fill()}
-  if(s.stlA&&s.stlA>0){var sp=s.stlA/400;ctx.strokeStyle='rgba(255,255,0,0.6)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(_(p2.x),_(p2.y),_(35)*(1+sp),0,Math.PI*2);ctx.stroke()}
-  if(s.drvA&&s.drvA>0){ctx.strokeStyle='rgba(0,136,255,0.5)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(_(p1.x),_(p1.y));ctx.lineTo(_(p1.x),_(p1.y)-_(50));ctx.stroke()}
-
-  // Ball — 与原始_drawBall一致
-  var ba=s.ba||{x:375,y:340,ia:false,ps:true};
-  if(!ba.ps||ba.ia||s.shotPath){
-    var bx=_(ba.x),by=_(ba.y),br=_(10);
-    ctx.fillStyle='#ff8c00';ctx.beginPath();ctx.arc(bx,by,br,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle='#cc6600';ctx.lineWidth=1.5;ctx.stroke();
-    ctx.strokeStyle='#333';ctx.lineWidth=1;
-    ctx.beginPath();ctx.moveTo(bx-br,by);ctx.lineTo(bx+br,by);ctx.stroke();
-    ctx.beginPath();ctx.arc(bx,by,br*0.5,0,Math.PI*2);ctx.stroke();
-  }
-  // Shot path虚线
-  if(s.shotPath){var sp2=s.shotPath;ctx.strokeStyle='rgba(255,255,255,0.3)';ctx.lineWidth=1;ctx.setLineDash([4,4]);ctx.beginPath();ctx.moveTo(_(sp2.sx),_(sp2.sy));
-    for(var i2=1;i2<=20;i2++){var t2=i2/20;ctx.lineTo(_(sp2.sx+(sp2.ex-sp2.sx)*t2),_(sp2.sy+(sp2.ey-sp2.sy)*t2-sp2.peakH*Math.sin(Math.PI*t2)))}ctx.stroke();ctx.setLineDash([])}
-
-  // UI — 与原始_drawUI一致
-  ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,w,_(44));
-  var sc0=s.sc?s.sc[0]:0,sc1=s.sc?s.sc[1]:0;
-  ctx.fillStyle='#1a6dd4';ctx.font='bold '+Math.floor(_(13))+'px sans-serif';ctx.textAlign='center';ctx.fillText(p1data?p1data.name:'P1',w*0.2,_(18));
-  ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(_(18))+'px sans-serif';ctx.fillText(sc0+' - '+sc1,w/2,_(18));
-  ctx.fillStyle='#e03030';ctx.font='bold '+Math.floor(_(13))+'px sans-serif';ctx.fillText(p2data?p2data.name:'P2',w*0.8,_(18));
-  var sc2=Math.max(0,Math.ceil(s.cl||24));
-  ctx.fillStyle=sc2<=5?'#ff4444':'#fff';ctx.font='bold '+Math.floor(_(11))+'px sans-serif';ctx.fillText(sc2+'s',w-_(28),_(18));
-  var phaseT=s.ph==='freethrow'?'罚球: '+(s.fts===0?(p1data?p1data.name:'P1'):(p2data?p2data.name:'P2'))+' ('+(s.ftm||0)+'/2)':s.ph==='jumpball'?'跳球中...':'球权: '+(s.po===0?(p1data?p1data.name:'P1'):(p2data?p2data.name:'P2'));
-  ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font=Math.floor(_(10))+'px sans-serif';ctx.textAlign='center';ctx.fillText(phaseT,w/2,_(34));
-
-  // 计时器
-  if(s.gt!==undefined){var remMs=s.ot?s.ott:(s.gt||0);var remSec=Math.ceil(remMs/1000),mins=Math.floor(remSec/60),secs=remSec%60;var timeStr=mins+':'+(secs<10?'0':'')+secs;
-    ctx.fillStyle=remMs<=30000?'#ff4444':remMs<=60000?'#ff0':'#fff';ctx.font='bold '+Math.floor(_(12))+'px sans-serif';ctx.textAlign='center';
-    var tl=(s.ot?'⏱ OT ':'⏱ ')+timeStr;if(s.gtype==='target'&&s.tgt)tl+=' | 🎯'+s.tgt+'分';ctx.fillText(tl,w/2,_(58))}
-
-  if(s.nct&&!s.ctd){ctx.fillStyle='#ff0';ctx.font='bold '+Math.floor(_(14))+'px sans-serif';ctx.textAlign='center';ctx.fillText('⚠ 需运球出三分线！',w/2,_(65))}
-
-  // 投篮条
-  if(s.sh){var bw=_(180),bh=_(10),bx2=w/2-bw/2,by2=h-_(90);ctx.fillStyle='#333';ctx.fillRect(bx2,by2,bw,bh);ctx.fillStyle='rgba(0,255,0,0.3)';ctx.fillRect(bx2+bw*0.45,by2,bw*0.1,bh);
-    var p=s.sp||0,mc=p>=.45&&p<=.55?'#00ff00':p>=.35&&p<=.65?'#ffff00':'#ff0000';ctx.fillStyle=mc;ctx.fillRect(bx2,by2,bw*p,bh);
-    ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.strokeRect(bx2,by2,bw,bh);ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(_(11))+'px sans-serif';ctx.textAlign='center';
-    ctx.fillText((s.ph==='freethrow'?'罚球':'投篮')+' 力度 '+Math.floor(p*100)+'%',w/2,by2-_(6))}
-
-  // 得分动画
-  if(s.san>0&&s.spt>0){var ao2=Math.min(1,s.san/800);var o2=(1500-(s.san>1500?1500:s.san))/1500*_(40);ctx.fillStyle='rgba(255,255,0,'+ao2+')';ctx.font='bold '+Math.floor(_(22))+'px sans-serif';ctx.textAlign='center';ctx.fillText('+'+s.spt,w/2,_(180)-o2)}
-
-  // 消息
-  if(s.ev&&s.ev.length>0){var am3=Math.min(1,(s.msgT||1500)/300);ctx.fillStyle='rgba(255,255,255,'+am3+')';ctx.font='bold '+Math.floor(_(16))+'px sans-serif';ctx.textAlign='center';ctx.fillText(s.ev[s.ev.length-1],w/2,h-_(160))}
-
-  // 体力条
-  var ey=_(48),eh=_(5),ew=_(70),eg=_(10);ctx.fillStyle='#333';ctx.fillRect(eg,ey,ew,eh);ctx.fillStyle='#0cf';ctx.fillRect(eg,ey,ew*((p1.e||100)/100),eh);ctx.fillStyle='#333';ctx.fillRect(w-eg-ew,ey,ew,eh);ctx.fillStyle='#0cf';ctx.fillRect(w-eg-ew,ey,ew*((p2.e||100)/100),eh);
-
-  // 犯规冷却
-  if(s.fcd&&s.fcd[mySideIdx]&&s.fcd[mySideIdx]>0){ctx.fillStyle='rgba(255,68,0,0.4)';ctx.font=Math.floor(_(10))+'px sans-serif';ctx.textAlign='center';ctx.fillText('犯规冷却'+(s.fcd[mySideIdx]/1000).toFixed(1)+'s',w-_(50),_(60))}
-
-  // 游戏结束
-  if(s.ph==='gameover'){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,h/2-_(40),w,_(80));ctx.fillStyle='#ffd700';ctx.font='bold '+Math.floor(_(24))+'px sans-serif';ctx.textAlign='center';
-    var wn2=s.winner===0?(p1data?p1data.name:'P1'):(p2data?p2data.name:'P2');ctx.fillText(wn2+' 获胜！',w/2,h/2+_(6))}
+// === 初始化选人页 ===
+function renderSelectPage(){
+  const teams=CBA_TEAMS;
+  let h='<div class="s-header"><h1>CBA篮球1v1</h1><p>选择球员 · 单挑对决</p></div>';
+  h+='<div class="versus">';
+  h+=renderPlayerCard(player1,1,'挑战者');
+  h+='<div class="vs-badge">VS</div>';
+  h+=renderPlayerCard(player2,2,'防守者');
+  h+='</div>';
+  h+=`<div class="s-hint">为 ${selectingFor===1?'挑战者':'防守者'} 选择球员</div>`;
+  h+='<div class="team-scroll">';
+  teams.forEach(t=>{h+=`<div class="t-chip${t.id===currentTeamId?' active':''}" onclick="selectTeam('${t.id}')" style="border-color:${t.color}">${t.abbr}</div>`});
+  h+='</div><div id="playerList">';
+  const players=getPlayersByTeam(currentTeamId);
+  players.forEach(p=>{
+    h+=`<div class="p-card${p.id===selectedPid?' sel':''}" onclick="selectPlayer('${p.id}')" style="border-left:4px solid ${p.teamColor}">`;
+    h+=`<div class="cl"><span class="num">#${p.num}</span><span class="name">${p.name}</span><span class="pos">${p.pos}</span></div>`;
+    h+='<div class="ms">';
+    ATTR_KEYS.forEach(k=>{h+=`<span>${k[0]}${p[k]}</span>`});
+    h+='</div></div>';
+  });
+  h+='</div>';
+  h+=`<button id="startBtn" class="${player1&&player2?'ready':''}" onclick="startGame()">${player1&&player2?'开始比赛':'请选择双方球员'}</button>`;
+  selectPage.innerHTML=h;
+}
+function renderPlayerCard(p,idx,label){
+  if(!p)return `<div class="pick"><div class="pick-head"><span class="lbl">${label}</span><span class="nm ph">选择球员</span></div></div>`;
+  let h=`<div class="pick"><div class="pick-head" style="background:${p.teamColor}"><span class="lbl">${label}</span><span class="nm">${p.name}</span><span class="tm">${p.teamAbbr} #${p.num}</span></div><div class="attrs-box">`;
+  ATTR_KEYS.forEach((k,i)=>{
+    const v=p[k];
+    h+=`<div class="attr-row"><span class="an">${ATTR_NAMES[i]}</span><div class="ab"><div style="width:${v}%;background:${v>70?'#0c6':v>40?'#fa0':'#f44'}"></div></div><span class="av">${v}</span></div>`;
+  });
+  h+='</div></div>';
+  return h;
+}
+function selectTeam(id){currentTeamId=id;selectedPid='';renderSelectPage()}
+function selectPlayer(pid){
+  const players=getPlayersByTeam(currentTeamId);
+  const p=players.find(x=>x.id===pid);if(!p)return;
+  selectedPid=pid;
+  if(selectingFor===1){
+    player1=p;selectingFor=2;
+    const nt=CBA_TEAMS.find(t=>t.id!==p.teamId)||CBA_TEAMS[0];
+    currentTeamId=nt.id;selectedPid='';renderSelectPage();
+  }else{player2=p;selectingFor=1;renderSelectPage()}
 }
 
-// ====== 单机模式游戏循环 ======
-function startSingleGame(){
+// === 进入游戏 ===
+function startGame(){
   if(!player1||!player2)return;
-  selectPage.style.display='none';document.getElementById('settingsPage').style.display='none';gamePage.style.display='flex';
-  goOverlay.classList.remove('show');cdOverlay.classList.remove('show');
+  selectPage.style.display='none';
+  gamePage.style.display='flex';resultPage.style.display='none';
   resizeCanvas();
-  engine=new GameEngine(canvas.width,canvas.height,player1,player2,gameSettings);engine.bgImage=bgImage;gameEnded=false;lastTime=performance.now();
+  engine=new GameEngine(canvas.width,canvas.height);
+  engine.bgImage=bgImage;
+  engine.setPlayers(player1,player2);
+  gameEnded=false;
+  lastTime=performance.now();
   if(gameLoop)clearInterval(gameLoop);
-  gameLoop=setInterval(function(){
-    var now=performance.now(),dt=now-lastTime;lastTime=now;
-    engine.update(dt);engine.offInput.mx=myInput.mx;engine.offInput.my=myInput.my;
+  gameLoop=setInterval(()=>{
+    const now=performance.now(),dt=now-lastTime;lastTime=now;
+    engine.update(dt);
     ctx.clearRect(0,0,canvas.width,canvas.height);
     engine.render(ctx);
-    if(engine.gameOver&&!gameEnded){gameEnded=true;clearInterval(gameLoop);showSingleGameOver()}
+    if(engine.gameOver&&!gameEnded){
+      gameEnded=true;clearInterval(gameLoop);
+      const wn=engine.winner===0?player1.name:player2.name;
+      const ov=$('gameOverOverlay');
+      ov.innerHTML=`<div class="ov-box"><h2>${wn} 获胜！</h2><div class="ov-score">${engine.score[0]} - ${engine.score[1]}</div><div class="ov-stat">${player1.name}: ${engine.stats.p1.pts}分 ${engine.stats.p1.reb||0}板 ${engine.stats.p1.blk}帽 ${engine.stats.p1.stl}断</div><div class="ov-stat">${player2.name}: ${engine.stats.p2.pts}分 ${engine.stats.p2.reb||0}板 ${engine.stats.p2.blk}帽 ${engine.stats.p2.stl}断</div><button class="ov-detail" onclick="showResult()">查看详情</button><button class="ov-again" onclick="restartGame()">再来一局</button></div>`;
+      ov.classList.add('show');
+    }
+  },16);
+}
+function resizeCanvas(){
+  const rect=gamePage.getBoundingClientRect();
+  const ctrlH=150; // approx control height
+  canvas.width=rect.width;
+  canvas.height=rect.height-ctrlH;
+  canvas.style.width=rect.width+'px';
+  canvas.style.height=(rect.height-ctrlH)+'px';
+}
+function restartGame(){
+  $('gameOverOverlay').classList.remove('show');
+  if(gameLoop)clearInterval(gameLoop);
+  engine=new GameEngine(canvas.width,canvas.height);
+  engine.bgImage=bgImage;
+  engine.setPlayers(player1,player2);
+  gameEnded=false;lastTime=performance.now();
+  gameLoop=setInterval(()=>{
+    const now=performance.now(),dt=now-lastTime;lastTime=now;
+    engine.update(dt);
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    engine.render(ctx);
+    if(engine.gameOver&&!gameEnded){
+      gameEnded=true;clearInterval(gameLoop);
+      const wn=engine.winner===0?player1.name:player2.name;
+      const ov=$('gameOverOverlay');
+      ov.innerHTML=`<div class="ov-box"><h2>${wn} 获胜！</h2><div class="ov-score">${engine.score[0]} - ${engine.score[1]}</div><div class="ov-stat">${player1.name}: ${engine.stats.p1.pts}分 ${engine.stats.p1.reb||0}板 ${engine.stats.p1.blk}帽 ${engine.stats.p1.stl}断</div><div class="ov-stat">${player2.name}: ${engine.stats.p2.pts}分 ${engine.stats.p2.reb||0}板 ${engine.stats.p2.blk}帽 ${engine.stats.p2.stl}断</div><button class="ov-detail" onclick="showResult()">查看详情</button><button class="ov-again" onclick="restartGame()">再来一局</button></div>`;
+      ov.classList.add('show');
+    }
   },16);
 }
 
-function showSingleGameOver(){
-  var s=engine.stats,w=engine.winner,sc=engine.score;
-  var h='<div class="ov-box"><h2>'+(w===0?player1.name:player2.name)+' 获胜！</h2><div class="ov-score">'+sc[0]+' - '+sc[1]+'</div>';
-  h+='<div class="ov-stat">'+player1.name+': '+s.p1.pts+'分 '+(s.p1.reb||0)+'板 '+s.p1.blk+'帽 '+s.p1.stl+'断</div>';
-  h+='<div class="ov-stat">'+player2.name+': '+s.p2.pts+'分 '+(s.p2.reb||0)+'板 '+s.p2.blk+'帽 '+s.p2.stl+'断</div>';
-  h+='<button class="ov-rematch" onclick="startSingleGame()">再来一局</button><button class="ov-home" onclick="goHome()">返回首页</button></div>';
-  goOverlay.innerHTML=h;goOverlay.classList.add('show');
+// === 结果页 ===
+function showResult(){
+  $('gameOverOverlay').classList.remove('show');
+  gamePage.style.display='none';selectPage.style.display='none';
+  resultPage.style.display='flex';resultPage.classList.add('show');
+  const s=engine.stats,w=engine.winner,sc=engine.score;
+  let h='<div class="r-head"><span class="trophy">🏆</span>';
+  h+=`<h2>${w===0?player1.name:player2.name} 获胜！</h2><div class="r-score">${sc[0]} - ${sc[1]}</div></div>`;
+  h+='<div class="r-compare">';
+  h+=renderResultPlayer(player1,s.p1,w===0);
+  h+=renderResultPlayer(player2,s.p2,w===1);
+  h+='</div>';
+  h+='<div class="attr-section"><h3>球员能力对比</h3>';
+  ATTR_KEYS.forEach((k,i)=>{
+    h+=`<div class="ac-row"><div class="ac-labels"><span>${player1.name}</span><span>${ATTR_NAMES[i]}</span><span>${player2.name}</span></div>`;
+    h+=`<div class="ac-bars">`;
+    h+=`<div class="ac-bar l" style="width:${player1[k]/1.8}%;background:${player1.teamColor};flex:none"></div>`;
+    h+=`<span class="ac-mid">${player1[k]}-${player2[k]}</span>`;
+    h+=`<div class="ac-bar r" style="width:${player2[k]/1.8}%;background:${player2.teamColor};flex:none"></div>`;
+    h+=`</div></div>`;
+  });
+  h+='</div>';
+  h+='<div class="r-btns"><button class="r-rematch" onclick="goRematch()">再来一局</button><button class="r-home" onclick="goHome()">返回首页</button></div>';
+  resultPage.innerHTML=h;
 }
-
-// ====== 联机模式游戏循环 ======
-function startOnlineGame(){
-  selectPage.style.display='none';gamePage.style.display='flex';goOverlay.classList.remove('show');
-  resizeCanvas();gameStarted=true;
-  if(gameLoop)clearInterval(gameLoop);
-  gameLoop=setInterval(function(){sendOnlineInput();renderOnlineGame()},33);
+function renderResultPlayer(p,stats,isWin){
+  let h=`<div class="r-player${isWin?' w':''}"><div class="rn">${p.name}</div><div class="rt">${p.teamAbbr} #${p.num}</div><div class="r-stats">`;
+  h+=`<div class="rs"><div class="rsv">${stats.pts}</div><div class="rsl">得分</div></div>`;
+  h+=`<div class="rs"><div class="rsv">${stats.blk}</div><div class="rsl">盖帽</div></div>`;
+  h+=`<div class="rs"><div class="rsv">${stats.stl}</div><div class="rsl">抢断</div></div>`;
+  h+=`<div class="rs"><div class="rsv">${stats.reb||0}</div><div class="rsl">篮板</div></div>`;
+  h+='</div></div>';return h;
 }
-
-function sendOnlineInput(){
-  if(!wsConnected||!gameState)return;
-  sendMsg({type:'input',data:{action:'move',mx:myInput.mx,my:myInput.my}});
-}
-
-function renderOnlineGame(){
-  if(!ctx||!canvas||!gameState)return;
-  var p1d=mySide===0?player1:player2,p2d=mySide===1?player1:player2;
-  renderSharedState(gameState,p1d,p2d,mySide);
-}
-
-function showOnlineGameOver(msg){
-  if(gameLoop){clearInterval(gameLoop);gameLoop=null}gameStarted=false;
-  var p1n=player1?player1.name:'我方',p2n=player2?(player2.name||'对手'):'对手';
-  var h='<div class="ov-box"><h2>'+msg.winner.name+' 获胜！</h2><div class="ov-score">'+msg.score[0]+' - '+msg.score[1]+'</div>';
-  h+='<div class="ov-stat">'+p1n+': '+(msg.stats.p1?msg.stats.p1.pts:0)+'分 '+(msg.stats.p1?msg.stats.p1.reb||0:0)+'板 '+(msg.stats.p1?msg.stats.p1.blk:0)+'帽 '+(msg.stats.p1?msg.stats.p1.stl:0)+'断</div>';
-  h+='<div class="ov-stat">'+p2n+': '+(msg.stats.p2?msg.stats.p2.pts:0)+'分 '+(msg.stats.p2?msg.stats.p2.reb||0:0)+'板 '+(msg.stats.p2?msg.stats.p2.blk:0)+'帽 '+(msg.stats.p2?msg.stats.p2.stl:0)+'断</div>';
-  h+='<button class="ov-rematch" onclick="rematchOnline()">再来一局</button><button class="ov-home" onclick="goHome()">返回首页</button></div>';
-  goOverlay.innerHTML=h;goOverlay.classList.add('show');
-}
-
-function rematchOnline(){sendMsg({type:'rematch_request'});goOverlay.classList.remove('show');gameState=null}
-
-// ====== 通用 ======
-function resizeCanvas(){
-  var r=gamePage.getBoundingClientRect();canvas.width=r.width;canvas.height=r.height-155;
-  canvas.style.width=r.width+'px';canvas.style.height=(r.height-155)+'px';
+function goRematch(){
+  resultPage.style.display='none';resultPage.classList.remove('show');
+  gamePage.style.display='flex';
+  resizeCanvas();restartGame();
 }
 function goHome(){
-  if(gameLoop){clearInterval(gameLoop);gameLoop=null}gameStarted=false;gameState=null;engine=null;
-  gamePage.style.display='none';goOverlay.classList.remove('show');cdOverlay.classList.remove('show');
-  isQueuing=false;if(wsConnected)sendMsg({type:'leave_queue'});
-  myInput={mx:0,my:0};startMode(gameMode);
+  resultPage.style.display='none';resultPage.classList.remove('show');
+  gamePage.style.display='none';selectPage.style.display='flex';
+  if(gameLoop)clearInterval(gameLoop);
+  player1=null;player2=null;selectingFor=1;currentTeamId='liaoning';selectedPid='';
+  renderSelectPage();
 }
-window.addEventListener('resize',function(){if(gamePage.style.display==='flex')resizeCanvas()});
 
-// ====== 触控 ======
-function getJoyR(){var r=joyBase.getBoundingClientRect();joyRect={cx:r.left+r.width/2,cy:r.top+r.height/2,mr:r.width/2}}
-joyBase.addEventListener('touchstart',function(e){e.preventDefault();joyActive=true;getJoyR();procJ(e.touches[0])},{passive:false});
-joyBase.addEventListener('touchmove',function(e){e.preventDefault();if(!joyActive)return;procJ(e.touches[0])},{passive:false});
-joyBase.addEventListener('touchend',function(e){e.preventDefault();joyActive=false;joyRect=null;joyThumb.style.left='50%';joyThumb.style.top='50%';myInput.mx=0;myInput.my=0});
-function procJ(t){if(!joyRect)return;var dx=t.clientX-joyRect.cx,dy=t.clientY-joyRect.cy;var d=Math.sqrt(dx*dx+dy*dy);if(d>joyRect.mr){dx=dx/d*joyRect.mr;dy=dy/d*joyRect.mr}var jx=dx/joyRect.mr,jy=dy/joyRect.mr;joyThumb.style.left=(jx*50+50)+'%';joyThumb.style.top=(jy*50+50)+'%';myInput.mx=jx;myInput.my=jy}
-
-btnShoot.addEventListener('touchstart',function(e){e.preventDefault();btnShoot.classList.add('active');shootLabel.textContent='松手!';
-  if(gameMode==='single'&&engine)engine.startShoot();else if(gameMode==='online')sendMsg({type:'input',data:{action:'shoot_start'}})});
-btnShoot.addEventListener('touchend',function(e){e.preventDefault();btnShoot.classList.remove('active');shootLabel.textContent='投篮';
-  if(gameMode==='single'&&engine)engine.releaseShoot();else if(gameMode==='online')sendMsg({type:'input',data:{action:'shoot_release'}})});
-btnShoot.addEventListener('mousedown',function(){btnShoot.classList.add('active');shootLabel.textContent='松手!';
-  if(gameMode==='single'&&engine)engine.startShoot();else if(gameMode==='online')sendMsg({type:'input',data:{action:'shoot_start'}})});
-btnShoot.addEventListener('mouseup',function(){btnShoot.classList.remove('active');shootLabel.textContent='投篮';
-  if(gameMode==='single'&&engine)engine.releaseShoot();else if(gameMode==='online')sendMsg({type:'input',data:{action:'shoot_release'}})});
-
-function bindBtn(id,act){
-  var b=$(id);b.addEventListener('touchstart',function(e){e.preventDefault();b.classList.add('active');
-    if(gameMode==='single'&&engine){if(act==='drive')engine.drive();else if(act==='steal')engine.steal();else if(act==='block')engine.block();else if(act==='foul')engine.foul()}
-    else if(gameMode==='online')sendMsg({type:'input',data:{action:act}});
-    setTimeout(function(){b.classList.remove('active')},400)});
-  b.addEventListener('mousedown',function(){b.classList.add('active');
-    if(gameMode==='single'&&engine){if(act==='drive')engine.drive();else if(act==='steal')engine.steal();else if(act==='block')engine.block();else if(act==='foul')engine.foul()}
-    else if(gameMode==='online')sendMsg({type:'input',data:{action:act}});
-    setTimeout(function(){b.classList.remove('active')},400)});
+// === 触控：摇杆 ===
+const joyBase=$('joyBase'),joyThumb=$('joyThumb');
+let joyActive=false,joyRect=null;
+function getJoyRect(){
+  const r=joyBase.getBoundingClientRect();
+  joyRect={cx:r.left+r.width/2,cy:r.top+r.height/2,mr:r.width/2};
 }
-bindBtn('btnDrive','drive');bindBtn('btnSteal','steal');bindBtn('btnBlock','block');bindBtn('btnFoul','foul');
+joyBase.addEventListener('touchstart',e=>{e.preventDefault();joyActive=true;getJoyRect();procJoy(e.touches[0])},{passive:false});
+joyBase.addEventListener('touchmove',e=>{e.preventDefault();if(!joyActive)return;procJoy(e.touches[0])},{passive:false});
+joyBase.addEventListener('touchend',e=>{e.preventDefault();joyActive=false;joyRect=null;joyThumb.style.left='50%';joyThumb.style.top='50%';if(engine)engine.offInput.mx=engine.offInput.my=0});
+function procJoy(t){
+  if(!joyRect)return;
+  let dx=t.clientX-joyRect.cx,dy=t.clientY-joyRect.cy;
+  const dist=Math.sqrt(dx*dx+dy*dy);
+  if(dist>joyRect.mr){dx=dx/dist*joyRect.mr;dy=dy/dist*joyRect.mr}
+  const jx=dx/joyRect.mr,jy=dy/joyRect.mr;
+  joyThumb.style.left=(jx*50+50)+'%';joyThumb.style.top=(jy*50+50)+'%';
+  if(engine){engine.offInput.mx=jx;engine.offInput.my=jy}
+}
 
-// ====== 启动 ======
+// === 触控：按钮 ===
+const btnShoot=$('btnShoot'),btnDrive=$('btnDrive'),btnSteal=$('btnSteal'),btnBlock=$('btnBlock'),btnFoul=$('btnFoul'),shootLabel=$('shootLabel');
+btnShoot.addEventListener('touchstart',e=>{e.preventDefault();btnShoot.classList.add('active');shootLabel.textContent='松手!';if(engine)engine.startShoot()});
+btnShoot.addEventListener('touchend',e=>{e.preventDefault();btnShoot.classList.remove('active');shootLabel.textContent='投篮';if(engine)engine.releaseShoot()});
+btnShoot.addEventListener('mousedown',e=>{btnShoot.classList.add('active');shootLabel.textContent='松手!';if(engine)engine.startShoot()});
+btnShoot.addEventListener('mouseup',e=>{btnShoot.classList.remove('active');shootLabel.textContent='投篮';if(engine)engine.releaseShoot()});
+
+btnDrive.addEventListener('touchstart',e=>{e.preventDefault();btnDrive.classList.add('active');if(engine)engine.drive();setTimeout(()=>btnDrive.classList.remove('active'),600)});
+btnSteal.addEventListener('touchstart',e=>{e.preventDefault();btnSteal.classList.add('active');if(engine)engine.steal();setTimeout(()=>btnSteal.classList.remove('active'),400)});
+btnBlock.addEventListener('touchstart',e=>{e.preventDefault();btnBlock.classList.add('active');if(engine)engine.block();setTimeout(()=>btnBlock.classList.remove('active'),500)});
+btnFoul.addEventListener('touchstart',e=>{e.preventDefault();btnFoul.classList.add('active');if(engine)engine.foul();setTimeout(()=>btnFoul.classList.remove('active'),500)});
+// 鼠标支持(PC调试)
+btnDrive.addEventListener('mousedown',e=>{btnDrive.classList.add('active');if(engine)engine.drive();setTimeout(()=>btnDrive.classList.remove('active'),600)});
+btnSteal.addEventListener('mousedown',e=>{btnSteal.classList.add('active');if(engine)engine.steal();setTimeout(()=>btnSteal.classList.remove('active'),400)});
+btnBlock.addEventListener('mousedown',e=>{btnBlock.classList.add('active');if(engine)engine.block();setTimeout(()=>btnBlock.classList.remove('active'),500)});
+btnFoul.addEventListener('mousedown',e=>{btnFoul.classList.add('active');if(engine)engine.foul();setTimeout(()=>btnFoul.classList.remove('active'),500)});
+
+// === 窗口缩放 ===
+window.addEventListener('resize',()=>{if(gamePage.style.display==='flex')resizeCanvas()});
+
+// === Hook: 包装renderSelectPage ===
+(function(){
+  var orig=renderSelectPage;
+  renderSelectPage=function(){
+    orig();
+    if(GAME_MODE==='online'){
+      var h=$('selectPage').innerHTML;
+      var tag=wsConnected?'<span class="stag on">已连接</span>':'<span class="stag off">未连接</span>';
+      var connBar='<div class="conn-inline" style="padding:4px 8px;justify-content:center"><input id="srvInp" placeholder="服务器地址"><button onclick="doConn()">连接</button>'+tag+'</div>';
+      h=h.replace('</div><div class="team-scroll">','</div>'+connBar+'<div class="team-scroll">');
+      if(isQueuing){h=h.replace('选择球员 · 单挑对决','匹配中... <span class="q-badge">寻找对手</span>')}
+      $('selectPage').innerHTML=h;
+    }
+  };
+  // 启动按钮hook
+  var origStart=startGame;
+  startGame=function(){
+    if(GAME_MODE==='online'){
+      if(!player1||!wsConnected)return;
+      sendMsg({type:'join_queue',name:player1.name,player:{id:player1.id,name:player1.name,num:player1.num,pos:player1.pos,shooting:player1.shooting,speed:player1.speed,strength:player1.strength,defense:player1.defense,dribbling:player1.dribbling,jumping:player1.jumping,teamColor:player1.teamColor,teamAbbr:player1.teamAbbr}});
+      isQueuing=true;renderSelectPage();return;
+    }
+    initOnlineBtns();origStart();
+  };
+  // restartGame hook
+  var origRestart=restartGame;
+  restartGame=function(){
+    if(GAME_MODE==='online'){$('gameOverOverlay').classList.remove('show');startOnlineGame();return;}
+    origRestart();
+  };
+})();
+
+// === 启动 ===
 showModePage();
 </script>
 </body>
