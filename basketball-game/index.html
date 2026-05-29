@@ -111,12 +111,24 @@ body{background:#0f0f1a;overflow:hidden;touch-action:manipulation;font-family:-a
 .ov-box .ov-rematch{background:linear-gradient(135deg,#ff8c00,#ff4444);color:#fff}
 .ov-box .ov-home{background:rgba(255,255,255,.1);color:#ccc}
 .ov-box .ov-detail{background:linear-gradient(135deg,#ff8c00,#ff4444);color:#fff}
+
+/* 设置页 */
+#settingsPage{position:absolute;top:0;left:0;right:0;bottom:0;display:none;flex-direction:column;align-items:center;justify-content:center;z-index:15;gap:14px;padding:24px;overflow-y:auto}
+#settingsPage h2{font-size:20px;color:#ff8c00}
+.set-card{background:#1a1a2e;border-radius:16px;padding:18px;width:310px;max-width:90vw}
+.set-card h3{font-size:13px;color:#888;margin-bottom:10px}
+.set-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.set-opt{padding:8px 14px;border-radius:10px;border:2px solid #333;background:#111;color:#aaa;font-size:13px;cursor:pointer;text-align:center;flex:1;min-width:55px;transition:all .15s}
+.set-opt.sel{border-color:#ff8c00;color:#ff8c00;background:#2a1a0e}
+.set-label{font-size:11px;color:#666;margin-bottom:6px}
+#settingsStart{width:310px;max-width:90vw;height:48px;border-radius:24px;border:none;font-size:17px;font-weight:bold;background:linear-gradient(135deg,#ff8c00,#ff4444);color:#fff;margin-top:4px;padding:0}
 </style>
 </head>
 <body>
 <div id="app">
   <div id="modePage"></div>
   <div id="selectPage"></div>
+  <div id="settingsPage"></div>
   <div id="cdOverlay"><div class="cd-num" id="cdNum">3</div><div class="cd-opp" id="cdOpp"></div></div>
   <div id="gamePage">
     <canvas id="gameCanvas"></canvas>
@@ -163,6 +175,7 @@ var engine=null,gameLoop=null,lastTime=0,gameEnded=false;
 var ws=null,wsConnected=false,myId='',mySide=-1,roomId='';
 var gameState=null,isQueuing=false,myInput={mx:0,my:0};
 var bgImage=null,joyActive=false,joyRect=null;
+var gameSettings={gameType:'endless',gameTime:3,targetScore:0}; // default
 
 // ====== 模式选择页 ======
 function showModePage(){
@@ -251,7 +264,7 @@ function renderSelect(){
   h+='</div>';
 
   if(gameMode==='single'){
-    h+='<button id="startBtn" class="'+(player1&&player2?'ready':'')+'" onclick="startSingleGame()">'+(player1&&player2?'开始比赛':'请选择双方球员')+'</button>';
+    h+='<button id="startBtn" class="'+(player1&&player2?'ready':'')+'" onclick="showSettings()">'+(player1&&player2?'选择比赛规则':'请选择双方球员')+'</button>';
   }else{
     if(isQueuing){h+='<button id="startBtn" class="ready" onclick="cancelQ()">取消排队</button>'}
     else{h+='<button id="startBtn" class="'+(player1&&wsConnected?'ready':'')+'" onclick="joinQ()">开始匹配</button>'}
@@ -273,12 +286,39 @@ function doConn(){var addr=$('serverInp').value.trim();if(!addr)return;if(addr.i
 function joinQ(){if(!player1||!wsConnected)return;sendMsg({type:'join_queue',name:player1.name,player:{id:player1.id,name:player1.name,num:player1.num,pos:player1.pos,shooting:player1.shooting,speed:player1.speed,strength:player1.strength,defense:player1.defense,dribbling:player1.dribbling,jumping:player1.jumping,teamColor:player1.teamColor,teamAbbr:player1.teamAbbr}});isQueuing=true;renderSelect()}
 function cancelQ(){sendMsg({type:'leave_queue'});isQueuing=false;renderSelect()}
 
+// ====== 比赛设置页 ======
+function showSettings(){
+  selectPage.style.display='none';
+  var sp=$('settingsPage');sp.style.display='flex';
+  var gt=gameSettings.gameType, gtime=gameSettings.gameTime, tgt=gameSettings.targetScore;
+  var times=[1,2,3,5,10], targets=[7,11,15,21];
+  var h='<h2>⚙ 比赛规则</h2>';
+  h+='<div class="set-card"><h3>比赛模式</h3><div class="set-row">';
+  h+='<div class="set-opt'+(gt==='endless'?' sel':'')+'" onclick="setGT(\'endless\')">⏱ 无尽模式<div style="font-size:10px;opacity:.6">时间耗完分高者胜</div></div>';
+  h+='<div class="set-opt'+(gt==='target'?' sel':'')+'" onclick="setGT(\'target\')">🎯 目标分数<div style="font-size:10px;opacity:.6">先达标或时间到</div></div>';
+  h+='</div></div>';
+  h+='<div class="set-card"><h3>比赛时间</h3><div class="set-label">'+gtime+' 分钟</div><div class="set-row">';
+  times.forEach(function(t){h+='<div class="set-opt'+(gtime===t?' sel':'')+'" onclick="setTime('+t+')">'+t+'分钟</div>'});h+='</div></div>';
+  if(gt==='target'){
+    h+='<div class="set-card"><h3>目标分数</h3><div class="set-label">'+tgt+' 分(需赢2分)</div><div class="set-row">';
+    targets.forEach(function(t){h+='<div class="set-opt'+(tgt===t?' sel':'')+'" onclick="setTgt('+t+')">'+t+'分</div>'});h+='</div></div>';
+  }
+  h+='<button id="settingsStart" onclick="startSingleGame()">开始比赛</button>';
+  h+='<button style="background:none;border:1px solid #444;color:#888;padding:8px 24px;border-radius:14px;font-size:12px;margin-top:4px" onclick="backToSelect()">← 返回选人</button>';
+  sp.innerHTML=h;
+}
+function backToSelect(){document.getElementById('settingsPage').style.display='none';selectPage.style.display='flex'}
+function setGT(t){gameSettings.gameType=t;if(t==='endless')gameSettings.targetScore=0;else if(gameSettings.targetScore===0)gameSettings.targetScore=11;showSettings()}
+function setTime(t){gameSettings.gameTime=t;showSettings()}
+function setTgt(t){gameSettings.targetScore=t;showSettings()}
+
 // ====== 单机模式：GameEngine ======
 // (完整引擎代码，与cba-game.html一致，省略大量注释)
 function _clamp(v,a,b){return Math.max(a,Math.min(b,v))}
 
 class GameEngine{
-  constructor(w,h,p1,p2){
+  constructor(w,h,p1,p2,settings){
+    settings=settings||{};
     this.w=w;this.h=h;this.scale=Math.min(w/750,h/500);this.bgImage=null;
     this.poss=0;this.score=[0,0];this.gameOver=false;this.winner=-1;
     this.stats={p1:{pts:0,blk:0,stl:0,reb:0},p2:{pts:0,blk:0,stl:0,reb:0}};
@@ -290,6 +330,11 @@ class GameEngine{
     this.ftCount=0;this.ftMade=0;this.ftShooter=0;this.foulCooldown=0;
     this._shotPath=null;this._shotProgress=0;this._shotSpeed=0;
     this.p1=p1;this.p2=p2;
+    this.gameType=settings.gameType||'endless'; // 'endless' | 'target'
+    this.gameTimer=settings.gameTime*1000||180000; // default 3min
+    this.gameTimeTotal=this.gameTimer;
+    this.targetScore=settings.targetScore||0; // 0=endless
+    this.overtime=false;this.overtimeTimer=0;
     this._init();this._apply();
   }
   _s(v){return v*this.scale}
@@ -347,6 +392,9 @@ class GameEngine{
     if(this.phase==='freethrow'){this._updateFT(dt);return;}
     this.offEnergy=Math.min(100,this.offEnergy+dt*0.008);this.defEnergy=Math.min(100,this.defEnergy+dt*0.008);
     this.shotClockTimer+=dt;if(this.shotClockTimer>=24000)this._changePoss('进攻超时！');
+    // Game timer
+    if(!this.overtime){this.gameTimer-=dt;if(this.gameTimer<=0)this.gameTimer=0;}
+    else{this.overtimeTimer-=dt;if(this.overtimeTimer<=0)this.overtimeTimer=0;}
     if(this._shotPath){this._updateShotPath(dt);return;}
     this._physics(dt);this._move(dt);this._shootUpdate();this._collide();this._checkThreeClear();this._checkWin();
   }
@@ -426,9 +474,28 @@ class GameEngine{
   _collide(){if(this.stealAnim>0&&this.ball.has&&!this.shooting){var dx=this.def.x-this.off.x,dy=this.def.y-this.off.y;
     if(Math.sqrt(dx*dx+dy*dy)<this._s(35)){var c=0.25+this._dDef/99*0.35-this._oDrib/99*0.25;
     if(Math.random()<c){this._changePoss('抢断成功！');this.stats[this.poss===0?'p2':'p1'].stl++;this._msg('抢断！')}else this._msg('抢断失败');this.stealAnim=0;}}}
-  _checkWin(){if(this.phase==='gameover')return;var d=Math.abs(this.score[0]-this.score[1]);
-    if(this.score[0]>=11&&d>=2){this.phase='gameover';this.gameOver=true;this.winner=0}
-    else if(this.score[1]>=11&&d>=2){this.phase='gameover';this.gameOver=true;this.winner=1}}
+  _checkWin(){
+    if(this.phase==='gameover')return;
+    var s0=this.score[0],s1=this.score[1],d=Math.abs(s0-s1);
+    // Target score mode
+    if(this.gameType==='target'&&this.targetScore>0){
+      if(s0>=this.targetScore&&d>=2){this.phase='gameover';this.gameOver=true;this.winner=0;return;}
+      if(s1>=this.targetScore&&d>=2){this.phase='gameover';this.gameOver=true;this.winner=1;return;}
+    }
+    // Timer check
+    if(!this.overtime&&this.gameTimer<=0){
+      if(s0>s1){this.phase='gameover';this.gameOver=true;this.winner=0;return;}
+      if(s1>s0){this.phase='gameover';this.gameOver=true;this.winner=1;return;}
+      // Tie → overtime
+      if(s0===s1){this.overtime=true;this.overtimeTimer=120000;this._msg('平局！加时2分钟！');return;}
+    }
+    // Overtime check
+    if(this.overtime&&this.overtimeTimer<=0){
+      if(s0>s1){this.phase='gameover';this.gameOver=true;this.winner=0;}
+      else if(s1>s0){this.phase='gameover';this.gameOver=true;this.winner=1;}
+      else{this.overtimeTimer=120000;this._msg('继续加时！')}
+    }
+  }
 
   startShoot(){if(this.phase==='freethrow'){if(this.shooting||this.shotReleased)return;this.shooting=true;this.shotPower=0;this.shotReleased=false;this._powAnim=0;return;}
     if(!this.ball.has||this.shooting||this.ballInAir||this.driveAnim>0)return;if(this.needClearThree){this._msg('需先出三分线！');return;}
@@ -481,6 +548,7 @@ class GameEngine{
 
   // 渲染（供单机模式用）
   getState(){
+    var remMs=this.overtime?this.overtimeTimer:this.gameTimer;
     return{
       ph:this.phase,sc:this.score,po:this.poss,cl:Math.max(0,Math.ceil(24-this.shotClockTimer/1000)),
       p1:{x:this.off.x/this.scale,y:this.off.y/this.scale,e:this.offEnergy},
@@ -489,7 +557,8 @@ class GameEngine{
       nct:this.needClearThree,ctd:this.clearThreeDone,sh:this.shooting,sp:this.shotPower,
       san:this.scoredAnim,spt:this.shotResult?this.shotResult.pts:0,
       fts:this.ftShooter,ftm:this.ftMade,ftc:this.ftCount,fcd:[this.foulCooldown,0],
-      ev:this.msgTimer>0?[this.msg]:[]
+      ev:this.msgTimer>0?[this.msg]:[],
+      gt:this.gameTimer,gtt:this.gameTimeTotal,ot:this.overtime,ott:this.overtimeTimer,tgt:this.targetScore,gtype:this.gameType
     }
   }
 }
@@ -552,6 +621,18 @@ function renderSharedState(state, p1data, p2data, mySideIdx){
   var phaseT=state.ph==='freethrow'?'罚球: '+(state.fts===0?(p1data?p1data.name:'P1'):(p2data?p2data.name:'P2'))+' ('+(state.ftm||0)+'/2)':state.ph==='jumpball'?'跳球中...':'球权: '+(state.po===0?(p1data?p1data.name:'P1'):(p2data?p2data.name:'P2'));
   ctx.fillStyle='rgba(255,255,255,0.5)';ctx.font=Math.floor(_(10))+'px sans-serif';ctx.fillText(phaseT,w/2,_(34));
 
+  // Game timer
+  if(state.gt!==undefined||state.gtt!==undefined){
+    var remMs=state.ot?state.ott:(state.gt||0), totalMs=state.gtt||180000;
+    var remSec=Math.ceil(remMs/1000), mins=Math.floor(remSec/60), secs=remSec%60;
+    var timeStr=mins+':'+(secs<10?'0':'')+secs;
+    ctx.fillStyle=remMs<=30000?'#ff4444':remMs<=60000?'#ff0':'#fff';
+    ctx.font='bold '+Math.floor(_(12))+'px sans-serif';ctx.textAlign='center';
+    var timerLabel=(state.ot?'⏱ OT ':'⏱ ')+timeStr;
+    if(state.gtype==='target'&&state.tgt) timerLabel+=' | 🎯'+state.tgt+'分';
+    ctx.fillText(timerLabel,w/2,_(58));
+  }
+
   // 3pt warning
   if(state.nct&&!state.ctd){ctx.fillStyle='#ff0';ctx.font='bold '+Math.floor(_(14))+'px sans-serif';ctx.textAlign='center';ctx.fillText('⚠ 需运球出三分线！',w/2,_(65))}
 
@@ -580,15 +661,15 @@ function renderSharedState(state, p1data, p2data, mySideIdx){
 // ====== 单机模式游戏循环 ======
 function startSingleGame(){
   if(!player1||!player2)return;
-  selectPage.style.display='none';gamePage.style.display='flex';goOverlay.classList.remove('show');cdOverlay.classList.remove('show');
+  selectPage.style.display='none';document.getElementById('settingsPage').style.display='none';gamePage.style.display='flex';
+  goOverlay.classList.remove('show');cdOverlay.classList.remove('show');
   resizeCanvas();
-  engine=new GameEngine(canvas.width,canvas.height,player1,player2);engine.bgImage=bgImage;gameEnded=false;lastTime=performance.now();
+  engine=new GameEngine(canvas.width,canvas.height,player1,player2,gameSettings);engine.bgImage=bgImage;gameEnded=false;lastTime=performance.now();
   if(gameLoop)clearInterval(gameLoop);
   gameLoop=setInterval(function(){
     var now=performance.now(),dt=now-lastTime;lastTime=now;
     engine.update(dt);engine.offInput.mx=myInput.mx;engine.offInput.my=myInput.my;
     var st=engine.getState();
-    // Convert engine coordinates back to virtual 750x500
     st.p1.x=engine.off.x/engine.scale;st.p1.y=engine.off.y/engine.scale;
     st.p2.x=engine.def.x/engine.scale;st.p2.y=engine.def.y/engine.scale;
     st.ba.x=engine.ball.x/engine.scale;st.ba.y=engine.ball.y/engine.scale;
