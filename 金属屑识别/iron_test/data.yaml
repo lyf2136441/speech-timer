@@ -1,0 +1,7 @@
+path: C:/Users/Lenovo/Desktop/iron_test
+
+train: images
+val: images
+
+names:
+  0: iron_scrap

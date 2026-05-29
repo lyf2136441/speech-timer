@@ -1,0 +1,48 @@
+<view class="page">
+  <view class="top">
+    <text class="logo">CBA 1v1</text>
+    <text class="sub">选择球员 · 单挑对决</text>
+  </view>
+
+  <!-- 已选球员 -->
+  <view class="picked">
+    <view class="pk" style="border-top:6rpx solid {{p1Color}}">
+      <text class="pk-l">挑战者</text>
+      <text class="pk-n">{{p1Name}}</text>
+    </view>
+    <view class="vk">VS</view>
+    <view class="pk" style="border-top:6rpx solid {{p2Color}}">
+      <text class="pk-l">防守者</text>
+      <text class="pk-n">{{p2Name}}</text>
+    </view>
+  </view>
+
+  <!-- 提示 -->
+  <view class="hint">为 {{selLabel}} 选择球员</view>
+
+  <!-- 球队选择 -->
+  <picker mode="selector" range="{{teamNames}}" value="{{teamIndex}}" bindchange="onTeamChange">
+    <view class="picker-box">
+      <text>{{teamNames[teamIndex]}}</text>
+      <text class="arrow">▼</text>
+    </view>
+  </picker>
+
+  <!-- 球员列表 -->
+  <view class="list">
+    <block wx:for="{{playerList}}" wx:key="id">
+      <view class="card {{item.id==selId?'sel':''}}" data-pid="{{item.id}}" bindtap="onCardTap">
+        <text class="c-num">#{{item.num}}</text>
+        <text class="c-name">{{item.name}}</text>
+        <text class="c-pos">{{item.pos}}</text>
+        <text class="c-attr">投{{item.shoot}} 速{{item.speed}} 力{{item.str}} 防{{item.def}} 控{{item.drib}} 跳{{item.jump}}</text>
+      </view>
+    </block>
+  </view>
+
+  <!-- 按钮 -->
+  <button class="btn {{ready?'ok':''}}" bindtap="onStart" disabled="{{!ready}}">
+    {{ready?'开始比赛！':'请为双方选择球员'}}
+  </button>
+  <button class="btn2" bindtap="onOnline">在线对战</button>
+</view>

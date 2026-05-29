@@ -7,6 +7,12 @@
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 body{background:#0f0f1a;overflow:hidden;touch-action:manipulation;font-family:-apple-system,sans-serif;width:100vw;height:100vh;height:100dvh}
+/* 强制横屏提示 */
+#rotateHint{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:#0a0a15;flex-direction:column;align-items:center;justify-content:center;color:#fff;gap:20px}
+#rotateHint .icon{font-size:60px;animation:rotPulse 1.5s infinite}
+@keyframes rotPulse{0%,100%{transform:rotate(0deg)}50%{transform:rotate(90deg)}}
+@media screen and (orientation:portrait){#rotateHint{display:flex}}
+@media screen and (orientation:landscape){#rotateHint{display:none !important}}
 #app{width:100%;height:100%;position:relative}
 
 /* 模式选择 */
@@ -125,6 +131,7 @@ body{background:#0f0f1a;overflow:hidden;touch-action:manipulation;font-family:-a
 </style>
 </head>
 <body>
+<div id="rotateHint"><div class="icon">📱</div><div style="font-size:20px;font-weight:bold">请旋转手机</div><div style="color:#888">横屏体验更佳</div></div>
 <div id="app">
   <div id="modePage"></div>
   <div id="selectPage"></div>
@@ -593,7 +600,9 @@ class GameEngine{
     ctx.beginPath();ctx.ellipse(x+bw*0.2,legTop+legLen+r*0.08,r*0.22,r*0.1,0,0,Math.PI*2);ctx.fill();
     // Jersey
     var bodyTop=y-bh*0.42;
-    ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x-bw,bodyTop,bw*2,bh*0.48,r*0.08);ctx.fill();
+    ctx.fillStyle=color;
+    var jrx=x-bw,jry=bodyTop,jrw=bw*2,jrh=bh*0.48,jrad=r*0.08;
+    ctx.beginPath();ctx.moveTo(jrx+jrad,jry);ctx.lineTo(jrx+jrw-jrad,jry);ctx.quadraticCurveTo(jrx+jrw,jry,jrx+jrw,jry+jrad);ctx.lineTo(jrx+jrw,jry+jrh-jrad);ctx.quadraticCurveTo(jrx+jrw,jry+jrh,jrx+jrw-jrad,jry+jrh);ctx.lineTo(jrx+jrad,jry+jrh);ctx.quadraticCurveTo(jrx,jry+jrh,jrx,jry+jrh-jrad);ctx.lineTo(jrx,jry+jrad);ctx.quadraticCurveTo(jrx,jry,jrx+jrad,jry);ctx.closePath();ctx.fill();
     ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=0.8;ctx.stroke();
     // Jersey number
     ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(r*0.52)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
@@ -714,7 +723,9 @@ function renderSharedState(state, p1data, p2data, mySideIdx){
     ctx.beginPath();ctx.ellipse(x+bw*0.2,legTop+legLen+r*0.08,r*0.22,r*0.1,0,0,Math.PI*2);ctx.fill();
     // Jersey
     var bodyTop=y-bh*0.42;
-    ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x-bw,bodyTop,bw*2,bh*0.48,r*0.08);ctx.fill();
+    ctx.fillStyle=color;
+    var jrx=x-bw,jry=bodyTop,jrw=bw*2,jrh=bh*0.48,jrad=r*0.08;
+    ctx.beginPath();ctx.moveTo(jrx+jrad,jry);ctx.lineTo(jrx+jrw-jrad,jry);ctx.quadraticCurveTo(jrx+jrw,jry,jrx+jrw,jry+jrad);ctx.lineTo(jrx+jrw,jry+jrh-jrad);ctx.quadraticCurveTo(jrx+jrw,jry+jrh,jrx+jrw-jrad,jry+jrh);ctx.lineTo(jrx+jrad,jry+jrh);ctx.quadraticCurveTo(jrx,jry+jrh,jrx,jry+jrh-jrad);ctx.lineTo(jrx,jry+jrad);ctx.quadraticCurveTo(jrx,jry,jrx+jrad,jry);ctx.closePath();ctx.fill();
     ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=0.8;ctx.stroke();
     // Jersey number
     ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(r*0.52)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';

@@ -1,0 +1,206 @@
+.container {
+  min-height: 100vh;
+  background: #0f0f1a;
+  padding: 48rpx 24rpx 120rpx;
+}
+
+.result-header {
+  text-align: center;
+  margin-bottom: 40rpx;
+}
+
+.winner-icon {
+  font-size: 80rpx;
+  display: block;
+}
+
+.winner-title {
+  display: block;
+  font-size: 44rpx;
+  font-weight: bold;
+  color: #ffd700;
+  margin: 12rpx 0;
+}
+
+.final-score {
+  display: block;
+  font-size: 72rpx;
+  font-weight: bold;
+  color: #fff;
+  letter-spacing: 8rpx;
+}
+
+/* 球员对比 */
+.players-compare {
+  display: flex;
+  align-items: flex-start;
+}
+
+.player-result {
+  flex: 1;
+  opacity: 0.7;
+  transition: opacity 0.3s;
+}
+
+.player-result.winner {
+  opacity: 1;
+}
+
+.result-card {
+  background: #1a1a2e;
+  border-radius: 16rpx;
+  padding: 24rpx;
+  text-align: center;
+}
+
+.result-card.winner-card {
+  box-shadow: 0 0 24rpx rgba(255,215,0,0.2);
+}
+
+.result-name {
+  display: block;
+  font-size: 32rpx;
+  font-weight: bold;
+  color: #fff;
+}
+
+.result-team {
+  display: block;
+  font-size: 22rpx;
+  color: #888;
+  margin: 4rpx 0 16rpx;
+}
+
+.result-stats {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.r-stat {
+  width: 50%;
+  padding: 12rpx 0;
+}
+
+.r-stat-val {
+  display: block;
+  font-size: 36rpx;
+  font-weight: bold;
+  color: #ff8c00;
+}
+
+.r-stat-label {
+  display: block;
+  font-size: 20rpx;
+  color: #888;
+  margin-top: 2rpx;
+}
+
+.vs-small {
+  display: flex;
+  align-items: center;
+  padding-top: 80rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #555;
+  flex-shrink: 0;
+  margin-left: 16rpx;
+  margin-right: 16rpx;
+}
+
+/* 能力对比 */
+.detail-section {
+  margin-top: 40rpx;
+  background: #1a1a2e;
+  border-radius: 16rpx;
+  padding: 24rpx;
+}
+
+.section-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 20rpx;
+  text-align: center;
+}
+
+.attr-compare {
+  margin-bottom: 16rpx;
+}
+
+.attr-compare-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6rpx;
+}
+
+.ac-left, .ac-right {
+  font-size: 20rpx;
+  color: #888;
+  width: 120rpx;
+}
+
+.ac-left { text-align: right; }
+
+.ac-attr {
+  font-size: 22rpx;
+  color: #fff;
+  font-weight: bold;
+}
+
+.ac-bars {
+  display: flex;
+  align-items: center;
+}
+
+.ac-bar-left {
+  height: 12rpx;
+  border-radius: 6rpx 0 0 6rpx;
+  margin-left: auto;
+}
+
+.ac-bar-right {
+  height: 12rpx;
+  border-radius: 0 6rpx 6rpx 0;
+  margin-right: auto;
+}
+
+.ac-mid {
+  font-size: 18rpx;
+  color: #666;
+  white-space: nowrap;
+}
+
+/* 按钮 */
+.bottom-btns {
+  position: fixed;
+  bottom: 40rpx;
+  left: 40rpx;
+  right: 40rpx;
+  display: flex;
+}
+
+.btn-rematch {
+  flex: 2;
+  height: 88rpx;
+  line-height: 88rpx;
+  background: linear-gradient(135deg, #ff8c00, #ff4444);
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: bold;
+  border-radius: 44rpx;
+  border: none;
+}
+
+.btn-home {
+  flex: 1;
+  height: 88rpx;
+  line-height: 88rpx;
+  background: rgba(255,255,255,0.1);
+  color: #ccc;
+  font-size: 28rpx;
+  border-radius: 44rpx;
+  border: none;
+  margin-left: 20rpx;
+}

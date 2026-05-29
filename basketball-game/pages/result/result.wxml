@@ -1,0 +1,85 @@
+<view class="container">
+  <view class="result-header">
+    <text class="winner-icon">🏆</text>
+    <text class="winner-title">{{winnerName}} 获胜！</text>
+    <text class="final-score">{{score[0]}} - {{score[1]}}</text>
+  </view>
+
+  <view class="players-compare">
+    <!-- 玩家1 -->
+    <view class="player-result {{winner === 0 ? 'winner' : ''}}">
+      <view class="result-card" style="border-top: 6rpx solid {{player1.teamColor}}">
+        <text class="result-name">{{player1.name}}</text>
+        <text class="result-team">{{player1.teamAbbr}} #{{player1.num}}</text>
+        <view class="result-stats">
+          <view class="r-stat">
+            <text class="r-stat-val">{{stats.p1.pts}}</text>
+            <text class="r-stat-label">得分</text>
+          </view>
+          <view class="r-stat">
+            <text class="r-stat-val">{{stats.p1.blk}}</text>
+            <text class="r-stat-label">盖帽</text>
+          </view>
+          <view class="r-stat">
+            <text class="r-stat-val">{{stats.p1.stl}}</text>
+            <text class="r-stat-label">抢断</text>
+          </view>
+          <view class="r-stat">
+            <text class="r-stat-val">{{stats.p1.reb || 0}}</text>
+            <text class="r-stat-label">篮板</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <view class="vs-small">VS</view>
+
+    <!-- 玩家2 -->
+    <view class="player-result {{winner === 1 ? 'winner' : ''}}">
+      <view class="result-card" style="border-top: 6rpx solid {{player2.teamColor}}">
+        <text class="result-name">{{player2.name}}</text>
+        <text class="result-team">{{player2.teamAbbr}} #{{player2.num}}</text>
+        <view class="result-stats">
+          <view class="r-stat">
+            <text class="r-stat-val">{{stats.p2.pts}}</text>
+            <text class="r-stat-label">得分</text>
+          </view>
+          <view class="r-stat">
+            <text class="r-stat-val">{{stats.p2.blk}}</text>
+            <text class="r-stat-label">盖帽</text>
+          </view>
+          <view class="r-stat">
+            <text class="r-stat-val">{{stats.p2.stl}}</text>
+            <text class="r-stat-label">抢断</text>
+          </view>
+          <view class="r-stat">
+            <text class="r-stat-val">{{stats.p2.reb || 0}}</text>
+            <text class="r-stat-label">篮板</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 数据对比 -->
+  <view class="detail-section" wx:if="{{player1 && player2}}">
+    <text class="section-title">球员能力对比</text>
+    <view class="attr-compare" wx:for="{{attrNames}}" wx:key="index">
+      <view class="attr-compare-row">
+        <text class="ac-left">{{player1.name}}</text>
+        <text class="ac-attr">{{item}}</text>
+        <text class="ac-right">{{player2.name}}</text>
+      </view>
+      <view class="ac-bars">
+        <view class="ac-bar-left" style="width: {{player1[attrKeys[index]] / 1.8}}%; background: {{player1.teamColor}}"></view>
+        <text class="ac-mid">{{player1[attrKeys[index]]}} - {{player2[attrKeys[index]]}}</text>
+        <view class="ac-bar-right" style="width: {{player2[attrKeys[index]] / 1.8}}%; background: {{player2.teamColor}}"></view>
+      </view>
+    </view>
+  </view>
+
+  <view class="bottom-btns">
+    <button class="btn-rematch" bindtap="rematch">再来一局</button>
+    <button class="btn-home" bindtap="goHome">返回首页</button>
+  </view>
+</view>

@@ -1,0 +1,208 @@
+{
+  "version": "6.1.3",
+  "flags": {},
+  "shapes": [
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          56.288659793814396,
+          87.97938144329893
+        ],
+        [
+          508.86597938144325,
+          130.24742268041234
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          8.865979381443264,
+          170.45360824742266
+        ],
+        [
+          117.11340206185564,
+          367.36082474226805
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          119.17525773195872,
+          223.03092783505153
+        ],
+        [
+          242.8865979381443,
+          295.19587628865975
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          122.26804123711337,
+          166.32989690721647
+        ],
+        [
+          261.44329896907215,
+          221.99999999999997
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          437.73195876288656,
+          149.83505154639172
+        ],
+        [
+          674.8453608247422,
+          220.96907216494841
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          461.44329896907215,
+          354.9896907216495
+        ],
+        [
+          778.9690721649484,
+          425.09278350515467
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          612.9896907216495,
+          331.2783505154639
+        ],
+        [
+          732.5773195876288,
+          351.8969072164948
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          587.2164948453608,
+          231.27835051546387
+        ],
+        [
+          648.0412371134021,
+          316.8453608247422
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          2.680412371133986,
+          380.7628865979382
+        ],
+        [
+          255.25773195876286,
+          460.14432989690715
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          433.6082474226804,
+          477.6701030927835
+        ],
+        [
+          558.3505154639175,
+          539.5257731958762
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          763.5051546391752,
+          432.30927835051546
+        ],
+        [
+          898.7636432422207,
+          544.0
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    }
+  ],
+  "imagePath": "174.jpg",
+  "imageData": null,
+  "imageHeight": 544,
+  "imageWidth": 960
+}

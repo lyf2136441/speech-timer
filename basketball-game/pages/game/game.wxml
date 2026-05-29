@@ -1,0 +1,128 @@
+<view class="g-page">
+  <!-- 全屏Canvas -->
+  <canvas type="2d" id="gc" class="g-canvas"></canvas>
+
+  <!-- HUD顶栏 -->
+  <view class="g-hud">
+    <view class="hud-left">
+      <text class="hud-name" style="color:{{p1Color}}">{{p1Name}}</text>
+      <text class="hud-score">{{score0}}</text>
+    </view>
+    <view class="hud-mid">
+      <text class="hud-vs">VS</text>
+      <text class="hud-clock">⏱{{shotClock}}s</text>
+      <text class="hud-timer">⏳{{gameTimeStr}}</text>
+      <view class="stamina-bar">
+        <view class="stamina-fill" style="width:{{stamina}}%;background:{{stamina<25?'#ff4444':stamina<50?'#ffaa00':'#00cc66'}}"></view>
+        <text class="stamina-txt">体力{{stamina}}</text>
+      </view>
+    </view>
+    <view class="hud-right">
+      <text class="hud-score">{{score1}}</text>
+      <text class="hud-name" style="color:{{p2Color}}">{{p2Name}}</text>
+    </view>
+  </view>
+
+  <!-- 投篮条 -->
+  <view class="meter-wrap" wx:if="{{shooting && !isDunkLayup}}">
+    <view class="meter-bg">
+      <view class="meter-green" style="left:{{chargeZoneLo}}%;width:{{chargeZoneW}}%"></view>
+      <view class="meter-fill" style="width:{{powerPct}}%"></view>
+      <view class="meter-mark" style="left:{{powerPct}}%"></view>
+    </view>
+    <text class="meter-txt">松手投篮！</text>
+  </view>
+
+  <!-- 解说 -->
+  <view class="g-commentary" wx:if="{{commentary.length > 0}}">
+    <text class="gc-item" wx:for="{{commentary}}" wx:key="time" wx:for-item="c">{{c.text}}</text>
+  </view>
+
+  <!-- 消息 -->
+  <view class="g-msg" wx:if="{{msg}}">
+    <text>{{msg}}</text>
+  </view>
+
+  <!-- 跳球 -->
+  <view class="jump-overlay" wx:if="{{jumpBallPhase === 'countdown'}}">
+    <text class="jump-countdown">{{jumpBallTimer}}</text>
+  </view>
+  <view class="jump-overlay" wx:if="{{jumpBallPhase === 'raise'}}">
+    <text class="jump-go">比赛开始！</text>
+  </view>
+
+  <!-- 摇杆 - 左下角 -->
+  <view class="joy-area"
+    bindtouchstart="onJoyDown"
+    bindtouchmove="onJoyMove"
+    bindtouchend="onJoyUp">
+    <view class="joy-base">
+      <view class="joy-dot" style="left:{{jx*50+50}}%;top:{{jy*50+50}}%"></view>
+    </view>
+    <text class="joy-label">移动</text>
+  </view>
+
+  <!-- 动作按钮 - 右下角 -->
+  <view class="act-area">
+    <view wx:if="{{!ballLoose}}" class="act-btn big shoot {{shooting?'on':''}}"
+      catchtouchstart="onShootDown"
+      catchtouchend="onShootUp"
+      catchtouchcancel="onShootUp">
+      <text class="ab-ico">🏀</text>
+      <text class="ab-txt">{{shooting?'松手！':'按住投篮'}}</text>
+    </view>
+    <view wx:if="{{ballLoose}}" class="act-btn big rebound"
+      catchtap="onReboundTap">
+      <text class="ab-ico">🏀</text>
+      <text class="ab-txt">捡球</text>
+    </view>
+    <view class="act-row">
+      <view class="act-btn drive {{driving?'on':''}}" catchtap="onDriveTap">
+        <text class="ab-ico">⚡</text>
+        <text class="ab-txt">突破</text>
+      </view>
+      <view class="act-btn steal {{stealing?'on':''}}" catchtap="onStealTap">
+        <text class="ab-ico">✋</text>
+        <text class="ab-txt">抢断</text>
+      </view>
+      <view class="act-btn block {{blocking?'on':''}}" catchtap="onBlockTap">
+        <text class="ab-ico">🧱</text>
+        <text class="ab-txt">盖帽</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 时间选择弹窗 -->
+  <view class="overlay" wx:if="{{timeSelecting}}">
+    <scroll-view class="ov-scroll" scroll-y="true" enhanced="true" show-scrollbar="false">
+      <view class="ov-box">
+        <text class="ov-win">选择比赛设置</text>
+        <text class="set-label">发球模式</text>
+        <view class="mode-options">
+          <button class="mode-btn {{scoringMode==='alternate'?'mode-on':''}}" data-mode="alternate" bindtap="onSelectMode">换发</button>
+          <button class="mode-btn {{scoringMode==='keep'?'mode-on':''}}" data-mode="keep" bindtap="onSelectMode">连发</button>
+        </view>
+        <text class="mode-hint">{{scoringMode==='alternate'?'进球后交换球权':'进球方继续进攻'}}</text>
+        <text class="set-label">比赛时长</text>
+        <view class="time-options">
+          <button class="time-btn" data-duration="120" bindtap="onSelectTime">2 分钟</button>
+          <button class="time-btn" data-duration="180" bindtap="onSelectTime">3 分钟</button>
+          <button class="time-btn" data-duration="300" bindtap="onSelectTime">5 分钟</button>
+          <button class="time-btn" data-duration="600" bindtap="onSelectTime">10 分钟</button>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 游戏结束弹窗 -->
+  <view class="overlay" wx:if="{{gameOver}}">
+    <view class="ov-box">
+      <text class="ov-win">{{winName}} 获胜！</text>
+      <text class="ov-score">{{score0}} - {{score1}}</text>
+      <text class="ov-stat">{{p1Name}}: {{st1pts}}分 {{st1reb}}板 {{st1blk}}帽 {{st1stl}}断</text>
+      <text class="ov-stat">{{p2Name}}: {{st2pts}}分 {{st2reb}}板 {{st2blk}}帽 {{st2stl}}断</text>
+      <button class="ov-btn" bindtap="onResult">查看详情</button>
+      <button class="ov-btn2" bindtap="onRematch">再来一局</button>
+    </view>
+  </view>
+</view>

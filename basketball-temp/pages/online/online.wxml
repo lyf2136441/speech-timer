@@ -1,0 +1,100 @@
+<view class="op-page">
+  <!-- 顶栏 -->
+  <view class="op-top">
+    <text class="opt-title">CBA 1v1 在线对战</text>
+    <view class="opt-ws {{wsStatus}}">
+      <text class="opt-ws-dot"></text>
+      <text class="opt-ws-txt">{{wsStatus === 'connected' ? '已连接' : wsStatus === 'connecting' ? '连接中...' : '未连接'}}</text>
+      <text class="opt-ws-set" bindtap="onSetServer" wx:if="{{wsStatus !== 'connecting'}}">⚙</text>
+    </view>
+  </view>
+
+  <!-- 状态区域 -->
+  <view class="op-status" wx:if="{{status === 'idle' && wsStatus === 'disconnected'}}">
+    <text class="ops-icon">🔌</text>
+    <text class="ops-txt">未连接服务器</text>
+    <text class="ops-sub">请设置服务器地址后重连</text>
+    <view class="ops-actions">
+      <button class="op-btn-sm" bindtap="onSetServer">设置地址</button>
+      <button class="op-btn-sm" bindtap="onReconnect">重连</button>
+    </view>
+  </view>
+
+  <view class="op-status" wx:if="{{status === 'idle' && wsStatus === 'connecting'}}">
+    <text class="ops-icon">⏳</text>
+    <text class="ops-txt">正在连接服务器...</text>
+  </view>
+
+  <view class="op-status" wx:if="{{status === 'idle' && wsStatus === 'connected'}}">
+    <text class="ops-icon">🏀</text>
+    <text class="ops-txt">准备就绪</text>
+    <text class="ops-sub">选择球员后开始匹配对手</text>
+  </view>
+
+  <view class="op-status queuing" wx:if="{{status === 'queuing'}}">
+    <text class="ops-icon">🔍</text>
+    <text class="ops-txt">正在匹配对手...</text>
+    <text class="ops-sub">队列位置: 第{{queuePos}}位</text>
+    <button class="op-btn-cancel" bindtap="onCancel">取消匹配</button>
+  </view>
+
+  <view class="op-status found" wx:if="{{status === 'matched'}}">
+    <text class="ops-icon">⚡</text>
+    <text class="ops-txt">找到对手！</text>
+    <text class="ops-sub">{{oppName}} - {{myName}}</text>
+    <text class="ops-countdown">即将开始... {{countdown}}</text>
+  </view>
+
+  <!-- 球员列表 -->
+  <view class="op-body" wx:if="{{status === 'idle' && wsStatus === 'connected'}}">
+    <view class="opb-label">选择你的球员</view>
+
+    <view class="opb-team-row">
+      <picker mode="selector" range="{{teamNames}}" value="{{teamIndex}}" bindchange="onTeamChange">
+        <view class="opb-picker">{{teamNames[teamIndex]}} ▾</view>
+      </picker>
+    </view>
+
+    <scroll-view scroll-y="true" class="opb-list">
+      <view
+        class="opb-card {{selId === item.id?'sel':''}}"
+        wx:for="{{playerList}}"
+        wx:key="id"
+        data-pid="{{item.id}}"
+        bindtap="onCardTap">
+        <view class="opbc-left">
+          <text class="opbc-num">#{{item.num}}</text>
+          <text class="opbc-name">{{item.name}}</text>
+          <text class="opbc-pos">{{item.pos}}</text>
+        </view>
+        <view class="opbc-stats">
+          <text class="opbcs">投篮{{item.shoot}} 速度{{item.speed}} 力量{{item.str}}</text>
+          <text class="opbcs">防守{{item.def}} 控球{{item.drib}} 弹跳{{item.jump}}</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <button class="op-btn-go" bindtap="onStartMatch" disabled="{{!selId}}">
+      {{selId ? '开始匹配' : '请先选择球员'}}
+    </button>
+  </view>
+
+  <!-- 排行榜 -->
+  <view class="op-lb" wx:if="{{status === 'idle' && leaderboard.length > 0}}">
+    <view class="oplb-title">排行榜</view>
+    <view class="oplb-row oplb-header">
+      <text class="oplb-rank">#</text>
+      <text class="oplb-name">玩家</text>
+      <text class="oplb-score">积分</text>
+      <text class="oplb-games">场次</text>
+    </view>
+    <scroll-view scroll-y="true" class="oplb-list">
+      <view class="oplb-row" wx:for="{{leaderboard}}" wx:key="name">
+        <text class="oplb-rank">{{index+1}}</text>
+        <text class="oplb-name">{{item.name}}</text>
+        <text class="oplb-score">{{item.score}}</text>
+        <text class="oplb-games">{{item.games}}</text>
+      </view>
+    </scroll-view>
+  </view>
+</view>

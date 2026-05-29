@@ -1,0 +1,7 @@
+path: C:/Users/Lenovo/Desktop/小助手/金属屑识别/yolo_dataset
+train: train/images
+val: val/images
+
+nc: 1
+names:
+  0: iron_scrap

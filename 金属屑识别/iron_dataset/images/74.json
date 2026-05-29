@@ -1,0 +1,172 @@
+{
+  "version": "6.1.3",
+  "flags": {},
+  "shapes": [
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          2.680412371133986,
+          474.57731958762884
+        ],
+        [
+          172.15342631898116,
+          544.0
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          224.32989690721647,
+          502.41237113402053
+        ],
+        [
+          339.6410496719777,
+          544.0
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          347.01030927835046,
+          499.319587628866
+        ],
+        [
+          74.84536082474223,
+          333.340206185567
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          167.6288659793814,
+          183.85567010309276
+        ],
+        [
+          249.07216494845358,
+          328.1855670103092
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          253.19587628865978,
+          198.28865979381442
+        ],
+        [
+          477.9381443298969,
+          329.2164948453608
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          354.2268041237113,
+          334.37113402061857
+        ],
+        [
+          468.659793814433,
+          442.6185567010309
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          305.77319587628864,
+          83.85567010309276
+        ],
+        [
+          523.2989690721649,
+          190.04123711340205
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          616.0824742268042,
+          160.14432989690718
+        ],
+        [
+          953.1958762886597,
+          224.06185567010309
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          758.3505154639175,
+          253.9587628865979
+        ],
+        [
+          959.3814432989691,
+          390.0412371134021
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    }
+  ],
+  "imagePath": "74.jpg",
+  "imageData": null,
+  "imageHeight": 544,
+  "imageWidth": 960
+}

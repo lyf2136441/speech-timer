@@ -1,0 +1,136 @@
+{
+  "version": "6.1.3",
+  "flags": {},
+  "shapes": [
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          101.64948453608244,
+          541.5876288659794
+        ],
+        [
+          1.649484536082439,
+          469.42268041237105
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          353.19587628865975,
+          542.6185567010309
+        ],
+        [
+          121.23711340206182,
+          487.97938144329896
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          274.8453608247422,
+          479.7319587628865
+        ],
+        [
+          17.113402061855638,
+          256.02061855670104
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          110.92783505154635,
+          169.4226804123711
+        ],
+        [
+          428.45360824742266,
+          250.86597938144328
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          218.14432989690718,
+          70.45360824742265
+        ],
+        [
+          874.8453608247422,
+          201.38144329896906
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          281.0309278350515,
+          257.0515463917526
+        ],
+        [
+          381.0309278350515,
+          404.47422680412365
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    },
+    {
+      "label": "iron_scrap",
+      "points": [
+        [
+          707.8350515463917,
+          235.4020618556701
+        ],
+        [
+          956.2886597938144,
+          349.8350515463917
+        ]
+      ],
+      "group_id": null,
+      "description": "",
+      "shape_type": "rectangle",
+      "flags": {},
+      "mask": null
+    }
+  ],
+  "imagePath": "67.jpg",
+  "imageData": null,
+  "imageHeight": 544,
+  "imageWidth": 960
+}

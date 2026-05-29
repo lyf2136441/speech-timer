@@ -1,0 +1,448 @@
+.g-page {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+  overflow: hidden;
+  background: #0f0f1a;
+}
+
+/* 全屏Canvas */
+.g-canvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ====== HUD顶栏 ====== */
+.g-hud {
+  position: absolute;
+  top: 12rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  background: rgba(0,0,0,0.52);
+  border-radius: 24rpx;
+  padding: 8rpx 32rpx;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hud-left, .hud-right {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+}
+
+.hud-mid {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 24rpx;
+}
+
+.hud-name {
+  font-size: 22rpx;
+  font-weight: bold;
+  white-space: nowrap;
+  max-width: 120rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hud-score {
+  font-size: 36rpx;
+  font-weight: 900;
+  color: #fff;
+  min-width: 36rpx;
+  text-align: center;
+}
+
+.hud-vs {
+  font-size: 16rpx;
+  color: rgba(255,255,255,0.35);
+}
+
+.hud-clock {
+  font-size: 18rpx;
+  color: #ff6;
+}
+
+.hud-timer {
+  font-size: 18rpx;
+  color: #ff9;
+  margin-top: 4rpx;
+}
+
+.stamina-bar {
+  width: 160rpx;
+  height: 10rpx;
+  background: rgba(255,255,255,0.15);
+  border-radius: 5rpx;
+  margin-top: 4rpx;
+  position: relative;
+  overflow: hidden;
+}
+
+.stamina-fill {
+  height: 100%;
+  border-radius: 5rpx;
+  transition: width 0.2s, background 0.3s;
+}
+
+.stamina-txt {
+  font-size: 12rpx;
+  color: rgba(255,255,255,0.6);
+  position: absolute;
+  top: -2rpx;
+  left: 0;
+  right: 0;
+  text-align: center;
+  line-height: 10rpx;
+}
+
+/* ====== 投篮条 ====== */
+.meter-wrap {
+  position: absolute;
+  left: 50%;
+  bottom: 260rpx;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.meter-bg {
+  width: 360rpx;
+  height: 22rpx;
+  background: rgba(0,0,0,0.6);
+  border-radius: 11rpx;
+  overflow: hidden;
+  position: relative;
+  border: 2rpx solid rgba(255,255,255,0.15);
+}
+
+.meter-green {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: rgba(0,220,80,0.45);
+  border-radius: 11rpx;
+  z-index: 1;
+  box-shadow: 0 0 8rpx rgba(0,255,100,0.3);
+}
+
+.meter-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #ff6a00, #ffaa00);
+  border-radius: 11rpx;
+  z-index: 0;
+}
+
+.meter-mark {
+  position: absolute;
+  top: -4rpx;
+  width: 6rpx;
+  height: 30rpx;
+  background: #fff;
+  border-radius: 3rpx;
+  transform: translateX(-50%);
+  z-index: 2;
+  box-shadow: 0 0 6rpx rgba(255,255,255,0.6);
+}
+
+.meter-txt {
+  display: block;
+  font-size: 22rpx;
+  color: #fff;
+  margin-top: 10rpx;
+  text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.8);
+  font-weight: bold;
+  letter-spacing: 2rpx;
+}
+
+/* ====== 消息 ====== */
+.jump-overlay {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50; pointer-events: none;
+  background: rgba(0,0,0,0.3);
+}
+.jump-countdown {
+  font-size: 120rpx; font-weight: bold; color: #ffd700;
+  text-shadow: 0 0 40rpx rgba(255,200,0,0.6);
+}
+.jump-go {
+  font-size: 80rpx; font-weight: bold; color: #ff4444;
+  text-shadow: 0 0 40rpx rgba(255,0,0,0.6);
+}
+
+.g-commentary {
+  position: absolute;
+  bottom: 220rpx;
+  left: 20rpx;
+  right: 20rpx;
+  z-index: 8;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+}
+.gc-item {
+  color: #ffd700;
+  font-size: 26rpx;
+  font-weight: bold;
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+  background: rgba(0,0,0,0.45);
+  padding: 4rpx 20rpx;
+  border-radius: 16rpx;
+  white-space: nowrap;
+}
+
+.g-msg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+  background: rgba(0,0,0,0.7);
+  padding: 12rpx 36rpx;
+  border-radius: 24rpx;
+  pointer-events: none;
+}
+
+.g-msg text {
+  font-size: 26rpx;
+  color: #ff0;
+  font-weight: bold;
+  text-shadow: 0 2rpx 4rpx rgba(0,0,0,0.6);
+}
+
+/* ====== 摇杆 - 左下角 ====== */
+.joy-area {
+  position: absolute;
+  bottom: 40rpx;
+  left: 36rpx;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.joy-base {
+  width: 130rpx;
+  height: 130rpx;
+  background: rgba(255,255,255,0.06);
+  border: 3rpx solid rgba(255,255,255,0.18);
+  border-radius: 50%;
+  position: relative;
+  backdrop-filter: blur(4rpx);
+}
+
+.joy-dot {
+  width: 56rpx;
+  height: 56rpx;
+  background: rgba(255,140,0,0.5);
+  border-radius: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.joy-label {
+  font-size: 18rpx;
+  color: rgba(255,255,255,0.3);
+  margin-top: 8rpx;
+}
+
+/* ====== 动作按钮 - 右下角 ====== */
+.act-area {
+  position: absolute;
+  bottom: 40rpx;
+  right: 36rpx;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.act-row {
+  display: flex;
+  margin-top: 10rpx;
+}
+
+.act-btn {
+  width: 110rpx;
+  height: 86rpx;
+  border-radius: 20rpx;
+  border: 2rpx solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.07);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-left: 10rpx;
+}
+
+.act-btn.big {
+  width: 160rpx;
+  height: 100rpx;
+  background: rgba(255,68,68,0.15);
+  border-color: rgba(255,68,68,0.28);
+}
+
+.act-btn.on {
+  background: rgba(255,140,0,0.28);
+  border-color: #ff8c00;
+}
+
+.act-btn.shoot { background: rgba(255,68,68,0.15); border-color: rgba(255,68,68,0.28); }
+.act-btn.rebound { background: rgba(0,255,136,0.15); border-color: rgba(0,255,136,0.32); }
+.act-btn.drive { background: rgba(0,136,255,0.13); border-color: rgba(0,136,255,0.2); }
+.act-btn.steal { background: rgba(255,200,0,0.11); border-color: rgba(255,200,0,0.2); }
+.act-btn.block { background: rgba(255,0,0,0.11); border-color: rgba(255,0,0,0.2); }
+
+.ab-ico { font-size: 32rpx; }
+.ab-txt { font-size: 18rpx; color: rgba(255,255,255,0.6); margin-top: 4rpx; }
+
+.act-btn.big .ab-ico { font-size: 40rpx; }
+.act-btn.big .ab-txt { font-size: 22rpx; font-weight: bold; }
+
+/* ====== 结束弹窗 ====== */
+.overlay {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.ov-scroll {
+  max-height: 80vh;
+  width: 560rpx;
+}
+
+.ov-box {
+  width: 560rpx;
+  background: #1a1a2e;
+  border-radius: 28rpx;
+  padding: 36rpx 36rpx;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+.ov-win {
+  display: block;
+  font-size: 40rpx;
+  font-weight: bold;
+  color: #ffd700;
+}
+
+.ov-score {
+  display: block;
+  font-size: 58rpx;
+  font-weight: 900;
+  color: #fff;
+  margin: 12rpx 0 22rpx;
+}
+
+.ov-stat {
+  display: block;
+  font-size: 24rpx;
+  color: #aaa;
+  margin: 6rpx 0;
+}
+
+.ov-btn {
+  width: 100%;
+  height: 80rpx;
+  line-height: 80rpx;
+  background: linear-gradient(135deg, #ff8c00, #ff4444);
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: bold;
+  border-radius: 40rpx;
+  border: none;
+  margin-top: 24rpx;
+  padding: 0;
+}
+
+.ov-btn2 {
+  width: 100%;
+  height: 80rpx;
+  line-height: 80rpx;
+  background: rgba(255,255,255,0.08);
+  color: #ccc;
+  font-size: 26rpx;
+  border-radius: 40rpx;
+  border: none;
+  margin-top: 14rpx;
+  padding: 0;
+}
+
+.time-options {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+  margin-top: 28rpx;
+}
+
+.time-btn {
+  width: 100%;
+  height: 76rpx;
+  line-height: 76rpx;
+  background: rgba(255,140,0,0.15);
+  color: #ffd700;
+  font-size: 28rpx;
+  font-weight: bold;
+  border-radius: 40rpx;
+  border: 2rpx solid rgba(255,140,0,0.3);
+  padding: 0;
+}
+
+.set-label {
+  display: block;
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.5);
+  margin: 24rpx 0 10rpx;
+}
+
+.mode-options {
+  display: flex;
+  gap: 16rpx;
+  width: 100%;
+}
+
+.mode-btn {
+  flex: 1;
+  height: 72rpx;
+  line-height: 72rpx;
+  text-align: center;
+  border-radius: 36rpx;
+  font-size: 28rpx;
+  font-weight: bold;
+  color: rgba(255,255,255,0.6);
+  background: rgba(255,255,255,0.06);
+  border: 2rpx solid rgba(255,255,255,0.15);
+  padding: 0;
+}
+
+.mode-btn.mode-on {
+  color: #fff;
+  background: rgba(255,140,0,0.3);
+  border-color: #ff8c00;
+  box-shadow: 0 0 16rpx rgba(255,140,0,0.3);
+}
+
+.mode-hint {
+  display: block;
+  font-size: 20rpx;
+  color: rgba(255,255,255,0.35);
+  margin-top: 8rpx;
+}
