@@ -578,13 +578,41 @@ class GameEngine{
   }
   _drawP(ctx,p,data,color,label){
     if(!data)return;var x=p.x,y=p.y,r=p.r;
-    ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(x,y+r*0.9,r*0.8,r*0.2,0,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;ctx.stroke();
-    ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(r*0.8)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(data.num||'?',x,y);
-    ctx.font=Math.floor(r*0.45)+'px sans-serif';ctx.fillText(data.name||'',x,y-r-this._s(8));
-    if(label){ctx.fillStyle=label==='攻'?'#ff0':label==='罚'?'#0f0':'#f88';ctx.font='bold '+Math.floor(r*0.45)+'px sans-serif';ctx.fillText(label,x,y+r+this._s(10))}
+    var bh=r*2.6,hdR=r*0.32,bw=r*0.45,skin='#e8b88a';
+    // Shadow
+    ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();ctx.ellipse(x,y+bh/2+r*0.25,bw*0.6,r*0.12,0,0,Math.PI*2);ctx.fill();
+    // Legs
+    var legTop=y+bh*0.1,legLen=bh*0.5;
+    ctx.strokeStyle=skin;ctx.lineWidth=r*0.2;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(x-bw*0.2,legTop);ctx.lineTo(x-bw*0.35,legTop+legLen);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x+bw*0.2,legTop);ctx.lineTo(x+bw*0.2,legTop+legLen);ctx.stroke();
+    // Shorts
+    ctx.fillStyle='#1a1a2e';ctx.fillRect(x-bw*0.85,legTop-r*0.1,bw*1.7,r*0.4);
+    // Shoes
+    ctx.fillStyle='#222';ctx.beginPath();ctx.ellipse(x-bw*0.35,legTop+legLen+r*0.08,r*0.22,r*0.1,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(x+bw*0.2,legTop+legLen+r*0.08,r*0.22,r*0.1,0,0,Math.PI*2);ctx.fill();
+    // Jersey
+    var bodyTop=y-bh*0.42;
+    ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x-bw,bodyTop,bw*2,bh*0.48,r*0.08);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=0.8;ctx.stroke();
+    // Jersey number
+    ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(r*0.52)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(data.num||'?',x,bodyTop+bh*0.24);
+    // Name
+    ctx.fillStyle='#fff';ctx.font=Math.floor(r*0.38)+'px sans-serif';ctx.textAlign='center';
+    ctx.fillText(data.name||'',x,y-bh/2-hdR-this._s(6));
+    // Arms
+    var sy=bodyTop+r*0.12;
+    ctx.strokeStyle=skin;ctx.lineWidth=r*0.15;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(x+bw*0.3,sy);ctx.lineTo(x+bw*0.5,sy-bh*0.3);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x-bw*0.3,sy);ctx.lineTo(x-bw*0.55,sy+bh*0.12);ctx.stroke();
+    // Head
+    ctx.fillStyle=skin;ctx.beginPath();ctx.arc(x,bodyTop-hdR*0.4,hdR,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#d4a574';ctx.lineWidth=0.6;ctx.stroke();
+    // Hair
+    ctx.fillStyle='#111';ctx.beginPath();ctx.arc(x,bodyTop-hdR*0.4-hdR*0.25,hdR*1.05,Math.PI,2*Math.PI);ctx.fill();
+    // Label
+    if(label){ctx.fillStyle=label==='攻'?'#ff0':label==='罚'?'#0f0':'#f88';ctx.font='bold '+Math.floor(r*0.38)+'px sans-serif';ctx.textAlign='center';ctx.fillText(label,x,y+bh/2+this._s(10))}
   }
   _drawBall(ctx){
     if(!this.ball.has||this.ballInAir||this._shotPath){
@@ -670,14 +698,42 @@ function renderSharedState(state, p1data, p2data, mySideIdx){
 
   // Players — 与原始_drawPlayers/_drawP一致
   function drawPx(px,py,data,color,label){
-    if(!data)return;var px2=_(px),py2=_(py),rr=_(25);
-    ctx.fillStyle='rgba(0,0,0,0.3)';ctx.beginPath();ctx.ellipse(px2,py2+rr*0.9,rr*0.8,rr*0.2,0,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle=color;ctx.beginPath();ctx.arc(px2,py2,rr,0,Math.PI*2);ctx.fill();
-    ctx.strokeStyle='rgba(255,255,255,0.5)';ctx.lineWidth=2;ctx.stroke();
-    ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(rr*0.8)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(data.num||'?',px2,py2);
-    ctx.font=Math.floor(rr*0.45)+'px sans-serif';ctx.fillText(data.name||'',px2,py2-rr-_(8));
-    if(label){ctx.fillStyle=label==='攻'?'#ff0':label==='罚'?'#0f0':'#f88';ctx.font='bold '+Math.floor(rr*0.45)+'px sans-serif';ctx.fillText(label,px2,py2+rr+_(10))}
+    if(!data)return;var x=_(px),y=_(py),r=_(25);
+    var bh=r*2.6,hdR=r*0.32,bw=r*0.45,skin='#e8b88a';
+    // Shadow
+    ctx.fillStyle='rgba(0,0,0,0.2)';ctx.beginPath();ctx.ellipse(x,y+bh/2+r*0.25,bw*0.6,r*0.12,0,0,Math.PI*2);ctx.fill();
+    // Legs
+    var legTop=y+bh*0.1,legLen=bh*0.5;
+    ctx.strokeStyle=skin;ctx.lineWidth=r*0.2;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(x-bw*0.2,legTop);ctx.lineTo(x-bw*0.35,legTop+legLen);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x+bw*0.2,legTop);ctx.lineTo(x+bw*0.2,legTop+legLen);ctx.stroke();
+    // Shorts
+    ctx.fillStyle='#1a1a2e';ctx.fillRect(x-bw*0.85,legTop-r*0.1,bw*1.7,r*0.4);
+    // Shoes
+    ctx.fillStyle='#222';ctx.beginPath();ctx.ellipse(x-bw*0.35,legTop+legLen+r*0.08,r*0.22,r*0.1,0,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.ellipse(x+bw*0.2,legTop+legLen+r*0.08,r*0.22,r*0.1,0,0,Math.PI*2);ctx.fill();
+    // Jersey
+    var bodyTop=y-bh*0.42;
+    ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x-bw,bodyTop,bw*2,bh*0.48,r*0.08);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,0.25)';ctx.lineWidth=0.8;ctx.stroke();
+    // Jersey number
+    ctx.fillStyle='#fff';ctx.font='bold '+Math.floor(r*0.52)+'px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(data.num||'?',x,bodyTop+bh*0.24);
+    // Name
+    ctx.fillStyle='#fff';ctx.font=Math.floor(r*0.38)+'px sans-serif';ctx.textAlign='center';
+    ctx.fillText(data.name||'',x,y-bh/2-hdR-_(6));
+    // Arms
+    var sy=bodyTop+r*0.12;
+    ctx.strokeStyle=skin;ctx.lineWidth=r*0.15;ctx.lineCap='round';
+    ctx.beginPath();ctx.moveTo(x+bw*0.3,sy);ctx.lineTo(x+bw*0.5,sy-bh*0.3);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(x-bw*0.3,sy);ctx.lineTo(x-bw*0.55,sy+bh*0.12);ctx.stroke();
+    // Head
+    ctx.fillStyle=skin;ctx.beginPath();ctx.arc(x,bodyTop-hdR*0.4,hdR,0,Math.PI*2);ctx.fill();
+    ctx.strokeStyle='#d4a574';ctx.lineWidth=0.6;ctx.stroke();
+    // Hair
+    ctx.fillStyle='#111';ctx.beginPath();ctx.arc(x,bodyTop-hdR*0.4-hdR*0.25,hdR*1.05,Math.PI,2*Math.PI);ctx.fill();
+    // Label
+    if(label){ctx.fillStyle=label==='攻'?'#ff0':label==='罚'?'#0f0':'#f88';ctx.font='bold '+Math.floor(r*0.38)+'px sans-serif';ctx.textAlign='center';ctx.fillText(label,x,y+bh/2+_(10))}
   }
 
   var p1=s.p1||{x:375,y:380,e:100},p2=s.p2||{x:375,y:120,e:100};
