@@ -33,13 +33,6 @@ body{background:#0f0f1a;overflow:hidden;touch-action:manipulation;font-family:-a
 #cdOverlay.show{display:flex}
 .cd-num{font-size:80px;font-weight:bold;color:#ffd700}
 .cd-opp{font-size:15px;color:#fff;margin-top:2px}
-/* 横屏提示 */
-#rotateHint{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:9999;background:#0a0a15;flex-direction:column;align-items:center;justify-content:center;color:#fff;gap:20px}
-#rotateHint .icon{font-size:60px;animation:rotPulse 1.5s infinite}
-@keyframes rotPulse{0%,100%{transform:rotate(0deg)}50%{transform:rotate(90deg)}}
-@media screen and (orientation:portrait){#rotateHint{display:flex}}
-@media screen and (orientation:landscape){#rotateHint{display:none !important}}
-
 /* 选人页 */
 #selectPage{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;flex-direction:column;z-index:10}
 .s-header{text-align:center;padding:16px 0 8px;flex-shrink:0}
@@ -137,7 +130,6 @@ body{background:#0f0f1a;overflow:hidden;touch-action:manipulation;font-family:-a
 </style>
 </head>
 <body>
-<div id="rotateHint"><div class="icon">📱</div><div style="font-size:20px;font-weight:bold">请旋转手机</div><div style="color:#888">横屏体验更佳</div></div>
 <div id="app">
   <div id="modePage"></div>
   <div id="cdOverlay"><div class="cd-num" id="cdNum">3</div><div class="cd-opp" id="cdOpp"></div></div>
@@ -321,6 +313,25 @@ function getPlayersByTeam(id){
   return t?t.players.map(p=>({...p,teamId:t.id,teamName:t.name,teamAbbr:t.abbr,teamColor:t.color})):[];
 }
 
+// ==================== 音效系统 ====================
+var SFX={ctx:null,init:function(){if(!this.ctx)this.ctx=new(window.AudioContext||window.webkitAudioContext)()},
+  play:function(freq,dur,type,vol,slide){
+    if(!this.ctx)this.init();if(this.ctx.state==='suspended')this.ctx.resume();
+    var o=this.ctx.createOscillator(),g=this.ctx.createGain();
+    o.type=type||'square';o.frequency.setValueAtTime(freq,this.ctx.currentTime);
+    if(slide)o.frequency.linearRampToValueAtTime(freq*slide,this.ctx.currentTime+dur);
+    g.gain.setValueAtTime(vol||0.08,this.ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001,this.ctx.currentTime+dur);
+    o.connect(g);g.connect(this.ctx.destination);o.start();o.stop(this.ctx.currentTime+dur);
+  },
+  bounce:function(){this.play(120,0.08,'square',0.05,0.5);setTimeout(function(){SFX.play(80,0.06,'square',0.03,0.5)},40)},
+  swish:function(){this.play(800,0.1,'sine',0.06,1.5);setTimeout(function(){SFX.play(600,0.08,'sine',0.04,1.3)},60)},
+  buzzer:function(){this.play(200,0.4,'sawtooth',0.1,0.6)},
+  whistle:function(){this.play(880,0.15,'square',0.07,1.2);setTimeout(function(){SFX.play(660,0.12,'square',0.05,1.1)},80)},
+  score:function(){this.play(523,0.08,'square',0.06,1.3);setTimeout(function(){SFX.play(659,0.08,'square',0.05,1.3)},80);setTimeout(function(){SFX.play(784,0.12,'square',0.07,1.0)},160)},
+  block:function(){this.play(60,0.2,'triangle',0.12,0.4)}
+};
+
 // ==================== 游戏引擎 ====================
 class GameEngine {
   constructor(w,h){
@@ -348,7 +359,10 @@ class GameEngine {
   _s(v){return v*this.scale}
   _init(){
     const cx=this._s(375),cy=this._s(250);
-    this.ball={x:cx,y:cy,vx:0,vy:0,r:this._s(10),has:false};
+    this.ball={x:cx,y:cy,vx:0,vy:0,r:this._s(10),has:false,trail:[]};
+    // 平滑移动：速度惯性
+    this.offVel={vx:0,vy:0};this.defVel={vx:0,vy:0};
+    this.scoreFlash=0;this.rimShake=0;
     this._resetJumpBall();
   }
   _resetJumpBall(){
@@ -580,23 +594,25 @@ class GameEngine {
   }
 
   _move(dt){
-    const mxW=this.w-this.off.r,mnX=this.off.r,mxH=this.h-this.off.r,mnY=this._s(40)+this.off.r;
-    let os=this._oSpeed;if(this.driveAnim>0)os=5;
-    let omx=this.offInput.mx,omy=this.offInput.my;
-    if(this.driveAnim>0)omy=-1;
-    if(omx!==0||omy!==0){const m=Math.sqrt(omx*omx+omy*omy);this.off.x+=omx/m*os*(dt/16);this.off.y+=omy/m*os*(dt/16)}
-    let dmx=this.defInput.mx,dmy=this.defInput.my;
-    const tox=this.off.x-this.def.x,toy=this.off.y-this.def.y,tod=Math.sqrt(tox*tox+toy*toy);
-    const id=this._s(40);
-    if(tod>0&&tod>id+5){dmx+=(tox/tod)*0.8;dmy+=(toy/tod)*0.8}
-    else if(tod<id-5&&tod>0){dmx-=(tox/tod)*0.3;dmy-=(toy/tod)*0.3}
-    const dm=Math.sqrt(dmx*dmx+dmy*dmy);
-    if(dm>1){dmx/=dm;dmy/=dm}
-    if(dm>0.1){this.def.x+=dmx*this._dSpeed*(dt/16);this.def.y+=dmy*this._dSpeed*(dt/16)}
-    this.off.x=Math.max(mnX,Math.min(mxW,this.off.x));
-    this.off.y=Math.max(mnY,Math.min(mxH,this.off.y));
-    this.def.x=Math.max(mnX,Math.min(mxW,this.def.x));
-    this.def.y=Math.max(mnY,Math.min(mxH,this.def.y));
+    var mxW=this.w-this.off.r,mnX=this.off.r,mxH=this.h-this.off.r,mnY=this._s(40)+this.off.r;
+    var os=this._oSpeed,accel=0.15,friction=0.85;if(this.driveAnim>0){os=5;accel=0.3}
+    var omx=this.offInput.mx,omy=this.offInput.my;if(this.driveAnim>0)omy=-1;
+    // 平滑加速度
+    var tx=omx*os,ty=omy*os;
+    this.offVel.vx+=(tx-this.offVel.vx)*accel*(dt/16);
+    this.offVel.vy+=(ty-this.offVel.vy)*accel*(dt/16);
+    if(Math.abs(omx)<0.1&&Math.abs(omy)<0.1){this.offVel.vx*=friction;this.offVel.vy*=friction}
+    this.off.x+=this.offVel.vx*(dt/16);this.off.y+=this.offVel.vy*(dt/16);
+    // 防守AI(同样平滑)
+    var tox=this.off.x-this.def.x,toy=this.off.y-this.def.y,tod=Math.sqrt(tox*tox+toy*toy),id=this._s(40);
+    var tdx=0,tdy=0;
+    if(tod>0&&tod>id+5){tdx+=(tox/tod)*0.8;tdy+=(toy/tod)*0.8}else if(tod<id-5&&tod>0){tdx-=(tox/tod)*0.3;tdy-=(toy/tod)*0.3}
+    this.defVel.vx+=(tdx*this._dSpeed-this.defVel.vx)*0.12*(dt/16);
+    this.defVel.vy+=(tdy*this._dSpeed-this.defVel.vy)*0.12*(dt/16);
+    if(Math.abs(tdx)<0.1&&Math.abs(tdy)<0.1){this.defVel.vx*=0.9;this.defVel.vy*=0.9}
+    this.def.x+=this.defVel.vx*(dt/16);this.def.y+=this.defVel.vy*(dt/16);
+    this.off.x=Math.max(mnX,Math.min(mxW,this.off.x));this.off.y=Math.max(mnY,Math.min(mxH,this.off.y));
+    this.def.x=Math.max(mnX,Math.min(mxW,this.def.x));this.def.y=Math.max(mnY,Math.min(mxH,this.def.y));
   }
 
   _shootUpdate(){
@@ -684,6 +700,8 @@ class GameEngine {
     this.ballInAir=false;this.ball.has=false;
     this.ball.x=this._s(375);this.ball.y=this._s(100);
     this.ball.vx=0;this.ball.vy=0;this._shotPath=null;this._shotProgress=0;
+    SFX.swish();setTimeout(function(){SFX.score()},120);
+    this.rimShake=250;this.scoreFlash=350;
     if(this.shotResult&&this.shotResult.made){
       if(this.phase==='freethrow'){
         this.score[this.poss]+=1;
@@ -780,7 +798,7 @@ class GameEngine {
   }
   foul(){
     if(this.phase!=='playing'||this.foulCooldown>0||!this.ball.has||this.defEnergy<15){if(this.defEnergy<15)this._msg('体力不足');else if(this.foulCooldown>0)this._msg('冷却中');return}
-    this.foulCooldown=5000;this.defEnergy-=15;
+    this.foulCooldown=5000;this.defEnergy-=15;SFX.whistle();
     this.ftShooter=this.poss;this.ftCount=2;this.ftMade=0;
     this.phase='freethrow';
     this._msg('犯规！对方罚球2次');
@@ -800,16 +818,18 @@ class GameEngine {
     this._drawUI(ctx);
   }
   _drawCourt(ctx){
-    const s=this.scale,cx=this._s(375);
-    if(this.bgImage){
-      ctx.fillStyle='rgba(198,134,66,0.35)';ctx.fillRect(0,0,this.w,this.h);
-    } else {
-      ctx.fillStyle='#c68642';ctx.fillRect(0,0,this.w,this.h);
-    }
-    ctx.strokeStyle='rgba(180,130,80,0.2)';ctx.lineWidth=1;
-    for(let y=0;y<this.h;y+=this._s(25)){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(this.w,y);ctx.stroke()}
+    var s=this.scale,cx=this._s(375);
+    // 木地板
+    var grad=ctx.createLinearGradient(0,0,0,this.h);
+    grad.addColorStop(0,'#d4a056');grad.addColorStop(0.5,'#c8924a');grad.addColorStop(1,'#b8803a');
+    ctx.fillStyle=grad;ctx.fillRect(0,0,this.w,this.h);
+    // 木纹
+    ctx.strokeStyle='rgba(0,0,0,0.08)';ctx.lineWidth=1;
+    for(var y=0;y<this.h;y+=this._s(20)){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(this.w,y);ctx.stroke()}
     // 篮板
-    const rx=cx,ry=this._s(60);
+    var rx=cx,ry=this._s(60);
+    // 得分震动效果
+    if(this.rimShake>0){this.rimShake-=16;var sx=(Math.random()-0.5)*this._s(3)*Math.min(1,this.rimShake/150);var sy2=(Math.random()-0.5)*this._s(3)*Math.min(1,this.rimShake/150);rx+=sx;ry+=sy2}
     ctx.fillStyle='#ddd';ctx.fillRect(rx-this._s(50),ry-this._s(20),this._s(100),this._s(8));
     // 篮筐
     ctx.strokeStyle='#ff4444';ctx.lineWidth=3;
@@ -899,10 +919,12 @@ class GameEngine {
     }
   }
   _drawUI(ctx){
-    const w=this.w,h=this.h;
+    var w=this.w,h=this.h;
+    // 得分闪光
+    if(this.scoreFlash>0){this.scoreFlash-=16;ctx.fillStyle='rgba(255,255,255,'+(Math.min(1,this.scoreFlash/300)*0.12)+')';ctx.fillRect(0,0,w,h)}
     // 顶栏
     ctx.fillStyle='rgba(0,0,0,0.6)';ctx.fillRect(0,0,w,this._s(44));
-    const p1=this.p1,p2=this.p2;
+    var p1=this.p1,p2=this.p2;
     ctx.fillStyle='#1a6dd4';ctx.font=`bold ${Math.floor(this._s(13))}px sans-serif`;ctx.textAlign='center';
     ctx.fillText(p1?p1.name:'P1',w*0.2,this._s(18));
     ctx.fillStyle='#fff';ctx.font=`bold ${Math.floor(this._s(18))}px sans-serif`;
