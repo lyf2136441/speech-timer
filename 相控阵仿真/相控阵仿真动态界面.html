@@ -1,0 +1,1176 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>相控阵超声仿真动态系统 — 二维线阵波束形成·聚焦·声场可视化</title>
+<style>
+:root {
+  --bg: #080c12;
+  --panel: #10161e;
+  --border: #1c2a3a;
+  --text: #c0cedc;
+  --accent: #4dc9f6;
+  --accent2: #ffb347;
+  --danger: #e5534b;
+  --green: #4caf84;
+  --slider: #1d3550;
+  --input-bg: #161d2a;
+  --hover: #1e3048;
+  --font: 'Segoe UI', 'Microsoft YaHei', system-ui, sans-serif;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh; display: flex; flex-direction: column; overflow: hidden;
+  user-select: none;
+}
+
+/* Header */
+header {
+  background: var(--panel); border-bottom: 1px solid var(--border);
+  padding: 6px 18px; display: flex; align-items: center; gap: 14px; flex-shrink: 0;
+}
+header h1 { font-size: 1.05rem; font-weight: 600; color: var(--accent); letter-spacing: 0.4px; }
+.badge {
+  font-size: 0.66rem; background: #162233; padding: 2px 9px; border-radius: 9px;
+  color: #7a8fa0; white-space: nowrap;
+}
+
+/* Main layout */
+main { display: flex; flex: 1; overflow: hidden; }
+
+/* Sidebar */
+.sidebar {
+  width: 285px; min-width: 285px; background: var(--panel);
+  border-right: 1px solid var(--border); overflow-y: auto; padding: 10px;
+  display: flex; flex-direction: column; gap: 8px; flex-shrink: 0;
+}
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-thumb { background: #283848; border-radius: 2px; }
+
+.sec {
+  background: #141c26; border: 1px solid var(--border); border-radius: 7px; overflow: hidden;
+}
+.sec-hdr {
+  background: #182230; padding: 8px 12px; font-size: 0.78rem; font-weight: 600;
+  cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+  color: var(--accent); letter-spacing: 0.3px; transition: background 0.15s;
+}
+.sec-hdr:hover { background: #1d2a3a; }
+.sec-hdr .arr { transition: transform 0.2s; font-size: 0.65rem; color: #6a8aaa; }
+.sec-hdr.folded .arr { transform: rotate(-90deg); }
+.sec-body { padding: 8px 12px; display: flex; flex-direction: column; gap: 6px; }
+.sec-body.hidden { display: none; }
+
+.row { display: flex; align-items: center; gap: 6px; font-size: 0.74rem; }
+.row label { min-width: 72px; color: #8a9db0; flex-shrink: 0; }
+.row label.sm { min-width: 58px; }
+.row input[type="range"] {
+  flex: 1; -webkit-appearance: none; height: 4px; background: var(--slider);
+  border-radius: 2px; outline: none; cursor: pointer;
+}
+.row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 14px; height: 14px;
+  background: var(--accent); border-radius: 50%; cursor: pointer; border: 2px solid #fff3;
+}
+.row input[type="number"] {
+  width: 60px; background: var(--input-bg); border: 1px solid var(--border);
+  color: var(--text); padding: 3px 5px; border-radius: 4px; font-size: 0.74rem;
+  text-align: center; font-family: var(--font);
+}
+.row input[type="number"]:focus { outline: 1px solid var(--accent); background: #1e2a38; }
+.row select {
+  flex: 1; background: var(--input-bg); border: 1px solid var(--border);
+  color: var(--text); padding: 4px 7px; border-radius: 4px; font-size: 0.74rem;
+  font-family: var(--font); cursor: pointer;
+}
+.row input[type="checkbox"] { accent-color: var(--accent); cursor: pointer; }
+.row .unit { font-size: 0.66rem; color: #5a7a90; flex-shrink: 0; }
+
+.btn {
+  padding: 5px 12px; border: 1px solid var(--border); border-radius: 5px;
+  background: #182332; color: var(--text); cursor: pointer; font-size: 0.74rem;
+  font-family: var(--font); transition: all 0.15s; white-space: nowrap;
+}
+.btn:hover { background: var(--hover); border-color: #385878; }
+.btn.accent { background: #0d3150; border-color: var(--accent); color: var(--accent); }
+.btn.accent:hover { background: #124573; }
+.btn-row { display: flex; gap: 5px; flex-wrap: wrap; }
+
+/* Center canvas */
+.canvas-area {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  padding: 8px; position: relative; background: radial-gradient(ellipse at center, #0d1520 0%, #060a10 100%);
+}
+.canvas-wrap { position: relative; border: 1px solid var(--border); border-radius: 3px; }
+canvas { display: block; }
+.cbar {
+  position: absolute; right: -38px; top: 5%; width: 20px; height: 90%;
+  border-radius: 3px; border: 1px solid #3a4a5a; opacity: 0.9;
+}
+.cbar-label {
+  position: absolute; right: -34px; color: #7a8fa0; font-size: 0.62rem;
+  font-family: var(--font); pointer-events: none;
+}
+
+/* Right panel */
+.rpanel {
+  width: 295px; min-width: 295px; background: var(--panel);
+  border-left: 1px solid var(--border); overflow-y: auto; padding: 10px;
+  display: flex; flex-direction: column; gap: 10px; flex-shrink: 0;
+}
+.rpanel::-webkit-scrollbar { width: 4px; }
+.rpanel::-webkit-scrollbar-thumb { background: #283848; border-radius: 2px; }
+
+/* Footer */
+footer {
+  background: var(--panel); border-top: 1px solid var(--border);
+  padding: 3px 16px; font-size: 0.68rem; color: #5a7a90; display: flex;
+  gap: 18px; flex-shrink: 0; flex-wrap: wrap;
+}
+footer .v { color: var(--accent2); font-weight: 600; font-variant-numeric: tabular-nums; }
+
+/* Tooltip */
+.ttip {
+  position: absolute; background: rgba(0,8,20,0.92); color: #e0e8f0;
+  padding: 5px 9px; border-radius: 4px; font-size: 0.7rem; pointer-events: none;
+  display: none; border: 1px solid #3a5a7a; white-space: nowrap; z-index: 100;
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>相控阵超声仿真动态系统</h1>
+  <span class="badge">二维线阵</span>
+  <span class="badge">惠更斯-菲涅尔原理</span>
+  <span class="badge">波束形成&聚焦</span>
+  <span class="badge">柔性换能器</span>
+  <span class="badge">中国计量大学</span>
+</header>
+
+<main>
+  <!-- ===== 左侧控制面板 ===== -->
+  <aside class="sidebar" id="sidebar">
+    <!-- 阵列 -->
+    <div class="sec">
+      <div class="sec-hdr" onclick="tg(this)"><span>阵列参数</span><span class="arr">&#9660;</span></div>
+      <div class="sec-body">
+        <div class="row"><label>阵元数量 N</label><input type="range" id="N" min="2" max="64" value="8" step="1" oninput="up('N')"><input type="number" id="Nv" value="8" min="2" max="128" onchange="upn('N')"></div>
+        <div class="row"><label>间距 d</label><input type="range" id="d" min="0.1" max="3" value="0.5" step="0.02" oninput="up('d')"><input type="number" id="dv" value="0.5" min="0.05" max="10" step="0.02" onchange="upn('d')"><span class="unit">mm</span></div>
+        <div class="row"><label>频率 f</label><input type="range" id="freq" min="0.1" max="10" value="1" step="0.05" oninput="up('freq')"><input type="number" id="freqv" value="1" min="0.05" max="20" step="0.05" onchange="upn('freq')"><span class="unit">MHz</span></div>
+        <div class="row"><label>阵元宽度 a</label><input type="range" id="ew" min="0.05" max="1" value="0.2" step="0.02" oninput="up('ew')"><input type="number" id="ewv" value="0.2" min="0.02" max="5" step="0.02" onchange="upn('ew')"><span class="unit">mm</span></div>
+        <div class="row"><label>变迹加权</label><select id="apod" onchange="up('apod')"><option value="uniform">均匀 Uniform</option><option value="hanning">汉宁 Hanning</option><option value="hamming">汉明 Hamming</option><option value="blackman">布莱克曼 Blackman</option><option value="taylor">泰勒 Taylor(-30dB)</option></select></div>
+        <div class="row"><label>激励模式</label><select id="excite" onchange="up('excite')"><option value="cw">连续波 CW</option><option value="pulse">脉冲波 Pulse</option><option value="toneburst">猝发音 ToneBurst</option></select></div>
+      </div>
+    </div>
+
+    <!-- 介质 -->
+    <div class="sec">
+      <div class="sec-hdr" onclick="tg(this)"><span>介质参数</span><span class="arr">&#9660;</span></div>
+      <div class="sec-body">
+        <div class="row"><label>声速 c</label><input type="range" id="c" min="300" max="6000" value="1500" step="5" oninput="up('c')"><input type="number" id="cv" value="1500" min="100" max="20000" step="5" onchange="upn('c')"><span class="unit">m/s</span></div>
+        <div class="row"><label>密度 ρ</label><input type="range" id="rho" min="500" max="3000" value="1000" step="10" oninput="up('rho')"><input type="number" id="rhov" value="1000" min="100" max="20000" step="10" onchange="upn('rho')"><span class="unit">kg/m³</span></div>
+        <div class="row"><label>衰减 α</label><input type="range" id="att" min="0" max="10" value="0.5" step="0.1" oninput="up('att')"><input type="number" id="attv" value="0.5" min="0" max="100" step="0.1" onchange="upn('att')"><span class="unit">dB/cm/MHz</span></div>
+        <div class="row"><label>介质类型</label><select id="medium" onchange="setMedium()"><option value="custom">自定义</option><option value="water" selected>水 (1500/1000)</option><option value="soft">软组织 (1540/1050)</option><option value="bone">骨骼 (3500/1900)</option><option value="air">空气 (343/1.2)</option><option value="steel">钢 (5900/7800)</option></select></div>
+      </div>
+    </div>
+
+    <!-- 波束控制 -->
+    <div class="sec">
+      <div class="sec-hdr" onclick="tg(this)"><span>波束控制</span><span class="arr">&#9660;</span></div>
+      <div class="sec-body">
+        <div class="row"><label>转向角 θ</label><input type="range" id="theta" min="-80" max="80" value="0" step="0.5" oninput="up('theta')"><input type="number" id="thetav" value="0" min="-89" max="89" step="0.5" onchange="upn('theta')"><span class="unit">°</span></div>
+        <div class="row"><label>聚焦深度 F</label><input type="range" id="F" min="0.3" max="20" value="20" step="0.1" oninput="up('F')"><input type="number" id="Fv" value="20" min="0.2" max="100" step="0.1" onchange="upn('F')"><span class="unit">mm</span></div>
+        <div class="row"><label>焦点偏移 Δy</label><input type="range" id="Fy" min="-10" max="10" value="0" step="0.1" oninput="up('Fy')"><input type="number" id="Fyv" value="0" min="-15" max="15" step="0.1" onchange="upn('Fy')"><span class="unit">mm</span></div>
+      </div>
+    </div>
+
+    <!-- 柔性阵列 -->
+    <div class="sec">
+      <div class="sec-hdr" onclick="tg(this)"><span>柔性阵列形变</span><span class="arr">&#9660;</span></div>
+      <div class="sec-body">
+        <div class="row"><label>曲率 κ</label><input type="range" id="kappa" min="-0.5" max="0.5" value="0" step="0.005" oninput="up('kappa')"><input type="number" id="kappav" value="0" min="-1" max="1" step="0.005" onchange="upn('kappa')"><span class="unit">mm⁻¹</span></div>
+        <div class="row"><label>随机扰动</label><input type="range" id="noise" min="0" max="10" value="0" step="0.1" oninput="up('noise')"><input type="number" id="noisev" value="0" min="0" max="20" step="0.1" onchange="upn('noise')"><span class="unit">%</span></div>
+        <div class="row"><label>拉伸系数</label><input type="range" id="stretch" min="0.5" max="2" value="1" step="0.02" oninput="up('stretch')"><input type="number" id="stretchv" value="1" min="0.3" max="3" step="0.02" onchange="upn('stretch')"><span class="unit">×</span></div>
+      </div>
+    </div>
+
+    <!-- 障碍物 -->
+    <div class="sec">
+      <div class="sec-hdr" onclick="tg(this)"><span>🔴 障碍物设置</span><span class="arr">&#9660;</span></div>
+      <div class="sec-body" id="obsBody">
+        <div class="row"><label>障碍物类型</label><select id="obsType" onchange="upObsType()"><option value="circle">圆形</option><option value="rect">矩形</option></select></div>
+        <div class="row"><label>中心X</label><input type="range" id="obsX" min="0" max="20" value="10" step="0.1" oninput="upObs()"><input type="number" id="obsXv" value="10" min="0" max="20" step="0.1" onchange="upObsN()"><span class="unit">mm</span></div>
+        <div class="row"><label>中心Y</label><input type="range" id="obsY" min="-10" max="10" value="0" step="0.1" oninput="upObs()"><input type="number" id="obsYv" value="0" min="-10" max="10" step="0.1" onchange="upObsN()"><span class="unit">mm</span></div>
+        <div class="row"><label id="obsSLbl">半径R</label><input type="range" id="obsS" min="0.3" max="10" value="2" step="0.1" oninput="upObs()"><input type="number" id="obsSv" value="2" min="0.1" max="15" step="0.1" onchange="upObsN()"><span class="unit">mm</span></div>
+        <div class="row"><label>声速 c</label><input type="range" id="obsC" min="300" max="6000" value="3500" step="10" oninput="upObs()"><input type="number" id="obsCv" value="3500" min="100" max="15000" step="10" onchange="upObsN()"><span class="unit">m/s</span></div>
+        <div class="row"><label>密度 ρ</label><input type="range" id="obsRho" min="100" max="8000" value="1900" step="10" oninput="upObs()"><input type="number" id="obsRhov" value="1900" min="1" max="20000" step="10" onchange="upObsN()"><span class="unit">kg/m³</span></div>
+        <div class="row"><label>衰减 α</label><input type="range" id="obsAtt" min="0" max="20" value="10" step="0.1" oninput="upObs()"><input type="number" id="obsAttv" value="10" min="0" max="100" step="0.1" onchange="upObsN()"><span class="unit">dB/cm/MHz</span></div>
+        <div class="row"><label>预设材料</label><select id="obsPreset" onchange="setObsPreset()"><option value="custom">自定义</option><option value="bone" selected>骨骼</option><option value="steel">钢</option><option value="fat">脂肪 (1450/920)</option><option value="muscle">肌肉 (1580/1060)</option><option value="air">空气泡</option></select></div>
+        <div class="btn-row" style="margin-top:4px">
+          <button class="btn accent" onclick="addObstacle()">➕ 添加障碍物</button>
+          <button class="btn" onclick="clearObstacles()">✖ 清除全部</button>
+        </div>
+        <div id="obsList" style="font-size:0.68rem;color:#8a9db0;max-height:120px;overflow-y:auto;margin-top:4px"></div>
+      </div>
+    </div>
+
+    <!-- 显示 -->
+    <div class="sec">
+      <div class="sec-hdr folded" onclick="tg(this)"><span>显示设置</span><span class="arr">&#9660;</span></div>
+      <div class="sec-body hidden">
+        <div class="row"><label>显示模式</label><select id="mode" onchange="up('mode')"><option value="pressure">瞬时声压</option><option value="envelope">声压包络</option><option value="intensity">声强</option><option value="db">分贝 (dB)</option><option value="tof">飞行时间 TOF</option></select></div>
+        <div class="row"><label>配色</label><select id="cmap" onchange="up('cmap')"><option value="jet">Jet 彩虹</option><option value="viridis">Viridis 感知</option><option value="hot">Hot 热力</option><option value="coolwarm">CoolWarm</option><option value="bone">Bone 灰度</option></select></div>
+        <div class="row"><label>动态范围</label><input type="range" id="dr" min="10" max="60" value="40" step="1" oninput="up('dr')"><input type="number" id="drv" value="40" min="6" max="120" step="1" onchange="upn('dr')"><span class="unit">dB</span></div>
+        <div class="row"><label>动画速度</label><input type="range" id="spd" min="0.1" max="5" value="1" step="0.05" oninput="up('spd')"><input type="number" id="spdv" value="1" min="0.1" max="10" step="0.1" onchange="upn('spd')"><span class="unit">×</span></div>
+        <div class="row"><label>显示网格</label><input type="checkbox" id="grid" checked onchange="up('grid')"></div>
+        <div class="row"><label>显示阵元</label><input type="checkbox" id="elems" checked onchange="up('elems')"></div>
+        <div class="row"><label>显示焦点</label><input type="checkbox" id="foc" checked onchange="up('foc')"></div>
+        <div class="row"><label>显示近场区</label><input type="checkbox" id="nfz" checked onchange="up('nfz')"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn accent" id="playBtn" onclick="togAnim()">暂停 ⏸</button>
+      <button class="btn" onclick="resetAll()">重置</button>
+      <button class="btn" onclick="screenshot()">截图</button>
+    </div>
+    <div style="font-size:0.62rem;color:#4a6a80;text-align:center;margin-top:4px;">
+      点击声场图设置焦点 | 滚轮缩放 | 快捷键: 空格暂停
+    </div>
+  </aside>
+
+  <!-- ===== 中心画布 ===== -->
+  <section class="canvas-area" id="cvArea">
+    <div class="canvas-wrap" id="cvWrap" style="position:relative;">
+      <canvas id="mc"></canvas>
+      <div class="ttip" id="ttip"></div>
+    </div>
+    <div class="cbar" id="cbar"></div>
+  </section>
+
+  <!-- ===== 右侧面板 ===== -->
+  <aside class="rpanel">
+    <div class="sec">
+      <div class="sec-hdr">波束方向图 (极坐标)</div>
+      <div class="sec-body" style="align-items:center"><canvas id="pol" width="260" height="260"></canvas></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hdr">轴向声压截面 (中心y处沿x)</div>
+      <div class="sec-body" style="align-items:center"><canvas id="ax" width="275" height="140"></canvas></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hdr">横向声压截面 (焦点位置处沿y)</div>
+      <div class="sec-body" style="align-items:center"><canvas id="lat" width="275" height="140"></canvas></div>
+    </div>
+    <div class="sec">
+      <div class="sec-hdr">实时参数</div>
+      <div class="sec-body" id="info" style="font-size:0.72rem;gap:3px"></div>
+    </div>
+  </aside>
+</main>
+
+<footer>
+  <span>λ=<span class="v" id="sl">--</span>mm</span>
+  <span>d/λ=<span class="v" id="sdl">--</span></span>
+  <span>近场=<span class="v" id="snf">--</span>mm</span>
+  <span>主瓣宽=<span class="v" id="sbw">--</span>°</span>
+  <span>FPS:<span class="v" id="sfps">--</span></span>
+  <span>光标:<span class="v" id="spos">--</span></span>
+  <span>P=<span class="v" id="spv">--</span></span>
+</footer>
+
+<script>
+// ============================================================
+// 相控阵超声仿真引擎 v2
+// 基于: 惠更斯-菲涅尔原理 | Westervelt方程 | 声场叠加
+// 参考文献: 韩梦雨硕士论文, 高雨萌硕士论文, 郑慧峰项目申报书
+// ============================================================
+
+const P = {
+  N:8, d:0.5, freq:1, ew:0.2, apod:'uniform', excite:'cw',
+  c:1500, rho:1000, att:0.5, medium:'water',
+  theta:0, F:20, Fy:0,
+  kappa:0, noise:0, stretch:1,
+  mode:'pressure', cmap:'jet', dr:40, spd:1,
+  grid:true, elems:true, foc:true, nfz:true,
+  obstacles:[], obsType:'circle', obsX:10, obsY:0, obsS:2, obsC:3500, obsRho:1900, obsAtt:10,
+};
+
+const GRID = 200, AREA_MM = 20, DX = AREA_MM/GRID; // 0.1mm grid
+let els=[], apw=[], t=0, running=true;
+let fp=null; // Float32Array GRID*GRID
+let fpCount=0, fpStamp=performance.now(), fpDisp=0;
+let mxG=-1, myG=-1;
+let mc, mctx, pol, pctx, ax, axctx, lat, latctx;
+
+// ---- 初始化 ----
+function init() {
+  mc=document.getElementById('mc'); mctx=mc.getContext('2d');
+  pol=document.getElementById('pol'); pctx=pol.getContext('2d');
+  ax=document.getElementById('ax'); axctx=ax.getContext('2d');
+  lat=document.getElementById('lat'); latctx=lat.getContext('2d');
+  resize(); window.addEventListener('resize',resize);
+  mc.addEventListener('mousemove', mmove);
+  mc.addEventListener('mouseleave',()=>{document.getElementById('ttip').style.display='none'});
+  mc.addEventListener('click', mclick);
+  mc.addEventListener('wheel', mwheel, {passive:false});
+  document.addEventListener('keydown', kdown);
+  syncUI(); buildArray(); requestAnimationFrame(loop);
+}
+
+function resize() {
+  const a=document.getElementById('cvArea');
+  const s=Math.min(a.clientWidth-70, a.clientHeight-20, 720);
+  mc.width=s; mc.height=s;
+  const bar=document.getElementById('cbar');
+  bar.style.right=(s<=480?'-30px':'-38px');
+  bar.style.width=(s<=480?'16px':'20px');
+  bar.style.height=Math.round(s*0.85)+'px';
+  bar.style.top=Math.round(s*0.075)+'px';
+  document.getElementById('cbar').style.background = cbarGrad(Math.round(s*0.85));
+}
+
+function cbarGrad(h) {
+  let g='linear-gradient(to bottom';
+  for(let i=0;i<=20;i++){const[rr,gg,bb]=cmap(1-i/20);g+=`, rgb(${rr},${gg},${bb})`;}
+  return g+')';
+}
+
+// ---- 阵元构建 ----
+function buildArray() {
+  const N=P.N, d0=P.d, s=P.stretch;
+  const d=d0*s;
+  const tot=(N-1)*d;
+  els=[];
+
+  // 确定性随机种子(基于扰动参数)
+  let seed=P.noise*12345;
+
+  for(let i=0;i<N;i++) {
+    const yn=-tot/2+i*d;
+    let x=0, y=yn;
+
+    // 弯曲
+    if(Math.abs(P.kappa)>1e-7) {
+      const R=1/P.kappa;
+      const theta0=yn/R;
+      x=R*(1-Math.cos(theta0));
+      y=R*Math.sin(theta0);
+    }
+
+    // 扰动
+    if(P.noise>0) {
+      seed=(seed*1103515245+12345)&0x7fffffff;
+      const rx=((seed/0x7fffffff)-0.5)*2*P.noise/100*d0;
+      seed=(seed*1103515245+12345)&0x7fffffff;
+      const ry=((seed/0x7fffffff)-0.5)*2*P.noise/100*d0;
+      x+=rx; y+=ry;
+    }
+
+    els.push({x,y});
+  }
+
+  apw=apodWeights(N,P.apod);
+}
+
+function apodWeights(N,type) {
+  const w=new Float32Array(N);
+  switch(type) {
+    case 'uniform': w.fill(1); break;
+    case 'hanning': for(let i=0;i<N;i++)w[i]=0.5*(1-Math.cos(2*Math.PI*i/(N-1)));break;
+    case 'hamming': for(let i=0;i<N;i++)w[i]=0.54-0.46*Math.cos(2*Math.PI*i/(N-1));break;
+    case 'blackman': for(let i=0;i<N;i++)w[i]=0.42-0.5*Math.cos(2*Math.PI*i/(N-1))+0.08*Math.cos(4*Math.PI*i/(N-1));break;
+    case 'taylor': {
+      const nbar=5, A=Math.acosh(Math.pow(10,30/20));
+      const s2=nbar*nbar/(A*A+(nbar-0.5)*(nbar-0.5));
+      for(let i=0;i<N;i++) {
+        const xi=2*(i-(N-1)/2)/(N-1);
+        let Fm=1;
+        for(let m=1;m<nbar;m++) {
+          const num=1, den=1;
+          for(let n=1;n<nbar;n++){if(n===m)continue;}
+          // 使用标准Taylor公式
+          let prod=1;
+          for(let n=1;n<nbar;n++) {
+            if(n===m)continue;
+            prod*=1-(m*m)/(s2*(A*A+(n-0.5)*(n-0.5)));
+          }
+          Fm+=2*Math.cos(Math.PI*m*xi)*prod;
+        }
+        w[i]=Math.abs(Fm);
+      }
+      break;
+    }
+  }
+  const mw=Math.max(...w);
+  if(mw>0) for(let i=0;i<N;i++) w[i]/=mw;
+  return w;
+}
+
+// ---- 相位延迟(转向+聚焦) ----
+function phaseDelays() {
+  const N=P.N, k=waveNumber();
+  const ph=new Float32Array(N);
+  const th=P.theta*Math.PI/180;
+
+  for(let i=0;i<N;i++) {
+    let phi=-k*els[i].y*Math.sin(th);
+
+    // 聚焦: 各阵元到焦点距离差补偿
+    if(P.F<AREA_MM*0.8&&P.F>0.05) {
+      const fx=P.F, fy=P.Fy;
+      const ri=Math.sqrt((fx-els[i].x)**2+(fy-els[i].y)**2);
+      const rmax=Math.max(...els.map(e=>Math.sqrt((fx-e.x)**2+(fy-e.y)**2)));
+      phi+=k*(ri-rmax);
+    }
+
+    ph[i]=phi;
+  }
+  return ph;
+}
+
+function waveNumber() {
+  return 2*Math.PI*P.freq*1e6/(P.c*1e3);
+}
+
+function wavelength() {
+  return P.c/(P.freq*1e3);
+}
+
+// ---- 障碍物管理 ----
+function addObstacle(){
+  var o={
+    type:P.obsType,
+    x:P.obsX, y:P.obsY, size:P.obsS,
+    c:P.obsC, rho:P.obsRho, att:P.obsAtt,
+    Z:P.obsRho*P.obsC/1e6
+  };
+  if(o.type==='rect'){
+    o.w=P.obsS; o.h=P.obsS*0.6;
+  }
+  P.obstacles.push(o);
+  renderObsList();
+}
+
+function clearObstacles(){P.obstacles=[];renderObsList()}
+
+function removeObstacle(i){P.obstacles.splice(i,1);renderObsList()}
+
+function renderObsList(){
+  var el=document.getElementById('obsList');
+  if(!el)return;
+  if(P.obstacles.length===0){
+    el.innerHTML='<div style="color:#5a7a90">暂无障碍物，点击上方按钮添加</div>';
+    return;
+  }
+  var h='';
+  for(var i=0;i<P.obstacles.length;i++){
+    var o=P.obstacles[i];
+    var label=o.type==='circle'?'⚪ 圆':'◻ 矩形';
+    h+='<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;border-bottom:1px solid #1c2a3a">';
+    h+='<span>'+label+' ('+o.x.toFixed(1)+','+o.y.toFixed(1)+') c='+o.c+' Z='+o.Z.toFixed(1)+'</span>';
+    h+='<button onclick="removeObstacle('+i+')" style="background:none;border:none;color:#e5534b;cursor:pointer;font-size:14px">✕</button></div>';
+  }
+  el.innerHTML=h;
+}
+
+function upObsType(){
+  P.obsType=document.getElementById('obsType').value;
+  document.getElementById('obsSLbl').textContent=P.obsType==='circle'?'半径R':'宽度W';
+}
+
+function upObs(){
+  P.obsX=parseFloat(document.getElementById('obsX').value);
+  P.obsY=parseFloat(document.getElementById('obsY').value);
+  P.obsS=parseFloat(document.getElementById('obsS').value);
+  P.obsC=parseFloat(document.getElementById('obsC').value);
+  P.obsRho=parseFloat(document.getElementById('obsRho').value);
+  P.obsAtt=parseFloat(document.getElementById('obsAtt').value);
+  ['obsXv','obsYv','obsSv','obsCv','obsRhov','obsAttv'].forEach(function(id){
+    var el=document.getElementById(id);if(el)el.value=parseFloat(document.getElementById(id.replace('v','')).value).toFixed(1);
+  });
+}
+
+function upObsN(){
+  ['obsX','obsY','obsS','obsC','obsRho','obsAtt'].forEach(function(k){
+    var el=document.getElementById(k+'v');if(!el)return;
+    var v=parseFloat(el.value);if(isNaN(v))return;
+    P[k]=v;var sl=document.getElementById(k);if(sl)sl.value=v;
+  });
+}
+
+function setObsPreset(){
+  var m=document.getElementById('obsPreset').value;
+  switch(m){
+    case'bone':P.obsC=3500;P.obsRho=1900;P.obsAtt=10;break;
+    case'steel':P.obsC=5900;P.obsRho=7800;P.obsAtt=0.004;break;
+    case'fat':P.obsC=1450;P.obsRho=920;P.obsAtt=1.0;break;
+    case'muscle':P.obsC=1580;P.obsRho=1060;P.obsAtt=0.8;break;
+    case'air':P.obsC=343;P.obsRho=1.2;P.obsAtt=1.5;break;
+  }
+  document.getElementById('obsC').value=P.obsC;document.getElementById('obsCv').value=P.obsC;
+  document.getElementById('obsRho').value=P.obsRho;document.getElementById('obsRhov').value=P.obsRho;
+  document.getElementById('obsAtt').value=P.obsAtt;document.getElementById('obsAttv').value=P.obsAtt.toFixed(1);
+}
+
+// ---- 射线与障碍物的相交检测 ----
+function rayIntersectsObs(x1,y1,x2,y2,obs){
+  if(obs.type==='circle'){
+    // 线段与圆相交
+    var dx=x2-x1,dy=y2-y1;
+    var fx=x1-obs.x,fy=y1-obs.y;
+    var a=dx*dx+dy*dy;
+    var b=2*(fx*dx+fy*dy);
+    var c=fx*fx+fy*fy-obs.size*obs.size;
+    var disc=b*b-4*a*c;
+    if(disc<0)return null;
+    disc=Math.sqrt(disc);
+    var t1=(-b-disc)/(2*a),t2=(-b+disc)/(2*a);
+    if(t1>t2){var tmp=t1;t1=t2;t2=tmp;}
+    if(t2<0||t1>1)return null;
+    t1=Math.max(0,t1);t2=Math.min(1,t2);
+    return t2-t1>0.001?{t1:t1,t2:t2,len:(t2-t1)*Math.sqrt(a)}:null;
+  } else if(obs.type==='rect'){
+    var hw=obs.w/2,hh=obs.h/2;
+    var l=obs.x-hw,r=obs.x+hw,t=obs.y-hh,b=obs.y+hh;
+    var tmin=0,tmax=1;
+    var dx2=x2-x1,dy2=y2-y1;
+    // X clip
+    if(Math.abs(dx2)<1e-9){if(x1<l||x1>r)return null;}
+    else{
+      var txl=(l-x1)/dx2,txr=(r-x1)/dx2;
+      if(txl>txr){var tmp2=txl;txl=txr;txr=tmp2;}
+      tmin=Math.max(tmin,txl);tmax=Math.min(tmax,txr);
+    }
+    if(tmin>tmax)return null;
+    // Y clip
+    if(Math.abs(dy2)<1e-9){if(y1<t||y1>b)return null;}
+    else{
+      var tyl=(t-y1)/dy2,tyr=(b-y1)/dy2;
+      if(tyl>tyr){var tmp3=tyl;tyl=tyr;tyr=tmp3;}
+      tmin=Math.max(tmin,tyl);tmax=Math.min(tmax,tyr);
+    }
+    if(tmin>tmax||tmax<0||tmin>1)return null;
+    tmin=Math.max(0,tmin);tmax=Math.min(1,tmax);
+    var segLen=Math.sqrt(dx2*dx2+dy2*dy2)*(tmax-tmin);
+    return segLen>0.001?{t1:tmin,t2:tmax,len:segLen}:null;
+  }
+  return null;
+}
+
+// ---- 声压场计算(带障碍物) ----
+function computeField(time_s) {
+  if(!fp) fp=new Float32Array(GRID*GRID);
+  var N=P.N, k=waveNumber(), omega=2*Math.PI*P.freq*1e6;
+  var att_db=P.att;
+  var alpha_Np=att_db*P.freq*Math.log(10)/200/10;
+  var ph=phaseDelays();
+  var w=apw;
+  var obs=P.obstacles;
+  var baseC=P.c, baseZ=P.rho*P.c/1e6;
+
+  for(var gy=0;gy<GRID;gy++) {
+    var y=(gy-GRID/2)*DX;
+    for(var gx=0;gx<GRID;gx++) {
+      var x=gx*DX;
+      var re=0, im=0;
+      var totalTOF=0, tofCount=0;
+
+      for(var i=0;i<N;i++) {
+        var ex=els[i].x, ey=els[i].y;
+        var rx=x-ex, ry=y-ey;
+        var r=Math.sqrt(rx*rx+ry*ry)+0.015;
+
+        // 方向性因子
+        var arg=k*P.ew/2*(rx/(r+1e-9));
+        var dir=Math.abs(arg)<1e-6?1:Math.sin(arg)/arg;
+
+        var amp=w[i]*dir/Math.sqrt(r+1e-6);
+        var phaseShift=0;
+        var totalAtten=1;
+        var tofDist=0;
+
+        // 障碍物处理：检查射线路径是否穿过障碍物
+        if(obs.length>0){
+          // 收集所有相交段
+          var hits=[];
+          for(var oi=0;oi<obs.length;oi++){
+            var hit=rayIntersectsObs(ex,ey,x,y,obs[oi]);
+            if(hit){hits.push({t1:hit.t1,t2:hit.t2,len:hit.len,obsIdx:oi});}
+          }
+          // 按t1排序
+          hits.sort(function(a,b){return a.t1-b.t1});
+
+          // 处理相交段：在外侧用基础介质，在内侧用障碍物介质
+          var segDist=Math.sqrt(rx*rx+ry*ry);
+          var tofAccum=0;
+          var coveredStart=0;
+
+          for(var hi=0;hi<hits.length;hi++){
+            var h=hits[hi];
+            // 障碍物之前的自由段
+            var freeLen=(h.t1-coveredStart)*segDist;
+            if(freeLen>0){
+              tofAccum+=freeLen/(baseC*1e3);
+              phaseShift+=k*freeLen;
+              totalAtten*=Math.exp(-alpha_Np*freeLen);
+            }
+            // 障碍物内段：不同声速和衰减
+            var oo=obs[h.obsIdx];
+            var obsAlpha=oo.att*P.freq*Math.log(10)/200/10;
+            var obsLen=h.len;
+            if(obsLen>0){
+              tofAccum+=obsLen/(oo.c*1e3);
+              phaseShift+=2*Math.PI*P.freq*1e6*obsLen/(oo.c*1e3); // k_obs * len
+              totalAtten*=Math.exp(-obsAlpha*obsLen);
+
+              // 界面反射损失(声阻抗不匹配)
+              var Zobs=oo.rho*oo.c/1e6;
+              var R=(Zobs-baseZ)/(Zobs+baseZ); // 反射系数
+              var T_power=1-R*R; // 功率透射系数
+              totalAtten*=Math.sqrt(Math.max(0.01,T_power)); // 进入
+              totalAtten*=Math.sqrt(Math.max(0.01,T_power)); // 离开
+            }
+            coveredStart=h.t2;
+          }
+          // 最后一段自由段
+          var finalFree=(1-coveredStart)*segDist;
+          if(finalFree>0){
+            tofAccum+=finalFree/(baseC*1e3);
+            phaseShift+=k*finalFree;
+            totalAtten*=Math.exp(-alpha_Np*finalFree);
+          }
+          tofDist=tofAccum*baseC*1e3; // 换算为等效距离(mm)
+        } else {
+          // 无障碍物：直接路径
+          var atten=Math.exp(-alpha_Np*r);
+          totalAtten=atten;
+          phaseShift=k*r;
+          tofDist=r;
+        }
+
+        var psi=omega*time_s-phaseShift+ph[i];
+
+        // 激励模式
+        if(P.excite==='pulse') {
+          var tau=time_s-tofDist/(baseC*1e3);
+          var bw=0.5/P.freq;
+          psi=omega*tau;
+          var env=Math.exp(-((tau-2*bw)**2)/(bw*bw));
+          re+=amp*Math.cos(psi)*env*totalAtten;
+          im+=amp*Math.sin(psi)*env*totalAtten;
+        } else if(P.excite==='toneburst') {
+          var tau2=time_s-tofDist/(baseC*1e3);
+          var Tp=3/P.freq/1e6;
+          var env2=tau2>0&&tau2<Tp?0.5*(1-Math.cos(2*Math.PI*tau2/Tp)):0;
+          if(env2>0){
+            re+=amp*Math.cos(psi)*env2*totalAtten;
+            im+=amp*Math.sin(psi)*env2*totalAtten;
+          }
+        } else {
+          re+=amp*Math.cos(psi)*totalAtten;
+          im+=amp*Math.sin(psi)*totalAtten;
+        }
+
+        // TOF累积(用于TOF模式)
+        totalTOF+=tofDist/(baseC*1e3)*1e6; // μs
+        tofCount++;
+      }
+
+      var idx=gy*GRID+gx;
+      var mag=Math.sqrt(re*re+im*im);
+      if(P.mode==='pressure')fp[idx]=re;
+      else if(P.mode==='envelope')fp[idx]=mag;
+      else if(P.mode==='intensity')fp[idx]=re*re+im*im;
+      else if(P.mode==='db')fp[idx]=20*Math.log10(mag+1e-12);
+      else if(P.mode==='tof')fp[idx]=tofCount>0?totalTOF/tofCount:0;
+    }
+  }
+
+  // 归一化
+  if(P.mode==='db') {
+    var mx=-Infinity;
+    for(var i=0;i<GRID*GRID;i++){if(fp[i]>mx)mx=fp[i];}
+    for(var i=0;i<GRID*GRID;i++){fp[i]=Math.max(0,(fp[i]-mx+P.dr)/P.dr);}
+  }
+  if(P.mode==='tof') {
+    var tofMax=-Infinity, tofMin=Infinity;
+    for(var i2=0;i2<GRID*GRID;i2++){if(fp[i2]>tofMax)tofMax=fp[i2];if(fp[i2]<tofMin)tofMin=fp[i2];}
+    var tofRange=tofMax-tofMin||1;
+    for(var i3=0;i3<GRID*GRID;i3++){fp[i3]=(fp[i3]-tofMin)/tofRange;}
+  }
+}
+
+// ---- 渲染声场 ----
+function renderField() {
+  const ctx=mctx, w=mc.width, h=mc.height;
+  const img=ctx.createImageData(w,h), d=img.data;
+
+  let mxA=0;
+  if(P.mode!=='db') {
+    for(let i=0;i<GRID*GRID;i++){const v=Math.abs(fp[i]);if(v>mxA)mxA=v;}
+  }
+
+  const sx=GRID/w, sy=GRID/h;
+
+  for(let py=0;py<h;py++) {
+    const gy=Math.floor(py*sy);
+    for(let px=0;px<w;px++) {
+      const gx=Math.floor(px*sx);
+      let v=fp[gy*GRID+gx];
+
+      if(P.mode==='db'){/* 0-1 */}
+      else if(P.mode==='pressure'){v=v/(mxA+1e-12)*0.5+0.5;}
+      else{v=v/(mxA+1e-12);}
+      v=Math.max(0,Math.min(1,v));
+
+      const[rr,gg,bb]=cmap(v);
+      const pi=(py*w+px)*4;
+      d[pi]=rr;d[pi+1]=gg;d[pi+2]=bb;d[pi+3]=255;
+    }
+  }
+  ctx.putImageData(img,0,0);
+
+  // 叠加层
+  if(P.nfz) drawNFZone(ctx,w,h);
+  if(P.grid) drawGrid(ctx,w,h);
+  if(P.elems) drawElements(ctx,w,h);
+  if(P.foc&&P.F<AREA_MM*0.8&&P.F>0.05) drawFocus(ctx,w,h);
+  drawObstacles(ctx,w,h);
+}
+
+function drawNFZone(ctx,w,h) {
+  const sc=w/AREA_MM, ox=0, oy=h/2;
+  const nf=nearField();
+  if(nf<=0||nf>AREA_MM)return;
+  const nfx=nf*sc;
+  ctx.fillStyle='rgba(255,180,70,0.04)';
+  ctx.fillRect(ox,0,nfx,h);
+  ctx.strokeStyle='rgba(255,180,70,0.25)';
+  ctx.lineWidth=1; ctx.setLineDash([4,8]);
+  ctx.beginPath(); ctx.moveTo(ox+nfx,0); ctx.lineTo(ox+nfx,h); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle='rgba(255,180,70,0.6)';
+  ctx.font='italic 10px "Microsoft YaHei"';
+  ctx.fillText('近场区', ox+nfx/2-18, oy-15);
+}
+
+function drawGrid(ctx,w,h) {
+  ctx.strokeStyle='rgba(255,255,255,0.06)';
+  ctx.lineWidth=0.5;
+  const st=w/10;
+  for(let i=1;i<10;i++){ctx.beginPath();ctx.moveTo(i*st,0);ctx.lineTo(i*st,h);ctx.stroke();}
+  for(let i=1;i<10;i++){ctx.beginPath();ctx.moveTo(0,i*st);ctx.lineTo(w,i*st);ctx.stroke();}
+  ctx.fillStyle='rgba(255,255,255,0.45)';
+  ctx.font=`${Math.max(9,w/55)}px "Microsoft YaHei"`;
+  ctx.textAlign='center';
+  for(let i=0;i<=10;i++){ctx.fillText(((i/10)*AREA_MM).toFixed(0),i*w/10,h-3);}
+  ctx.textAlign='right';
+  for(let i=0;i<=10;i++){ctx.fillText(((i/10)*AREA_MM-AREA_MM/2).toFixed(0),16,i*h/10+4);}
+}
+
+function drawElements(ctx,w,h) {
+  const sc=w/AREA_MM, ox=0, oy=h/2;
+  const N=els.length;
+  for(let i=0;i<N;i++) {
+    const sx=ox+els[i].x*sc;
+    const sy=oy-els[i].y*sc;
+    const ew=Math.max(2.5,P.ew*sc);
+    const eh=Math.max(2.5,DX*sc*0.8);
+
+    const ph=phaseDelays()[i];
+    const hue=((ph%(2*Math.PI))/(2*Math.PI)+1)%1;
+
+    ctx.fillStyle=`hsla(${hue*360},75%,55%,0.9)`;
+    ctx.fillRect(sx-ew/2,sy-eh/2,ew,eh);
+    ctx.strokeStyle='rgba(255,255,255,0.7)';
+    ctx.lineWidth=1;
+    ctx.strokeRect(sx-ew/2,sy-eh/2,ew,eh);
+
+    // 阵元编号
+    if(N<=32) {
+      ctx.fillStyle='#fff';
+      ctx.font='bold 8px "Microsoft YaHei"';
+      ctx.textAlign='center';
+      ctx.fillText(i+1,sx,sy-eh/2-4);
+    }
+  }
+}
+
+function drawFocus(ctx,w,h) {
+  const sc=w/AREA_MM, ox=0, oy=h/2;
+  const fx=ox+P.F*sc, fy=oy-P.Fy*sc;
+  ctx.beginPath();ctx.arc(fx,fy,5,0,2*Math.PI);
+  ctx.fillStyle='rgba(255,60,60,0.8)';ctx.fill();
+  ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.setLineDash([3,3]);ctx.stroke();ctx.setLineDash([]);
+  ctx.fillStyle='#fff';ctx.font='bold 10px "Microsoft YaHei"';
+  ctx.fillText('焦点('+P.F.toFixed(1)+','+P.Fy.toFixed(1)+')',fx+8,fy-8);
+}
+
+function drawObstacles(ctx,w,h){
+  var sc2=w/AREA_MM, ox2=0, oy2=h/2;
+  for(var i=0;i<P.obstacles.length;i++){
+    var o=P.obstacles[i];
+    var cx2=ox2+o.x*sc2, cy2=oy2-o.y*sc2;
+    ctx.fillStyle='rgba(255,255,255,0.08)';
+    ctx.strokeStyle='rgba(255,255,255,0.55)';
+    ctx.lineWidth=2;
+    ctx.setLineDash([6,3]);
+    if(o.type==='circle'){
+      var r2=o.size*sc2;
+      ctx.beginPath();ctx.arc(cx2,cy2,r2,0,2*Math.PI);ctx.fill();ctx.stroke();
+    }else{
+      var hw2=o.w/2*sc2, hh2=o.h/2*sc2;
+      ctx.fillRect(cx2-hw2,cy2-hh2,o.w*sc2,o.h*sc2);
+      ctx.strokeRect(cx2-hw2,cy2-hh2,o.w*sc2,o.h*sc2);
+    }
+    ctx.setLineDash([]);
+    // 标签
+    ctx.fillStyle='rgba(255,255,255,0.75)';
+    ctx.font='bold 9px "Microsoft YaHei"';
+    ctx.textAlign='center';
+    ctx.fillText('Z='+o.Z.toFixed(0),cx2,cy2-((o.type==='circle'?o.size:o.h/2)*sc2)-6);
+    ctx.fillText('c='+o.c,cx2,cy2);
+  }
+}
+
+// ---- 颜色映射 ----
+function cmap(t) {
+  t=Math.max(0,Math.min(1,t));
+  switch(P.cmap) {
+    case 'jet': {
+      const r=Math.min(1,Math.max(0,t<0.25?0:t<0.5?4*(t-0.25):t<0.75?1:1-4*(t-0.75)));
+      const g=Math.min(1,Math.max(0,t<0.25?4*t:t<0.5?1:t<0.75?1-4*(t-0.5):0));
+      const b=Math.min(1,Math.max(0,t<0.25?1:t<0.5?1-4*(t-0.25):0));
+      return[~~(r*255),~~(g*255),~~(b*255)];
+    }
+    case 'viridis': {
+      const r=~~(255*Math.max(0,Math.min(1,0.267+t*(-0.033+t*(1.052+t*(-1.389+0.526*t))))));
+      const g=~~(255*Math.max(0,Math.min(1,0.004+t*(0.849+t*(0.115+t*(-0.198+0.163*t))))));
+      const b=~~(255*Math.max(0,Math.min(1,0.329+t*(0.864+t*(-1.469+t*(0.744-0.174*t))))));
+      return[r,g,b];
+    }
+    case 'hot': {
+      const r=Math.min(1,t<0.5?2*t:1);
+      const g=Math.min(1,t<0.5?0:2*(t-0.5));
+      const bv=Math.min(1,t<0.333?0:t<0.666?3*(t-0.333):1);
+      return[~~(r*255),~~(g*255),~~(bv*255)];
+    }
+    case 'coolwarm': {
+      const r=Math.min(1,Math.max(0,t<0.5?1-2*t:2*t-1));
+      const g=Math.min(1,Math.max(0,1-Math.abs(2*t-1)));
+      const bv=Math.min(1,Math.max(0,t<0.5?2*t:2-2*t));
+      return[~~(r*255),~~(g*255),~~(bv*255)];
+    }
+    case 'bone': {
+      const v=~~(255*(0.875*t+0.125));
+      const v2=~~(255*(Math.max(0,t-0.1)*1.1));
+      return[v2,v2,v];
+    }
+    default: return[~~(t*255),~~(t*255),~~(t*255)];
+  }
+}
+
+// ---- 波束方向图 ----
+function drawPolar() {
+  const ctx=pctx, w=pol.width, h=pol.height;
+  const cx=w/2, cy=h/2, R=Math.min(cx,cy)-28;
+  ctx.clearRect(0,0,w,h);
+
+  // 背景
+  ctx.strokeStyle='#253545';ctx.lineWidth=1;
+  for(let rr=R/4;rr<=R;rr+=R/4){ctx.beginPath();ctx.arc(cx,cy,rr,0,2*Math.PI);ctx.stroke();}
+  for(let a=-80;a<=80;a+=20){
+    const rad=a*Math.PI/180;
+    ctx.beginPath();ctx.moveTo(cx,cy);
+    ctx.lineTo(cx+R*Math.sin(rad),cy-R*Math.cos(rad));
+    ctx.strokeStyle=a===0?'#4a6a8a':'#223040';ctx.stroke();
+    if(a!==0){ctx.fillStyle='#556678';ctx.font='9px "Microsoft YaHei"';ctx.textAlign='center';
+    ctx.fillText(a+'°',cx+(R+14)*Math.sin(rad),cy-(R+14)*Math.cos(rad)+4);}
+  }
+
+  // 计算方向图
+  const k=waveNumber(),N=P.N, dp=phaseDelays();
+  const na=360;const pat=new Float32Array(na);
+  let mx=0;
+  for(let i=0;i<na;i++){
+    const th0=(-90+i*180/na)*Math.PI/180;
+    let sr=0,si=0;
+    for(let n=0;n<N;n++){
+      const psi=k*(els[n].x*Math.cos(th0)+els[n].y*Math.sin(th0))+dp[n];
+      sr+=apw[n]*Math.cos(psi);si+=apw[n]*Math.sin(psi);
+    }
+    pat[i]=Math.sqrt(sr*sr+si*si);
+    if(pat[i]>mx)mx=pat[i];
+  }
+
+  // 绘制
+  ctx.beginPath();
+  let first=true;
+  for(let i=0;i<na;i++){
+    const th0=(-90+i*180/na)*Math.PI/180;
+    let v=pat[i]/(mx+1e-12);
+    const vDB=20*Math.log10(v+1e-12);
+    const nr=Math.max(0,(vDB+P.dr)/P.dr)*R;
+    const px=cx+nr*Math.sin(th0), py=cy-nr*Math.cos(th0);
+    if(first){ctx.moveTo(px,py);first=false;}else ctx.lineTo(px,py);
+  }
+  ctx.strokeStyle='#4dc9f6';ctx.lineWidth=2;ctx.stroke();
+
+  // 主瓣方向
+  const sr0=P.theta*Math.PI/180;
+  ctx.beginPath();ctx.moveTo(cx,cy);
+  ctx.lineTo(cx+R*1.08*Math.sin(sr0),cy-R*1.08*Math.cos(sr0));
+  ctx.strokeStyle='#ffb347';ctx.lineWidth=1.5;ctx.setLineDash([5,4]);ctx.stroke();ctx.setLineDash([]);
+
+  // 标签
+  ctx.fillStyle='#c0cedc';ctx.font='bold 11px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText('波束方向图',cx,cy-R-10);
+}
+
+// ---- 截面图 ----
+function drawAxial() {
+  const ctx=axctx, w=ax.width, h=ax.height;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle='#0d1218';ctx.fillRect(0,0,w,h);
+  if(!fp)return;
+
+  const gy=Math.floor(GRID/2);
+  const mg=28;
+  const vs=[];for(let gx=0;gx<GRID;gx++)vs.push(fp[gy*GRID+gx]);
+  drawProfile(ctx,vs,w,h,mg,'x (mm)',AREA_MM);
+}
+
+function drawLateral() {
+  const ctx=latctx, w=lat.width, h=lat.height;
+  ctx.clearRect(0,0,w,h);
+  ctx.fillStyle='#0d1218';ctx.fillRect(0,0,w,h);
+  if(!fp)return;
+
+  const Fx=Math.min(GRID-1,Math.max(0,Math.floor(P.F/DX)));
+  const mg=28;
+  const vs=[];for(let gy=0;gy<GRID;gy++)vs.push(fp[gy*GRID+Fx]);
+  drawProfile(ctx,vs,w,h,mg,'y (mm)',AREA_MM);
+}
+
+function drawProfile(ctx,vs,w,h,mg,xlabel,range) {
+  const pw=w-2*mg, ph=h-2*mg;
+  ctx.strokeStyle='#2a3a4a';ctx.lineWidth=1;
+  ctx.beginPath();ctx.moveTo(mg,mg);ctx.lineTo(mg,h-mg);ctx.moveTo(mg,h/2);ctx.lineTo(w-mg,h/2);ctx.stroke();
+
+  let mx=0;for(const v of vs)mx=Math.max(mx,Math.abs(v));
+  if(mx<1e-12)mx=1;
+
+  ctx.beginPath();
+  for(let i=0;i<vs.length;i++){
+    const px=mg+(i/vs.length)*pw;
+    const py=h/2-(vs[i]/mx)*ph*0.42;
+    if(i===0)ctx.moveTo(px,py);else ctx.lineTo(px,py);
+  }
+  ctx.strokeStyle='#4dc9f6';ctx.lineWidth=1.5;ctx.stroke();
+
+  ctx.fillStyle='#6a8298';ctx.font='9px "Microsoft YaHei"';ctx.textAlign='center';
+  ctx.fillText(xlabel,w/2,h-4);
+  ctx.fillText('0',mg-6,h/2+10);
+  ctx.fillText((range/2).toFixed(1),mg+pw/4,h/2+10);
+  ctx.fillText(range.toFixed(1),mg+pw/2,h/2+10);
+}
+
+// ---- 物理计算 ----
+function nearField() {
+  const lam=wavelength();
+  const D=(P.N-1)*P.d*P.stretch;
+  return D*D/(4*lam);
+}
+
+// ---- UI更新 ----
+function updateInfo() {
+  const lam=wavelength();
+  const k=waveNumber();
+  const d_eff=P.d*P.stretch;
+  const d_over_lam=d_eff/lam;
+  const D=(P.N-1)*d_eff;
+  const nf=nearField();
+  const bw=0.886*lam/D*180/Math.PI;
+  const st=P.theta*Math.PI/180;
+  const glCond=lam/d_eff-Math.abs(Math.sin(st));
+  const glAng=glCond<1?Math.asin(Math.sin(st)+lam/d_eff)*180/Math.PI:NaN;
+  const Z=P.rho*P.c/1e6;
+
+  var obsInfo='';
+  if(P.obstacles.length>0){
+    obsInfo='<div style="color:#ffb347;margin-top:4px">🔴 障碍物: '+P.obstacles.length+'个</div>';
+    for(var oi=0;oi<P.obstacles.length;oi++){
+      var o=P.obstacles[oi];
+      obsInfo+='<div style="font-size:0.64rem;color:#aaa">  '+(o.type==='circle'?'⚪':'◻')+' Z='+o.Z.toFixed(1)+'MRayl c='+o.c+'m/s</div>';
+    }
+  }
+  var tofInfo=P.mode==='tof'?'<div style="color:#4dc9f6;margin-top:4px">⏱ TOF模式: 颜色=到达时间(μs)</div>':'';
+
+  document.getElementById('info').innerHTML=`
+    <div>波长 λ = <b style="color:#4dc9f6">${lam.toFixed(3)}</b> mm</div>
+    <div>波数 k = <b style="color:#4dc9f6">${k.toFixed(1)}</b> rad/mm</div>
+    <div>d/λ = <b style="color:${d_over_lam<=0.5?'#4caf84':'#e5534b'}">${d_over_lam.toFixed(3)}</b> ${d_over_lam<=0.5?'✓ 满足栅瓣条件':'✗ 导出栅瓣!'}</div>
+    <div>近场距离 = <b style="color:#ffb347">${nf.toFixed(1)}</b> mm</div>
+    <div>阵列孔径 D = <b>${D.toFixed(1)}</b> mm</div>
+    <div>主瓣宽度 ≈ <b>${bw.toFixed(1)}</b>°</div>
+    <div>栅瓣角度 ≈ <b>${isNaN(glAng)?'无':glAng.toFixed(1)+'°'}</b></div>
+    <div>声阻抗 Z = <b>${Z.toFixed(2)}</b> MRayl</div>
+    ${obsInfo}
+    ${tofInfo}
+    <div style="color:#889;font-size:0.66rem;margin-top:4px">基于惠更斯-菲涅尔原理<br>障碍物·TOF扩展·非均匀介质<br>参考文献: 韩梦雨(2025), 高雨萌</div>
+  `;
+
+  document.getElementById('sl').textContent=lam.toFixed(2);
+  document.getElementById('sdl').textContent=d_over_lam.toFixed(3);
+  document.getElementById('snf').textContent=nf.toFixed(1);
+  document.getElementById('sbw').textContent=bw.toFixed(1);
+}
+
+// ---- 鼠标 ----
+function mmove(e){
+  const r=mc.getBoundingClientRect();
+  const mx=e.clientX-r.left, my=e.clientY-r.top;
+  const gx=Math.floor(mx/ mc.width*GRID);
+  const gy=Math.floor(my/ mc.height*GRID);
+  if(gx>=0&&gx<GRID&&gy>=0&&gy<GRID){
+    mxG=gx;myG=gy;
+    const xv=(gx*DX).toFixed(2),yv=((gy-GRID/2)*DX).toFixed(2);
+    const pv=fp?fp[gy*GRID+gx].toFixed(4):'--';
+    document.getElementById('spos').textContent=`(${xv},${yv})mm`;
+    document.getElementById('spv').textContent=pv;
+    const tip=document.getElementById('ttip');
+    tip.style.display='block';tip.style.left=(mx+14)+'px';tip.style.top=(my-28)+'px';
+    tip.textContent=`(${xv}, ${yv}) mm | P=${pv}`;
+  }
+}
+
+function mclick(e){
+  const r=mc.getBoundingClientRect();
+  const gx=Math.floor((e.clientX-r.left)/mc.width*GRID);
+  const gy=Math.floor((e.clientY-r.top)/mc.height*GRID);
+  P.F=Math.max(0.15,gx*DX);
+  P.Fy=(gy-GRID/2)*DX;
+  document.getElementById('F').value=P.F;
+  document.getElementById('Fv').value=P.F.toFixed(1);
+  document.getElementById('Fy').value=P.Fy;
+  document.getElementById('Fyv').value=P.Fy.toFixed(1);
+  buildArray();
+}
+
+function mwheel(e){
+  e.preventDefault();
+  const delta=e.deltaY>0?0.9:1.1;
+  P.spd=Math.max(0.1,Math.min(5,P.spd*delta));
+  document.getElementById('spd').value=P.spd;
+  document.getElementById('spdv').value=P.spd.toFixed(2);
+}
+
+function kdown(e){
+  if(e.code==='Space'){e.preventDefault();togAnim();}
+  if(e.code==='KeyR'){e.preventDefault();resetAll();}
+}
+
+// ---- 参数同步 ----
+function up(key){
+  const el=document.getElementById(key);
+  if(!el)return;
+  if(el.type==='checkbox')P[key]=el.checked;
+  else if(el.tagName==='SELECT')P[key]=el.value;
+  else P[key]=parseFloat(el.value);
+
+  const vel=document.getElementById(key+'v');
+  if(vel && typeof P[key]==='number'){
+    vel.value=Number.isInteger(P[key])?P[key]:parseFloat(P[key].toFixed(3));
+  }
+
+  if(['N','d','kappa','noise','stretch','apod','theta','F','Fy'].includes(key))buildArray();
+  if(key==='mode'&&!fp)fp=new Float32Array(GRID*GRID);
+  var cb=document.getElementById('cbar');
+  if(cb)cb.style.background=cbarGrad(Math.round(mc.height*0.85));
+}
+
+function upn(key){
+  var vel=document.getElementById(key+'v');
+  if(!vel)return;
+  const v=parseFloat(vel.value);
+  if(isNaN(v))return;
+  P[key]=v;
+  const el=document.getElementById(key);
+  if(el)el.value=v;
+  if(['N','d','kappa','noise','stretch','theta','F','Fy'].includes(key))buildArray();
+  var cb=document.getElementById('cbar');
+  if(cb)cb.style.background=cbarGrad(Math.round(mc.height*0.85));
+}
+
+function setMedium(){
+  const m=document.getElementById('medium').value;
+  P.medium=m;
+  switch(m){
+    case'water':P.c=1500;P.rho=1000;P.att=0.002;break;
+    case'soft':P.c=1540;P.rho=1050;P.att=0.5;break;
+    case'bone':P.c=3500;P.rho=1900;P.att=10;break;
+    case'air':P.c=343;P.rho=1.2;P.att=1.5;break;
+    case'steel':P.c=5900;P.rho=7800;P.att=0.004;break;
+  }
+  syncUI();buildArray();
+  document.getElementById('cbar').style.background=cbarGrad(Math.round(mc.height*0.85));
+}
+
+function syncUI(){
+  for(const[k,v]of Object.entries(P)){
+    const el=document.getElementById(k);
+    if(el&&el.type==='checkbox')el.checked=v;
+    else if(el&&el.tagName==='SELECT')el.value=v;
+    else if(el)el.value=v;
+    var vel=document.getElementById(k+'v');
+    if(vel&&typeof v==='number')vel.value=Number.isInteger(v)?v:parseFloat(v.toFixed(3));
+  }
+}
+
+function tg(hdr){hdr.classList.toggle('folded');hdr.nextElementSibling.classList.toggle('hidden');}
+function togAnim(){running=!running;document.getElementById('playBtn').textContent=running?'暂停 ⏸':'播放 ▶';}
+function resetAll(){
+  P.N=8;P.d=0.5;P.freq=1;P.ew=0.2;P.apod='uniform';P.excite='cw';
+  P.c=1500;P.rho=1000;P.att=0.5;P.medium='water';
+  P.theta=0;P.F=20;P.Fy=0;
+  P.kappa=0;P.noise=0;P.stretch=1;
+  P.mode='pressure';P.cmap='jet';P.dr=40;P.spd=1;
+  P.grid=true;P.elems=true;P.foc=true;P.nfz=true;
+  P.obstacles=[];
+  syncUI();buildArray();t=0;
+  renderObsList();
+  document.getElementById('playBtn').textContent='暂停 ⏸';running=true;
+  document.getElementById('medium').value='water';
+  document.getElementById('cbar').style.background=cbarGrad(Math.round(mc.height*0.85));
+}
+function screenshot(){
+  const a=document.createElement('a');
+  a.download='相控阵仿真_'+new Date().toISOString().slice(0,19).replace(/:/g,'-')+'.png';
+  a.href=mc.toDataURL('image/png');a.click();
+}
+
+// ---- 主循环 ----
+function loop(ts){
+  if(running){t+=0.04*P.spd;if(t>1e4)t-=1e4;}
+  computeField(t*1e-6);
+  renderField();
+  drawPolar();
+  drawAxial();
+  drawLateral();
+  updateInfo();
+
+  fpCount++;
+  if(ts-fpStamp>1000){fpDisp=Math.round(fpCount*1000/(ts-fpStamp));fpCount=0;fpStamp=ts;document.getElementById('sfps').textContent=fpDisp;}
+
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('DOMContentLoaded',()=>{init();computeField(0);renderField();drawPolar();drawAxial();drawLateral();updateInfo();renderObsList();});
+</script>
+</body>
+</html>
